@@ -16,6 +16,7 @@ class NotificationService {
       requestSoundPermission: true,
     );
     /*
+    // TODO: set this up once I figure it out
     const initializationSettingsWindows = WindowsInitializationSettings(
       appName: 'Calendai', 
       appUserModelId: appUserModelId, 
@@ -27,7 +28,7 @@ class NotificationService {
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
       linux: initializationSettingsLinux,
-      // windows: initializationSettingsWindows
+      //windows: initializationSettingsWindows
     );
     
     await _notifications.initialize(initializationSettings);
@@ -66,6 +67,8 @@ class NotificationService {
         priority: Priority.high,
       ),
       iOS: DarwinNotificationDetails(),
+      linux: LinuxNotificationDetails(), 
+      //windows: WindowsNotificationDetails()
     );
 
     await _notifications.show(

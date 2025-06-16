@@ -3,9 +3,6 @@ import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/calendar_api_service.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:async';
 
 class CalendarPage extends StatefulWidget {

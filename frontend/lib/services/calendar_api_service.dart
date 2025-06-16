@@ -1,15 +1,16 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
+import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
+/// Contains methods for the calendar API.
 class CalendarApiService {
-  static const String baseUrl = 'https://your-backend-api.com/api';
+  static String baseUrl = envVars['api_base_url']!;
   
   /// Fetch events for a date range
   static Future<List<CalendarEvent>> fetchEvents(DateTime start, DateTime end) async {
     try {
-      // Stub implementation - replace with actual API call
+      // TODO: Stub implementation - replace with actual API call
       final response = await http.get(
         Uri.parse('$baseUrl/events?start=${start.toIso8601String()}&end=${end.toIso8601String()}'),
         headers: {'Content-Type': 'application/json'},
