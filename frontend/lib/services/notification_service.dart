@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
@@ -15,20 +14,17 @@ class NotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-    /*
-    // TODO: set this up once I figure it out
     const initializationSettingsWindows = WindowsInitializationSettings(
       appName: 'Calendai', 
-      appUserModelId: appUserModelId, 
-      guid: guid
+      appUserModelId: 'Calendai.Calendai.Desktop.1.0', 
+      guid: 'ab0ede05-7eca-4d77-b1b8-533688e2f52d' // TODO: is this ok?
     );
-    */
     
     const initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
       linux: initializationSettingsLinux,
-      //windows: initializationSettingsWindows
+      windows: initializationSettingsWindows
     );
     
     await _notifications.initialize(initializationSettings);
@@ -57,20 +53,27 @@ class NotificationService {
     _activeTimers.remove(eventId);
   }
 
-  static Future<void> _showNotification(CalendarEvent event) async {
-    const notificationDetails = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'calendar_reminders',
-        'Calendar Reminders',
-        channelDescription: 'Reminders for calendar events',
-        importance: Importance.high,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(),
-      linux: LinuxNotificationDetails(), 
-      //windows: WindowsNotificationDetails()
-    );
+  // TODO: delete this when no longer needed
+  static Future<void> debugNotif(CalendarEvent event) async {
+    await _showNotification(event);
+  }
 
+  static Future<void> _showNotification(CalendarEvent event) async {
+    final androidDetails = AndroidNotificationDetails(
+      'calendar_reminders',
+      'Calendar Reminders',
+      channelDescription: 'Reminders for calendar events',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    final windowsDetails = WindowsNotificationDetails(
+      audio: WindowsNotificationAudio.preset(sound: WindowsNotificationSound.alarm6) // TODO: what's the most alarming sound I can play
+    );
+    final notificationDetails = NotificationDetails(
+      android: androidDetails,
+      linux: const LinuxNotificationDetails(), // TODO: if I'm really supporting linux, fill these details out
+      windows: windowsDetails
+    );
     await _notifications.show(
       event.id.hashCode,
       'Upcoming Event: ${event.title}',

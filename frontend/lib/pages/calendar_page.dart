@@ -24,7 +24,6 @@ class _CalendarPageState extends State<CalendarPage> {
     _selectedDay = DateTime.now();
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     _loadEvents();
-    NotificationService.initialize();
   }
 
   @override

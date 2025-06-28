@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
+import 'package:namer_app/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,20 +20,14 @@ class _LoginPageState extends State<LoginPage> {
     _googleSignIn = GoogleSignIn(
       params: GoogleSignInParams(
         redirectPort: 3000,
+        clientId: envVars['google_client_id'],
+        clientSecret: envVars['google_client_secret'] 
       ),
     );
   }
   
 
   Future<void> _nativeGoogleSignIn() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await _phoneGoogleSignIn();
-    }
-    else {
-      await _webGoogleSignIn();
-    }
-
-    /*
     final credentials = await _googleSignIn.signIn();
     if (credentials != null) {
       await supabase.auth.signInWithIdToken(
@@ -45,32 +40,6 @@ class _LoginPageState extends State<LoginPage> {
       // TODO: proper error handling or something
       print('gg nerd');
     }
-    */
-  }
-
-  Future<void> _phoneGoogleSignIn() async {
-    final googleUser = await _googleSignIn.signIn();
-    final accessToken = googleUser!.accessToken;
-    final idToken = googleUser.idToken;
-
-    if (idToken == null) {
-      throw 'No idToken returned';
-    }
-    else {
-      await supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google, 
-        idToken: idToken,
-        accessToken: accessToken
-      );
-    }
-  }
-
-  Future<void> _webGoogleSignIn() async {
-    await supabase.auth.signInWithOAuth(
-      OAuthProvider.google,
-      redirectTo: true ? null : 'calendai://google-login-callback', // TODO: set up this deeplink?
-      authScreenLaunchMode: LaunchMode.externalApplication, 
-    );
   }
 
   @override
