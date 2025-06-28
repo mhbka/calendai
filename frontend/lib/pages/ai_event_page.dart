@@ -10,12 +10,11 @@ import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
 
 class AddEventPage extends StatefulWidget {
-  final CalendarController? calendarController;
+  final CalendarController calendarController = CalendarController.instance;
 
-  const AddEventPage({
-    Key? key,
-    this.calendarController,
-  }) : super(key: key);
+  AddEventPage({
+    super.key,
+  });
 
   @override
   _AddEventPageState createState() => _AddEventPageState();
@@ -27,7 +26,7 @@ class _AddEventPageState extends State<AddEventPage> {
   @override
   void initState() {
     super.initState();
-    _controller = AddEventController(calendarController: widget.calendarController);
+    _controller = AddEventController();
     _controller.addListener(_onControllerStateChanged);
   }
 

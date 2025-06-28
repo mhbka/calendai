@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/calendar_api_service.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarController extends ChangeNotifier {
+  // singleton stuff
+  CalendarController._internal() {
+    _selectedDay = DateTime.now();
+    loadEvents();
+  }
+
+  static final CalendarController _instance = CalendarController._internal();
+
+  factory CalendarController() {
+    return _instance;
+  }
+
+  static CalendarController get instance => _instance;
+
+  // members
   List<CalendarEvent> _events = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -15,11 +31,7 @@ class CalendarController extends ChangeNotifier {
   DateTime? get selectedDay => _selectedDay;
   bool get isLoading => _isLoading;
 
-  CalendarController() {
-    _selectedDay = DateTime.now();
-    loadEvents();
-  }
-
+  // methods
   List<CalendarEvent> getEventsForDay(DateTime day) {
     return _events.where((event) {
       return isSameDay(event.startTime, day);
@@ -74,7 +86,6 @@ class CalendarController extends ChangeNotifier {
       CalendarEvent savedEvent;
       
       if (existingEvent != null) {
-        // Update existing event
         savedEvent = existingEvent.copyWith(
           title: title,
           description: description,
@@ -92,7 +103,7 @@ class CalendarController extends ChangeNotifier {
       } else {
         // Create new event
         final newEvent = CalendarEvent(
-          id: '',
+          id: uuid.v4(),
           title: title,
           description: description,
           location: location,

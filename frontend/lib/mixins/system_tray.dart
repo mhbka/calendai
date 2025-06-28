@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/pages/ai_event_page.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -41,6 +43,8 @@ mixin SystemTrayMixin<T extends StatefulWidget> on State<T>, TrayListener {
         _hideWindow();
       case 'say_hello':
         _sayHello();
+      case 'show_ai_event':
+        _showAiEvent();
       case 'quit':
         _quitApp();
     }
@@ -64,6 +68,15 @@ mixin SystemTrayMixin<T extends StatefulWidget> on State<T>, TrayListener {
       endTime: DateTime.now()
     );
     await NotificationService.debugNotif(event);
+  }
+
+  Future<void> _showAiEvent() async {
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => AddEventPage(),
+      )
+    );
   }
 
   Future<void> _quitApp() async {

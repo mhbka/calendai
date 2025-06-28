@@ -45,9 +45,7 @@ class _CalendarPageState extends State<CalendarPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddEventPage(
-          calendarController: _controller,
-        ),
+        builder: (context) => AddEventPage(),
       ),
     );
   }

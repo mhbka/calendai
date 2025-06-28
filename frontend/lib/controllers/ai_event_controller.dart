@@ -5,19 +5,31 @@ import 'package:namer_app/services/ai_event_api_service.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 
 class AddEventController extends ChangeNotifier {
-  final CalendarController? _calendarController;
+  // singleton stuff
+  AddEventController._internal() {
+    _calendarController = CalendarController.instance;
+  }
+
+  static final AddEventController _instance = AddEventController._internal();
+
+  factory AddEventController() {
+    return _instance;
+  }
+
+  static AddEventController get instance => _instance;
+
+  late final CalendarController? _calendarController;
   
+  // members
   bool _isProcessing = false;
   bool _isRecording = false;
   String _processingType = '';
 
-  AddEventController({CalendarController? calendarController}) 
-      : _calendarController = calendarController;
-
   bool get isProcessing => _isProcessing;
   bool get isRecording => _isRecording;
   String get processingType => _processingType;
-
+  
+  // methods
   Future<String?> handlePaste() async {
     try {
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
