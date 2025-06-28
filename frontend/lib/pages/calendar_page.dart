@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
+import 'package:namer_app/pages/ai_event_page.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:namer_app/widgets/event_list.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -36,6 +37,17 @@ class _CalendarPageState extends State<CalendarPage> {
         event: event,
         selectedDay: _controller.selectedDay,
         onSave: _saveEvent,
+      ),
+    );
+  }
+
+  Future<void> _navToAiEventPage() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEventPage(
+          calendarController: _controller,
+        ),
       ),
     );
   }
@@ -146,7 +158,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendar'),
+        title: Text('Calendai'),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -159,6 +171,10 @@ class _CalendarPageState extends State<CalendarPage> {
                 );
               }
             },
+          ),
+          TextButton(
+            onPressed: () {}, 
+            child: Text('Log out')
           ),
         ],
       ),
@@ -197,9 +213,27 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showEventDialog(),
-        child: Icon(Icons.add),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(top: 0), 
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 16,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: _navToAiEventPage,
+              heroTag: "ai_add", 
+              backgroundColor: Colors.deepPurple,
+              icon: Icon(Icons.auto_awesome, color: Colors.white),
+              label: Text('Add with AI', style: TextStyle(color: Colors.white)),
+            ),
+            FloatingActionButton.extended(
+              onPressed: _showEventDialog,
+              heroTag: "normal_add", 
+              icon: Icon(Icons.add),
+              label: Text('Add Event')
+            ),
+          ],
+        )
       ),
     );
   }

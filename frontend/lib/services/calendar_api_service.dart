@@ -8,9 +8,10 @@ class CalendarApiService {
   static String baseUrl = envVars['api_base_url']!;
   
   /// Fetch events for a date range
+  /// TODO: Stub implementation - replace with actual API call
   static Future<List<CalendarEvent>> fetchEvents(DateTime start, DateTime end) async {
     try {
-      // TODO: Stub implementation - replace with actual API call
+      
       final response = await http.get(
         Uri.parse('$baseUrl/events?start=${start.toIso8601String()}&end=${end.toIso8601String()}'),
         headers: {'Content-Type': 'application/json'},
@@ -28,6 +29,7 @@ class CalendarApiService {
     }
   }
 
+  /// TODO: Stub implementation - replace with actual API call
   static Future<CalendarEvent> createEvent(CalendarEvent event) async {
     try {
       final response = await http.post(
@@ -46,7 +48,7 @@ class CalendarApiService {
       return event.copyWith(id: DateTime.now().millisecondsSinceEpoch.toString());
     }
   }
-
+  /// TODO: Stub implementation - replace with actual API call
   static Future<CalendarEvent> updateEvent(CalendarEvent event) async {
     try {
       final response = await http.put(
@@ -65,6 +67,7 @@ class CalendarApiService {
     }
   }
 
+  /// TODO: Stub implementation - replace with actual API call
   static Future<void> deleteEvent(String eventId) async {
     try {
       final response = await http.delete(

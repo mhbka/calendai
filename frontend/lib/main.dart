@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:namer_app/init.dart';
@@ -24,15 +23,15 @@ void main() async {
     anonKey: envVars['supabase_anon_key']!
   );
 
-  runApp(MyApp());
+  runApp(App());
 }
 
-class MyApp extends StatefulWidget {
+class App extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _AppState createState() => _AppState();
 }
 
-class _MyAppState extends State<MyApp> with TrayListener, SystemTrayMixin {
+class _AppState extends State<App> with TrayListener, SystemTrayMixin {
   @override
   void initState() {
     super.initState();
