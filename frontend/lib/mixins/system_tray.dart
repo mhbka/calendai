@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:namer_app/main.dart';
+import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/services/notification_service.dart';
 import 'package:tray_manager/tray_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
-/// Used for adding Windows system tray to the app.
+/// Mixin that provides system tray functionality to widgets
 mixin SystemTrayMixin<T extends StatefulWidget> on State<T>, TrayListener {
   @override
   void initState() {
@@ -31,9 +36,44 @@ mixin SystemTrayMixin<T extends StatefulWidget> on State<T>, TrayListener {
   void onTrayMenuItemClick(MenuItem menuItem) {
     switch (menuItem.key) {
       case 'show_window':
-        // Handle show window action
-        break;
-      // Add other menu item handlers here
+        _showWindow();
+      case 'hide_window':
+        _hideWindow();
+      case 'test':
+        _testNotif();
+      case 'quit':
+        _quitApp();
+    }
+  }
+
+  Future<void> _showWindow() async {
+    await windowManager.show();
+    await windowManager.focus();
+  }
+
+  Future<void> _hideWindow() async {
+    await windowManager.hide();
+  }
+
+  Future<void> _testNotif() async {
+    var event = CalendarEvent(
+      id: uuid.v4(), 
+      title: 'test', 
+      description: 'test 2', 
+      startTime: DateTime.now(), 
+      endTime: DateTime.now()
+    );
+    await NotificationService.debugNotif(event);
+  }
+
+  Future<void> _quitApp() async {
+    await windowManager.close();
+  }
+
+  /// Navigate to a specific route using GoRouter
+  void navigateToRoute(String route) {
+    if (mounted) {
+      context.go(route);
     }
   }
 }

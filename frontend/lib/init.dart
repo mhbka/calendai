@@ -1,9 +1,20 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:dotenv/dotenv.dart';
+import 'package:flutter/material.dart';
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:tray_manager/tray_manager.dart';
+import 'package:window_manager/window_manager.dart';
+
+/// Initializes any plugins/dependencies.
+Future<void> initDeps() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  NotificationService.initialize();
+  await windowManager.ensureInitialized();
+}
 
 /// Validates and returns the env vars for the app.
 DotEnv initEnvVars() {
@@ -30,17 +41,7 @@ Future<void> initSystemTray() async {
       MenuItem.separator(),
       MenuItem( 
         key: 'test',
-        label: 'test',
-        onClick: (item) {
-          var event = CalendarEvent(
-            id: uuid.v4(), 
-            title: 'test', 
-            description: 'test 2', 
-            startTime: DateTime.now(), 
-            endTime: DateTime.now()
-          );
-          NotificationService.debugNotif(event);
-          }
+        label: 'test'
       ),
     ],
   );
