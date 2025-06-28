@@ -5,6 +5,7 @@ import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:tray_manager/tray_manager.dart';
 
+/// Validates and returns the env vars for the app.
 DotEnv initEnvVars() {
   var env = DotEnv(includePlatformEnvironment: true)..load();
   if (!env.isEveryDefined(['supabase_url', 'supabase_anon_key', 'api_base_url', 'google_client_id', 'google_client_secret'])) {
@@ -13,6 +14,7 @@ DotEnv initEnvVars() {
   return env;
 }
 
+/// Initializes the Windows system tray for the app.
 Future<void> initSystemTray() async {
   await trayManager.setIcon(
     Platform.isWindows
