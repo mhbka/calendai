@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/services/calendar_api_service.dart';
-import 'package:namer_app/services/notification_service.dart';
+import 'package:namer_app/controllers/calendar_controller.dart';
+import 'package:namer_app/widgets/event_dialog.dart';
+import 'package:namer_app/widgets/event_list.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:async';
 
 class CalendarPage extends StatefulWidget {
   @override
@@ -11,179 +11,31 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  late final ValueNotifier<List<CalendarEvent>> _selectedEvents;
+  late CalendarController _controller;
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  List<CalendarEvent> _events = [];
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = DateTime.now();
-    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-    _loadEvents();
+    _controller = CalendarController();
+    _controller.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
-    _selectedEvents.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  List<CalendarEvent> _getEventsForDay(DateTime day) {
-    return _events.where((event) {
-      return isSameDay(event.startTime, day);
-    }).toList();
-  }
-
-  Future<void> _loadEvents() async {
-    setState(() => _isLoading = true);
-    try {
-      final startOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
-      final endOfMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
-      
-      final events = await CalendarApiService.fetchEvents(startOfMonth, endOfMonth);
-      setState(() {
-        _events = events;
-        _selectedEvents.value = _getEventsForDay(_selectedDay!);
-      });
-      
-      // Schedule reminders for all events
-      for (final event in events) {
-        NotificationService.scheduleEventReminder(event);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load events: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
-      setState(() {
-        _selectedDay = selectedDay;
-        _focusedDay = focusedDay;
-        _selectedEvents.value = _getEventsForDay(selectedDay);
-      });
-    }
-  }
-
   Future<void> _showEventDialog([CalendarEvent? event]) async {
-    final isEditing = event != null;
-    final titleController = TextEditingController(text: event?.title ?? '');
-    final descriptionController = TextEditingController(text: event?.description ?? '');
-    final locationController = TextEditingController(text: event?.location ?? '');
-    
-    DateTime startTime = event?.startTime ?? _selectedDay!.add(Duration(hours: 9));
-    DateTime endTime = event?.endTime ?? _selectedDay!.add(Duration(hours: 10));
-    
     await showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(isEditing ? 'Edit Event' : 'Add Event'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
-                ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(labelText: 'Description'),
-                  maxLines: 3,
-                ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: locationController,
-                  decoration: InputDecoration(labelText: 'Location (optional)'),
-                ),
-                SizedBox(height: 16),
-                ListTile(
-                  title: Text('Start Time'),
-                  subtitle: Text('${startTime.day}/${startTime.month}/${startTime.year} ${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}'),
-                  trailing: Icon(Icons.edit),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: startTime,
-                      firstDate: DateTime.now().subtract(Duration(days: 365)),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    );
-                    if (date != null) {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.fromDateTime(startTime),
-                      );
-                      if (time != null) {
-                        setDialogState(() {
-                          startTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-                          if (endTime.isBefore(startTime)) {
-                            endTime = startTime.add(Duration(hours: 1));
-                          }
-                        });
-                      }
-                    }
-                  },
-                ),
-                ListTile(
-                  title: Text('End Time'),
-                  subtitle: Text('${endTime.day}/${endTime.month}/${endTime.year} ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}'),
-                  trailing: Icon(Icons.edit),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: endTime,
-                      firstDate: startTime,
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    );
-                    if (date != null) {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.fromDateTime(endTime),
-                      );
-                      if (time != null) {
-                        setDialogState(() {
-                          endTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-                        });
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            if (isEditing)
-              TextButton(
-                onPressed: () => _deleteEvent(event),
-                child: Text('Delete', style: TextStyle(color: Colors.red)),
-              ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => _saveEvent(
-                event,
-                titleController.text,
-                descriptionController.text,
-                locationController.text.isEmpty ? null : locationController.text,
-                startTime,
-                endTime,
-              ),
-              child: Text(isEditing ? 'Update' : 'Add'),
-            ),
-          ],
-        ),
+      builder: (context) => EventDialog(
+        event: event,
+        selectedDay: _controller.selectedDay,
+        onSave: _saveEvent,
       ),
     );
   }
@@ -196,67 +48,31 @@ class _CalendarPageState extends State<CalendarPage> {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    if (title.isEmpty) return;
-
-    Navigator.pop(context);
-    setState(() => _isLoading = true);
-
+    Navigator.pop(context); // Close the dialog
+    
     try {
-      CalendarEvent newEvent;
-      
-      if (existingEvent != null) {
-        // Update existing event
-        newEvent = existingEvent.copyWith(
-          title: title,
-          description: description,
-          location: location,
-          startTime: startTime,
-          endTime: endTime,
-        );
-        await CalendarApiService.updateEvent(newEvent);
-        
-        // Update local list
-        final index = _events.indexWhere((e) => e.id == existingEvent.id);
-        if (index != -1) {
-          _events[index] = newEvent;
-        }
-      } else {
-        // Create new event
-        newEvent = CalendarEvent(
-          id: '',
-          title: title,
-          description: description,
-          location: location,
-          startTime: startTime,
-          endTime: endTime,
-        );
-        final createdEvent = await CalendarApiService.createEvent(newEvent);
-        _events.add(createdEvent);
-        newEvent = createdEvent;
-      }
-
-      // Schedule reminder
-      NotificationService.scheduleEventReminder(newEvent);
-      
-      setState(() {
-        _selectedEvents.value = _getEventsForDay(_selectedDay!);
-      });
+      await _controller.saveEvent(
+        existingEvent: existingEvent,
+        title: title,
+        description: description,
+        location: location,
+        startTime: startTime,
+        endTime: endTime,
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(existingEvent != null ? 'Event updated' : 'Event added')),
+        SnackBar(
+          content: Text(existingEvent != null ? 'Event updated' : 'Event added'),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save event: $e')),
       );
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _deleteEvent(CalendarEvent event) async {
-    Navigator.pop(context);
-    
+  Future<void> _showDeleteConfirmation(CalendarEvent event) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -277,17 +93,8 @@ class _CalendarPageState extends State<CalendarPage> {
     );
 
     if (confirmed == true) {
-      setState(() => _isLoading = true);
-      
       try {
-        await CalendarApiService.deleteEvent(event.id);
-        NotificationService.cancelEventReminder(event.id);
-        
-        setState(() {
-          _events.removeWhere((e) => e.id == event.id);
-          _selectedEvents.value = _getEventsForDay(_selectedDay!);
-        });
-
+        await _controller.deleteEvent(event);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Event deleted')),
         );
@@ -295,21 +102,63 @@ class _CalendarPageState extends State<CalendarPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to delete event: $e')),
         );
-      } finally {
-        setState(() => _isLoading = false);
       }
     }
   }
 
+  Future<void> _showEventOptions(CalendarEvent event) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text('Edit Event'),
+            onTap: () {
+              Navigator.pop(context);
+              _showEventDialog(event);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.delete, color: Colors.red),
+            title: Text('Delete Event', style: TextStyle(color: Colors.red)),
+            onTap: () {
+              Navigator.pop(context);
+              _showDeleteConfirmation(event);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.cancel),
+            title: Text('Cancel'),
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedEvents = _controller.selectedDay != null
+        ? _controller.getEventsForDay(_controller.selectedDay!)
+        : <CalendarEvent>[];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Calendar'),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: _loadEvents,
+            onPressed: () async {
+              try {
+                await _controller.loadEvents();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to load events: $e')),
+                );
+              }
+            },
           ),
         ],
       ),
@@ -318,14 +167,14 @@ class _CalendarPageState extends State<CalendarPage> {
           TableCalendar<CalendarEvent>(
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
+            focusedDay: _controller.focusedDay,
             calendarFormat: _calendarFormat,
-            eventLoader: _getEventsForDay,
+            eventLoader: _controller.getEventsForDay,
             startingDayOfWeek: StartingDayOfWeek.monday,
             calendarStyle: CalendarStyle(
               outsideDaysVisible: false,
             ),
-            onDaySelected: _onDaySelected,
+            onDaySelected: _controller.setSelectedDay,
             onFormatChanged: (format) {
               if (_calendarFormat != format) {
                 setState(() {
@@ -333,48 +182,17 @@ class _CalendarPageState extends State<CalendarPage> {
                 });
               }
             },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-              _loadEvents();
-            },
+            onPageChanged: _controller.setFocusedDay,
             selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
+              return isSameDay(_controller.selectedDay, day);
             },
           ),
           const SizedBox(height: 8.0),
-          if (_isLoading)
-            LinearProgressIndicator(),
           Expanded(
-            child: ValueListenableBuilder<List<CalendarEvent>>(
-              valueListenable: _selectedEvents,
-              builder: (context, value, _) {
-                return ListView.builder(
-                  itemCount: value.length,
-                  itemBuilder: (context, index) {
-                    final event = value[index];
-                    return Card(
-                      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      child: ListTile(
-                        onTap: () => _showEventDialog(event),
-                        title: Text(event.title),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(event.description),
-                            Text(
-                              '${event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')} - ${event.endTime.hour}:${event.endTime.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            if (event.location != null)
-                              Text('📍 ${event.location}'),
-                          ],
-                        ),
-                        trailing: Icon(Icons.edit),
-                      ),
-                    );
-                  },
-                );
-              },
+            child: EventList(
+              events: selectedEvents,
+              isLoading: _controller.isLoading,
+              onEventTap: _showEventOptions,
             ),
           ),
         ],
@@ -386,13 +204,3 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
-
-// Dependencies to add to pubspec.yaml:
-/*
-dependencies:
-  flutter:
-    sdk: flutter
-  table_calendar: ^3.0.9
-  flutter_local_notifications: ^16.3.2
-  http: ^1.1.0
-*/

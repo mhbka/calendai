@@ -39,8 +39,8 @@ mixin SystemTrayMixin<T extends StatefulWidget> on State<T>, TrayListener {
         _showWindow();
       case 'hide_window':
         _hideWindow();
-      case 'test':
-        _testNotif();
+      case 'say_hello':
+        _sayHello();
       case 'quit':
         _quitApp();
     }
@@ -55,11 +55,11 @@ mixin SystemTrayMixin<T extends StatefulWidget> on State<T>, TrayListener {
     await windowManager.hide();
   }
 
-  Future<void> _testNotif() async {
+  Future<void> _sayHello() async {
     var event = CalendarEvent(
       id: uuid.v4(), 
-      title: 'test', 
-      description: 'test 2', 
+      title: 'Calendai says...', 
+      description: 'hello!', 
       startTime: DateTime.now(), 
       endTime: DateTime.now()
     );

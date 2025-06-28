@@ -2,8 +2,6 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:namer_app/main.dart';
-import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -12,7 +10,7 @@ import 'package:window_manager/window_manager.dart';
 Future<void> initDeps() async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
-  NotificationService.initialize();
+  await NotificationService.initialize();
   await windowManager.ensureInitialized();
 }
 
@@ -40,8 +38,8 @@ Future<void> initSystemTray() async {
       ),
       MenuItem.separator(),
       MenuItem( 
-        key: 'test',
-        label: 'test'
+        key: 'say_hello',
+        label: 'Say Hello!'
       ),
     ],
   );
