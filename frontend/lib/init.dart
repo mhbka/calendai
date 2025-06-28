@@ -34,13 +34,18 @@ Future<void> initSystemTray() async {
     items: [
       MenuItem(
         key: 'show_window',
-        label: 'Show Window',
+        label: 'Open',
       ),
       MenuItem.separator(),
       MenuItem( 
         key: 'say_hello',
         label: 'Say Hello!'
       ),
+      MenuItem.separator(),
+      MenuItem(
+        key: 'show_ai_event',
+        label: 'Add event with AI'
+      )
     ],
   );
   await trayManager.setContextMenu(menu);

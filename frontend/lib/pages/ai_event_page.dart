@@ -21,19 +21,18 @@ class AddEventPage extends StatefulWidget {
 }
 
 class _AddEventPageState extends State<AddEventPage> {
-  late AddEventController _controller;
+  late final AddEventController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AddEventController();
+    _controller = AddEventController.instance;
     _controller.addListener(_onControllerStateChanged);
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onControllerStateChanged);
-    _controller.dispose();
     super.dispose();
   }
 

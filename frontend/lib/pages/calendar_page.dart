@@ -12,13 +12,12 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  late CalendarController _controller;
+  final CalendarController _controller = CalendarController.instance;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   @override
   void initState() {
     super.initState();
-    _controller = CalendarController();
     _controller.addListener(() {
       if (mounted) setState(() {});
     });
@@ -26,7 +25,6 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
