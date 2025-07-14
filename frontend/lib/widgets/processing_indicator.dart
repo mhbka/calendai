@@ -5,10 +5,10 @@ class ProcessingIndicatorWidget extends StatelessWidget {
   final double height;
 
   const ProcessingIndicatorWidget({
-    Key? key,
+    super.key,
     required this.processingType,
     this.height = 300,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 /// The env vars for the app.
 late final DotEnv envVars;
 
+
 /// The UUID generator for the app.
 final Uuid uuid = Uuid();
 

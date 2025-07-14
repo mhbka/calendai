@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/widgets/audio_recording_input.dart';
 
 class EventInputWidget extends StatelessWidget {
+  final AudioRecordingInput audioRecorder;
   final VoidCallback onPaste;
   final VoidCallback onStartRecording;
   final double height;
 
   const EventInputWidget({
     Key? key,
+    required this.audioRecorder,
     required this.onPaste,
     required this.onStartRecording,
     this.height = 300,
@@ -23,7 +26,6 @@ class EventInputWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Paste area
           Expanded(
             child: InkWell(
               onTap: onPaste,
@@ -62,23 +64,20 @@ class EventInputWidget extends StatelessWidget {
               ),
             ),
           ),
-          
-          // Divider
           Container(
             height: 1,
             color: Colors.grey[300],
           ),
-          
-          // Record button
-          InkWell(
-            onTap: onStartRecording,
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
+          Card(
+            //onTap: onStartRecording,
+            //borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  /*
                   Icon(
                     Icons.mic,
                     color: Colors.grey[600],
@@ -93,6 +92,8 @@ class EventInputWidget extends StatelessWidget {
                       color: Colors.grey[600],
                     ),
                   ),
+                  */
+                  audioRecorder
                 ],
               ),
             ),

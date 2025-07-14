@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/widgets/audio_recorder.dart';
+import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:namer_app/widgets/processing_indicator.dart';
 import 'package:namer_app/widgets/event_input.dart';
@@ -144,25 +144,14 @@ class _AddEventPageState extends State<AddEventPage> {
       );
     }
 
-    if (_controller.isRecording) {
-      return Container(
-        height: 300,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.red, width: 2),
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.red[50],
-        ),
-        child: AudioRecorder(
+    return EventInputWidget(
+      onPaste: _handlePaste,
+      onStartRecording: () => _controller.setRecording(true),
+      audioRecorder: AudioRecordingInput(
           onRecordingComplete: _processAudioInput,
           onRecordingStart: () => _controller.setRecording(true),
           onRecordingStop: () => _controller.setRecording(false),
         ),
-      );
-    }
-
-    return EventInputWidget(
-      onPaste: _handlePaste,
-      onStartRecording: () => _controller.setRecording(true),
     );
   }
 

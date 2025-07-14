@@ -1,32 +1,36 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:record/record.dart';
 
 enum RecordingState { idle, recording, processing }
 
-class AudioRecorder extends StatefulWidget {
+class AudioRecordingInput extends StatefulWidget {
   final Function(Uint8List audioData) onRecordingComplete;
   final VoidCallback? onRecordingStart;
   final VoidCallback? onRecordingStop;
 
-  const AudioRecorder({
-    Key? key,
+  const AudioRecordingInput({
+    super.key,
     required this.onRecordingComplete,
     this.onRecordingStart,
     this.onRecordingStop,
-  }) : super(key: key);
+  });
 
   @override
-  _AudioRecorderState createState() => _AudioRecorderState();
+  _AudioRecordingInputState createState() => _AudioRecordingInputState();
 }
 
-class _AudioRecorderState extends State<AudioRecorder>
-    with TickerProviderStateMixin {
+class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerProviderStateMixin {
   RecordingState _state = RecordingState.idle;
   Timer? _recordingTimer;
   int _recordingDuration = 0;
+
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  final AudioRecorder _recorder = AudioRecorder();
+  late Stream<Uint8List> _audioRecording;
 
   @override
   void initState() {
@@ -48,6 +52,7 @@ class _AudioRecorderState extends State<AudioRecorder>
   void dispose() {
     _recordingTimer?.cancel();
     _pulseController.dispose();
+    _recorder.dispose();
     super.dispose();
   }
 
@@ -61,29 +66,24 @@ class _AudioRecorderState extends State<AudioRecorder>
 
   Future<void> _startRecording() async {
     try {
-      // In a real app, you would request microphone permission here
-      // and start actual audio recording using packages like:
-      // - record
-      // - flutter_sound
-      // - permission_handler
-      
       setState(() {
         _state = RecordingState.recording;
         _recordingDuration = 0;
       });
 
       widget.onRecordingStart?.call();
+
+      if (await _recorder.hasPermission()) {
+        _pulseController.repeat(reverse: true);
       
-      // Start pulse animation
-      _pulseController.repeat(reverse: true);
-
-      // Start timer for recording duration
-      _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-        setState(() {
-          _recordingDuration++;
+        _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+          setState(() {
+            _recordingDuration++;
+          });
         });
-      });
 
+        _audioRecording = await _recorder.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to start recording: $e')),
@@ -99,17 +99,11 @@ class _AudioRecorderState extends State<AudioRecorder>
 
       _recordingTimer?.cancel();
       _pulseController.stop();
+      _recorder.stop();
       widget.onRecordingStop?.call();
 
-      // Mock audio data - in a real app, this would be the actual recorded audio
-      final mockAudioData = Uint8List.fromList(
-        List.generate(1000, (index) => index % 256),
-      );
-
-      // Simulate processing delay
-      await Future.delayed(Duration(milliseconds: 500));
-
-      widget.onRecordingComplete(mockAudioData);
+      print("lists: ${await _audioRecording.length}");
+      widget.onRecordingComplete(await _audioRecording.first);
 
       setState(() {
         _state = RecordingState.idle;
@@ -132,67 +126,79 @@ class _AudioRecorderState extends State<AudioRecorder>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        AnimatedBuilder(
-          animation: _pulseAnimation,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _state == RecordingState.recording ? _pulseAnimation.value : 1.0,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _getButtonColor(),
-                  boxShadow: _state == RecordingState.recording
-                      ? [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(40),
-                    onTap: _state == RecordingState.processing ? null : _toggleRecording,
-                    child: Center(
-                      child: _getButtonIcon(),
+Widget build(BuildContext context) {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _state == RecordingState.recording ? _pulseAnimation.value : 1.0,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _getButtonColor(),
+                    boxShadow: _state == RecordingState.recording
+                        ? [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.3),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(40),
+                      onTap: _state == RecordingState.processing ? null : _toggleRecording,
+                      child: Center(
+                        child: _getButtonIcon(),
+                      ),
                     ),
                   ),
                 ),
+              );
+            },
+          ),
+          SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _getStatusText(),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: _getTextColor(),
+                    ),
               ),
-            );
-          },
-        ),
-        SizedBox(height: 16),
-        Text(
-          _getStatusText(),
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: _getTextColor(),
-              ),
-        ),
-        if (_state == RecordingState.recording) ...[
-          SizedBox(height: 8),
-          Text(
-            _formatDuration(_recordingDuration),
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
+              if (_state == RecordingState.recording) ...[
+                SizedBox(height: 4),
+                Text(
+                  _formatDuration(_recordingDuration),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
                 ),
+              ],
+            ],
           ),
         ],
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
-  Color _getButtonColor() {
+  Color _getButtonColor() { 
     switch (_state) {
       case RecordingState.idle:
         return Theme.of(context).primaryColor;
