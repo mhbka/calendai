@@ -168,7 +168,7 @@ class _AddEventPageState extends State<AddEventPage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -177,7 +177,7 @@ class _AddEventPageState extends State<AddEventPage> {
                 size: 64,
                 color: Theme.of(context).primaryColor,
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 12),
               Text(
                 'Create a calendar event with AI',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -194,9 +194,9 @@ class _AddEventPageState extends State<AddEventPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 48),
+              SizedBox(height: 16),
               _buildMainArea(),
-              SizedBox(height: 30),
+              SizedBox(height: 4),
               if (!_controller.isProcessing && !_controller.isRecording) 
                 ExampleTipWidget(),
             ],

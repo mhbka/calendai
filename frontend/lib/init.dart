@@ -17,10 +17,22 @@ Future<void> initDeps() async {
 /// Validates and returns the env vars for the app.
 DotEnv initEnvVars() {
   var env = DotEnv(includePlatformEnvironment: true)..load();
-  if (!env.isEveryDefined(['supabase_url', 'supabase_anon_key', 'api_base_url', 'google_client_id', 'google_client_secret'])) {
+  if (!env.isEveryDefined([
+    'supabase_url', 
+    'supabase_anon_key', 
+    'api_base_url', 
+    'google_client_id', 
+    'google_client_secret'
+    ])
+  ) {
     throw 'Not all required env vars were detected';
   }
   return env;
+}
+
+/// Initialize the window's settings.
+Future<void> initWindowSettings() async {
+  await windowManager.setSize(Size(1366, 768));
 }
 
 /// Initializes the Windows system tray for the app.

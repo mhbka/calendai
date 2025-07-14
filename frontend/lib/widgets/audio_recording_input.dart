@@ -147,7 +147,6 @@ Widget build(BuildContext context) {
                     boxShadow: _state == RecordingState.recording
                         ? [
                             BoxShadow(
-                              color: Colors.red.withOpacity(0.3),
                               blurRadius: 20,
                               spreadRadius: 5,
                             ),
@@ -155,7 +154,8 @@ Widget build(BuildContext context) {
                         : null,
                   ),
                   child: Material(
-                    color: Colors.transparent,
+                    type: MaterialType.transparency,
+                    color: Colors.black,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(40),
                       onTap: _state == RecordingState.processing ? null : _toggleRecording,

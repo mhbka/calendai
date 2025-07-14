@@ -32,7 +32,7 @@ class EventInputWidget extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(32),
+                padding: EdgeInsets.all(16),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -41,7 +41,7 @@ class EventInputWidget extends StatelessWidget {
                       size: 48,
                       color: Colors.grey[400],
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: 8),
                     Text(
                       'Paste your text here',
                       style: TextStyle(
@@ -69,32 +69,14 @@ class EventInputWidget extends StatelessWidget {
             color: Colors.grey[300],
           ),
           Card(
-            //onTap: onStartRecording,
-            //borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
+            shadowColor: Colors.transparent,
+            color: Colors.transparent,
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  /*
-                  Icon(
-                    Icons.mic,
-                    color: Colors.grey[600],
-                    size: 20,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Or record your voice',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  */
-                  audioRecorder
-                ],
+                children: [audioRecorder],
               ),
             ),
           ),

@@ -10,15 +10,15 @@ import 'package:uuid/uuid.dart';
 /// The env vars for the app.
 late final DotEnv envVars;
 
-
 /// The UUID generator for the app.
 final Uuid uuid = Uuid();
 
 void main() async {
-  await initDeps();
   envVars = initEnvVars();  
+  await initDeps();
   await initSystemTray();
-  
+  await initWindowSettings();
+
   await Supabase.initialize(
     url: envVars['supabase_url']!,
     anonKey: envVars['supabase_anon_key']!
@@ -49,6 +49,11 @@ class _AppState extends State<App> with TrayListener, SystemTrayMixin {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
+    double width = screenSize.width;
+    double height = screenSize.height;
+    print("$width x $height");
+
     return MaterialApp.router(
       title: 'Calendai',
       theme: ThemeData(
