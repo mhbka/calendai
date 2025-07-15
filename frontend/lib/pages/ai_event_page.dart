@@ -196,7 +196,7 @@ class _AddEventPageState extends State<AddEventPage> {
               ),
               SizedBox(height: 16),
               _buildMainArea(),
-              SizedBox(height: 4),
+              SizedBox(height: 16),
               if (!_controller.isProcessing && !_controller.isRecording) 
                 ExampleTipWidget(),
             ],

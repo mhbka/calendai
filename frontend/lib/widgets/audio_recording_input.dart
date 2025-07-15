@@ -29,8 +29,7 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  final AudioRecorder _recorder = AudioRecorder();
-  late Stream<Uint8List> _audioRecording;
+  final AudioRecorderWrapper _recorder = AudioRecorderWrapper();
 
   @override
   void initState() {
@@ -82,11 +81,11 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
           });
         });
 
-        _audioRecording = await _recorder.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
+        await _recorder.startRecording();
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to start recording: $e')),
+        SnackBar(content: Text('Failed while starting recording: $e')),
       );
     }
   }
@@ -99,22 +98,23 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
 
       _recordingTimer?.cancel();
       _pulseController.stop();
-      _recorder.stop();
       widget.onRecordingStop?.call();
 
-      print("lists: ${await _audioRecording.length}");
-      widget.onRecordingComplete(await _audioRecording.first);
+      Uint8List audioData = await _recorder.stopRecording();
+      widget.onRecordingComplete(audioData);
+      
 
       setState(() {
         _state = RecordingState.idle;
         _recordingDuration = 0;
       });
-    } catch (e) {
+    } 
+    catch (e) {
       setState(() {
         _state = RecordingState.idle;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to stop recording: $e')),
+        SnackBar(content: Text('Failed while stopping recording: $e')),
       );
     }
   }
@@ -247,5 +247,44 @@ Widget build(BuildContext context) {
       case RecordingState.processing:
         return Colors.orange;
     }
+  }
+}
+
+/// Wrapper for recording and collecting audio data.
+class AudioRecorderWrapper {
+  final AudioRecorder _recorder = AudioRecorder();
+  List<Uint8List> _audioData = [];
+  StreamSubscription? _audioSub;
+
+  AudioRecorderWrapper();
+
+  void dispose() {
+    _audioSub?.cancel();
+    _recorder.dispose();
+  }
+
+  /// Start recording and collecting audio data.
+  Future<void> startRecording() async {
+    _audioData.clear();
+    Stream<Uint8List> audioStream = await _recorder.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
+    _audioSub = audioStream.listen((chunk) {
+      _audioData.add(chunk);
+    });
+  }
+
+  /// Stop recording and return the audio data.
+  Future<Uint8List> stopRecording() async {
+    await _recorder.stop();
+    await _audioSub?.cancel();
+    final completeAudio = Uint8List.fromList(
+      _audioData.expand((chunk) => chunk).toList()
+    );
+    _audioData.clear();
+    return completeAudio;
+  }
+  
+  /// Passthrough for internal recorder `hasPermission`.
+  Future<bool> hasPermission() async {
+    return await _recorder.hasPermission();
   }
 }
