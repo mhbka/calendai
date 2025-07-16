@@ -29,18 +29,28 @@ class EventList extends StatelessWidget {
                         ),
                   ),
                 )
-              : ListView.builder(
-                  itemCount: events.length,
-                  itemBuilder: (context, index) {
-                    final event = events[index];
-                    return EventListItem(
-                      event: event,
-                      onTap: () => onEventTap(event),
-                    );
-                  },
-                ),
+              : _buildList()
         ),
       ],
+    );
+  }
+
+  Widget _buildList() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 1000, 
+      crossAxisSpacing: 0.0,
+      mainAxisSpacing: 0.0,
+      childAspectRatio: 5.4,
+    ),
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        final event = events[index];
+        return EventListItem(
+          event: event,
+          onTap: () => onEventTap(event),
+        );
+      },
     );
   }
 }

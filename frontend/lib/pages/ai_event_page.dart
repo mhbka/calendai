@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
@@ -12,9 +13,7 @@ import 'package:namer_app/controllers/ai_event_controller.dart';
 class AddAIEventPage extends StatefulWidget {
   final CalendarController calendarController = CalendarController.instance;
 
-  static final GlobalKey<_AddAIEventPageState> pageKey = GlobalKey<_AddAIEventPageState>();
-
-  AddAIEventPage({Key? key}) : super(key: key);
+  AddAIEventPage({super.key});
 
   @override
   _AddAIEventPageState createState() => _AddAIEventPageState();
@@ -163,7 +162,11 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Add Event'),
+        title: Text('Add event with AI'),
+        leading: IconButton(
+          onPressed: () => context.pop(), 
+          icon: Icon(Icons.arrow_back)
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,

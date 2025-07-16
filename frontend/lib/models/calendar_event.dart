@@ -1,3 +1,4 @@
+/// Describes a singular calendar event.
 class CalendarEvent {
   final String id;
   final String title;
