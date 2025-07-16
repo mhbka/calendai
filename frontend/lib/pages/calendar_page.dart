@@ -1,12 +1,14 @@
 // lib/pages/calendar_page.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
-import 'package:namer_app/pages/calendar_page/calendar_app_bar.dart';
+import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/pages/calendar_page/calendar_events.dart';
 import 'package:namer_app/pages/calendar_page/calendar_floating_actions.dart';
-import 'package:namer_app/pages/calendar_page/calendar_service.dart';
-import 'package:namer_app/pages/calendar_page/calendar_view.dart';
+import 'package:namer_app/pages/calendar_page/calendar_dialogs.dart';
+import 'package:namer_app/pages/calendar_page/calendar.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -17,13 +19,13 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   final CalendarController _controller = CalendarController.instance;
-  late final CalendarService _eventActionsService;
+  late final CalendarDialogs _calendarDialogs;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   @override
   void initState() {
     super.initState();
-    _eventActionsService = CalendarService(controller: _controller);
+    _calendarDialogs = CalendarDialogs(controller: _controller);
     _controller.addListener(() {
       if (mounted) setState(() {});
     });
@@ -55,7 +57,7 @@ class _CalendarPageState extends State<CalendarPage> {
   ) async {
     Navigator.pop(context); // Close the dialog
     
-    await _eventActionsService.saveEvent(
+    await _calendarDialogs.saveEvent(
       context,
       existingEvent: existingEvent,
       title: title,
@@ -67,7 +69,7 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> _showEventOptions(CalendarEvent event) async {
-    await _eventActionsService.showEventOptions(
+    await _calendarDialogs.showEventOptions(
       context,
       event,
       onEdit: () => _showEventDialog(event),
@@ -80,19 +82,55 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  Future<void> _handleRefresh() async {
+    try {
+      await _controller.loadEvents();
+    } catch (e) {
+      if (mounted) {
+        _calendarDialogs.showSnackBar(
+          context, 
+          Text('${CalendarConstants.failedToLoadMessage}: $e')
+        );
+      }
+    }
+  }
+  
+  Future<void> _handleLogout() async {
+    // TODO: logout of Supabase + nav to login page
+  }
+
+  List<Widget> _buildAppBarActions() {
+    return [
+      IconButton(
+        icon: Icon(Icons.refresh),
+        onPressed: () => _handleRefresh(),
+      ),
+      TextButton(
+        onPressed: () => context.push('/recurring_events'),
+        style: CalendarTheme.primaryButtonStyle,
+        child: Text(
+          CalendarConstants.viewRecurringEventsLabel,
+          style: CalendarConstants.whiteTextStyle,
+        ),
+      ),
+      TextButton(
+        onPressed: () => _handleLogout(),
+        child: Text(CalendarConstants.logoutLabel),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedEvents = _controller.selectedDay != null
         ? _controller.getEventsForDay(_controller.selectedDay!)
         : <CalendarEvent>[];
 
-    return Scaffold(
-      appBar: CalendarAppBar(
-        controller: _controller,
-      ),
+    return BasePage(
+      title: 'Calendai', 
       body: Column(
         children: [
-          CalendarView(
+          Calendar(
             controller: _controller,
             calendarFormat: _calendarFormat,
             onFormatChanged: _onFormatChanged,
@@ -106,9 +144,10 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
         ],
       ),
-      floatingActionButton: CalendarFloatingActions(
+      appBarActions: _buildAppBarActions(),
+      floatingActions: CalendarFloatingActions(
         onAddEvent: _showEventDialog,
-      ),
+      )
     );
   }
 }

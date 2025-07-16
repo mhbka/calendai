@@ -4,11 +4,12 @@ import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 
-class CalendarService {
+class CalendarDialogs {
   final CalendarController controller;
 
-  CalendarService({required this.controller});
+  CalendarDialogs({required this.controller});
 
+  /// Save an event.
   Future<void> saveEvent(
     BuildContext context, {
     CalendarEvent? existingEvent,
@@ -39,6 +40,7 @@ class CalendarService {
     }
   }
 
+  /// Delete an event.
   Future<void> deleteEvent(BuildContext context, CalendarEvent event) async {
     try {
       await controller.deleteEvent(event);
@@ -48,6 +50,7 @@ class CalendarService {
     }
   }
 
+  /// Show the dialog for confirming an event delete.
   Future<bool> showDeleteConfirmation(
     BuildContext context,
     CalendarEvent event,
@@ -76,6 +79,7 @@ class CalendarService {
     return confirmed ?? false;
   }
 
+  /// Show the options for an event.
   Future<void> showEventOptions(
     BuildContext context,
     CalendarEvent event, {
@@ -115,6 +119,12 @@ class CalendarService {
           ),
         ],
       ),
+    );
+  }
+
+  void showSnackBar(BuildContext context, Widget content) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: content),
     );
   }
 

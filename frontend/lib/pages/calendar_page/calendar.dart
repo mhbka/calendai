@@ -1,16 +1,16 @@
-// lib/widgets/calendar_view.dart
 import 'package:flutter/material.dart';
 import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class CalendarView extends StatefulWidget {
+/// The calendar.
+class Calendar extends StatefulWidget {
   final CalendarController controller;
   final Function(CalendarFormat) onFormatChanged;
   final CalendarFormat calendarFormat;
 
-  const CalendarView({
+  const Calendar({
     Key? key,
     required this.controller,
     required this.onFormatChanged,
@@ -18,10 +18,10 @@ class CalendarView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CalendarView> createState() => _CalendarViewState();
+  State<Calendar> createState() => _CalendarState();
 }
 
-class _CalendarViewState extends State<CalendarView> {
+class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return TableCalendar<CalendarEvent>(

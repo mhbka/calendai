@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:namer_app/widgets/processing_indicator.dart';
@@ -158,57 +159,42 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('Add event with AI'),
-        leading: IconButton(
-          onPressed: () => context.pop(), 
-          icon: Icon(Icons.arrow_back)
+Widget build(BuildContext context) {
+  return BasePage(
+    title: 'Add event with AI',
+    onBack: () => context.pop(),
+    body: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.auto_awesome,
+          size: 64,
+          color: Theme.of(context).primaryColor,
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.auto_awesome,
-                size: 64,
-                color: Theme.of(context).primaryColor,
+        SizedBox(height: 12),
+        Text(
+          'Create a calendar event with AI',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
-              SizedBox(height: 12),
-              Text(
-                'Create a calendar event with AI',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Paste text or record audio to automatically generate a calendar event',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              _buildMainArea(),
-              SizedBox(height: 16),
-              if (!_controller.isProcessing && !_controller.isRecording) 
-                ExampleTipWidget(),
-            ],
-          ),
+          textAlign: TextAlign.center,
         ),
-      ),
-    );
-  }
+        SizedBox(height: 12),
+        Text(
+          'Paste text or record audio to automatically generate a calendar event',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 16),
+        _buildMainArea(),
+        SizedBox(height: 16),
+        if (!_controller.isProcessing && !_controller.isRecording)
+          ExampleTipWidget(),
+      ],
+    ),
+  );
+}
 }
