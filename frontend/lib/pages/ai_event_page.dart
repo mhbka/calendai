@@ -9,19 +9,21 @@ import 'package:namer_app/widgets/example_tip.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
 
-class AddEventPage extends StatefulWidget {
+class AddAIEventPage extends StatefulWidget {
   final CalendarController calendarController = CalendarController.instance;
 
-  AddEventPage({
-    super.key,
-  });
+  static final GlobalKey<_AddAIEventPageState> pageKey = GlobalKey<_AddAIEventPageState>();
+
+  AddAIEventPage({Key? key}) : super(key: key);
 
   @override
-  _AddEventPageState createState() => _AddEventPageState();
+  _AddAIEventPageState createState() => _AddAIEventPageState();
 }
 
-class _AddEventPageState extends State<AddEventPage> {
+class _AddAIEventPageState extends State<AddAIEventPage> {
   late final AddEventController _controller;
+
+  
 
   @override
   void initState() {
@@ -40,7 +42,8 @@ class _AddEventPageState extends State<AddEventPage> {
     setState(() {});
   }
 
-  Future<void> _handlePaste() async {
+  /// Handles the pasting of the user's clipboard + processing of text into a calendar event.
+  Future<void> handlePaste() async {
     try {
       final text = await _controller.handlePaste();
       if (text != null) {
@@ -145,7 +148,7 @@ class _AddEventPageState extends State<AddEventPage> {
     }
 
     return EventInputWidget(
-      onPaste: _handlePaste,
+      onPaste: handlePaste,
       onStartRecording: () => _controller.setRecording(true),
       audioRecorder: AudioRecordingInput(
           onRecordingComplete: _processAudioInput,

@@ -5,6 +5,7 @@ import 'package:record/record.dart';
 
 enum RecordingState { idle, recording, processing }
 
+/// Widget for recording audio data.
 class AudioRecordingInput extends StatefulWidget {
   final Function(Uint8List audioData) onRecordingComplete;
   final VoidCallback? onRecordingStart;

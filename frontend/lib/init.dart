@@ -32,10 +32,13 @@ DotEnv initEnvVars() {
 
 /// Initialize the window's settings.
 Future<void> initWindowSettings() async {
+  windowManager.setPreventClose(true);
   await windowManager.setSize(Size(1366, 768));
 }
 
 /// Initializes the Windows system tray for the app.
+/// 
+/// Note that the handler functions for each option are in the `system_tray` mixin.
 Future<void> initSystemTray() async {
   await trayManager.setIcon(
     Platform.isWindows

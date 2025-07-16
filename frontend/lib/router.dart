@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:namer_app/pages/ai_event_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:namer_app/pages/login_page.dart';
 import 'package:namer_app/pages/calendar_page.dart';
@@ -38,6 +39,11 @@ class AppRouter {
         name: 'calendar',
         builder: (context, state) => CalendarPage(),
       ),
+      GoRoute(
+        path: '/add_ai_event',
+        name: 'add_ai_event',
+        builder: (context, state) => AddAIEventPage(key: AddAIEventPage.pageKey)
+      )
     ],
   );
 }
