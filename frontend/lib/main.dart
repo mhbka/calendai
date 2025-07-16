@@ -2,10 +2,12 @@ import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:namer_app/init.dart';
 import 'package:namer_app/mixins/system_tray.dart';
+import 'package:namer_app/mixins/window_manager.dart';
 import 'package:namer_app/router.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:uuid/uuid.dart';
+import 'package:window_manager/window_manager.dart';
 
 /// The env vars for the app.
 late final DotEnv envVars;
@@ -32,7 +34,7 @@ class App extends StatefulWidget {
   _AppState createState() => _AppState();
 }
 
-class _AppState extends State<App> with TrayListener, SystemTrayMixin {
+class _AppState extends State<App> with TrayListener, WindowListener, SystemTrayMixin, WindowManagerMixin {
   @override
   void initState() {
     super.initState();

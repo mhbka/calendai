@@ -32,7 +32,7 @@ DotEnv initEnvVars() {
 
 /// Initialize the window's settings.
 Future<void> initWindowSettings() async {
-  windowManager.setPreventClose(true);
+  //windowManager.setPreventClose(true);
   await windowManager.setSize(Size(1366, 768));
 }
 
