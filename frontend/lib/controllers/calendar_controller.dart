@@ -32,6 +32,7 @@ class CalendarController extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // methods
+  ///
   List<CalendarEvent> getEventsForDay(DateTime day) {
     return _events.where((event) {
       return isSameDay(event.startTime, day);
@@ -46,11 +47,13 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
+  /// Set the focused day.
   void setFocusedDay(DateTime focusedDay) {
     _focusedDay = focusedDay;
     loadEvents();
   }
 
+  /// Loads all calendar events between the start and end datetimes.
   Future<void> loadEvents() async {
     _setLoading(true);
     try {
@@ -73,6 +76,7 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
+  /// Saves a new event.
   Future<CalendarEvent> saveEvent({
     CalendarEvent? existingEvent,
     required String title,
@@ -126,6 +130,7 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
+  /// Deletes a chosen event.
   Future<void> deleteEvent(CalendarEvent event) async {
     _setLoading(true);
     try {
