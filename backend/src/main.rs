@@ -5,6 +5,7 @@ use sqlx::postgres::PgPoolOptions;
 
 mod config;
 mod api;
+mod models;
 
 #[tokio::main]
 async fn main() {
@@ -19,4 +20,5 @@ async fn main() {
         .run(&db)
         .await
         .expect("Migration should succeeed");
+
 }
