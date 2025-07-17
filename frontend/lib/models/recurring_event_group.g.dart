@@ -19,9 +19,7 @@ RecurringEventGroup _$RecurringEventGroupFromJson(Map<String, dynamic> json) =>
       endDate: json['endDate'] == null
           ? null
           : DateTime.parse(json['endDate'] as String),
-      recurringEvents: (json['recurringEvents'] as List<dynamic>)
-          .map((e) => RecurringEvent.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      recurringEvents: json['recurringEvents'] as num,
     );
 
 Map<String, dynamic> _$RecurringEventGroupToJson(

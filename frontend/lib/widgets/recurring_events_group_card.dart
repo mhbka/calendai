@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 
@@ -12,114 +10,31 @@ class RecurringEventsGroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      child: IntrinsicHeight(
+      margin: EdgeInsets.zero, 
+      child: SizedBox(
+        height: 130, // Fixed height for equal heights
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Color indicator (post-it style)
-            Container(
-              width: 6,
-              decoration: BoxDecoration(
-                color: group.color,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  bottomLeft: Radius.circular(4),
-                ),
-              ),
-            ),
-            // Main content
+            _buildColorIndicator(),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header row with name and status
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            group.name,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: group.isActive ? Colors.green : Colors.red,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            group.isActive ? 'Active' : 'Inactive',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildHeader(context),
                     const SizedBox(height: 8),
-                    
-                    // Description
-                    if (group.description != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          group.description!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (group.description != null) _buildDescription(context),
+                          if (group.startDate != null || group.endDate != null) 
+                            _buildDateRange(context),
+                          _buildRecurringEventsCount(context),
+                        ],
                       ),
-                    
-                    // Date range
-                    if (group.startDate != null || group.endDate != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.date_range,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDateRange(group.startDate, group.endDate),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    
-                    // Recurring events count
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.event_repeat,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${group.recurringEvents} recurring event${group.recurringEvents == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -131,10 +46,120 @@ class RecurringEventsGroupCard extends StatelessWidget {
     );
   }
 
+  Widget _buildColorIndicator() {
+    return Container(
+      width: 6,
+      decoration: BoxDecoration(
+        color: group.color,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(4),
+          bottomLeft: Radius.circular(4),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            group.name,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        _buildStatusBadge(),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: group.isActive ? Colors.green : Colors.red,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        group.isActive ? 'Active' : 'Inactive',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDescription(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        group.description!,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Colors.grey[600],
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildDateRange(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            Icons.date_range,
+            size: 16,
+            color: Colors.grey[600],
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              _formatDateRange(group.startDate, group.endDate),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecurringEventsCount(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          Icons.event_repeat,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '${group.recurringEvents} recurring event${group.recurringEvents == 1 ? '' : 's'}',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
   String _formatDateRange(DateTime? startDate, DateTime? endDate) {
     if (startDate == null && endDate == null) return '';
-    
-    final dateFormat = 'MMM d, yyyy';
     
     if (startDate != null && endDate != null) {
       return '${_formatDate(startDate)} - ${_formatDate(endDate)}';
