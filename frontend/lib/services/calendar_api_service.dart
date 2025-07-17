@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
-/// Contains methods for the calendar API.
+/// For interacting with the calendar (event) API.
 class CalendarApiService {
   static String baseUrl = "${envVars['api_base_url']!}/calendar";
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
+/// For interacting with the app's notifications.
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   static final Map<String, Timer> _activeTimers = {};

@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
+/// For interacting with the AI Event API.
 class AIEventService {
   static String baseUrl = "${envVars['api_base_url']!}/add_ai_event";
 

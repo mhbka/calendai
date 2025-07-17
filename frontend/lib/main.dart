@@ -34,7 +34,12 @@ class App extends StatefulWidget {
   _AppState createState() => _AppState();
 }
 
-class _AppState extends State<App> with TrayListener, WindowListener, SystemTrayMixin, WindowManagerMixin {
+class _AppState extends State<App> with 
+  TrayListener, 
+  WindowListener, 
+  SystemTrayMixin, 
+  WindowManagerMixin 
+{
   @override
   void initState() {
     super.initState();
