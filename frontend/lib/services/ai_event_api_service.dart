@@ -4,7 +4,7 @@ import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
 class AIEventService {
-  static String baseUrl = envVars['api_base_url']!;
+  static String baseUrl = "${envVars['api_base_url']!}/add_ai_event";
 
   /// Process text input to generate a CalendarEvent
   /// TODO: Stub implementation - replace with actual API call

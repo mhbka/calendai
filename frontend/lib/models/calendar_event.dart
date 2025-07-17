@@ -1,4 +1,9 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'calendar_event.g.dart';
+
 /// Describes a singular calendar event.
+@JsonSerializable()
 class CalendarEvent {
   final String id;
   final String title;
@@ -15,28 +20,6 @@ class CalendarEvent {
     required this.endTime,
     this.location,
   });
-
-  factory CalendarEvent.fromJson(Map<String, dynamic> json) {
-    return CalendarEvent(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      startTime: DateTime.parse(json['startTime']),
-      endTime: DateTime.parse(json['endTime']),
-      location: json['location'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'startTime': startTime.toIso8601String(),
-      'endTime': endTime.toIso8601String(),
-      'location': location,
-    };
-  }
 
   CalendarEvent copyWith({
     String? id,
@@ -55,4 +38,7 @@ class CalendarEvent {
       location: location ?? this.location,
     );
   }
+
+  factory CalendarEvent.fromJson(Map<String, dynamic> json) => _$CalendarEventFromJson(json);
+  Map<String, dynamic> toJson() => _$CalendarEventToJson(this);
 }

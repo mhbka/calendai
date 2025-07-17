@@ -6,6 +6,7 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   static final Map<String, Timer> _activeTimers = {};
 
+  /// Initialize notification settings for the app.
   static Future<void> initialize() async {
     const initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initializationSettingsLinux = LinuxInitializationSettings(defaultActionName: 'test');

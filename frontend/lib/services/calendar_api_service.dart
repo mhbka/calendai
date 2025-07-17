@@ -5,18 +5,18 @@ import 'package:namer_app/models/calendar_event.dart';
 
 /// Contains methods for the calendar API.
 class CalendarApiService {
-  static String baseUrl = envVars['api_base_url']!;
+  static String baseUrl = "${envVars['api_base_url']!}/calendar";
+
+  static Map<String, String> _headers = {'Content-Type': 'application/json'};
   
   /// Fetch events for a date range
   /// TODO: Stub implementation - replace with actual API call
   static Future<List<CalendarEvent>> fetchEvents(DateTime start, DateTime end) async {
     try {
-      
       final response = await http.get(
         Uri.parse('$baseUrl/events?start=${start.toIso8601String()}&end=${end.toIso8601String()}'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
       );
-      
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => CalendarEvent.fromJson(json)).toList();
@@ -34,10 +34,9 @@ class CalendarApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/events'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: json.encode(event.toJson()),
       );
-      
       if (response.statusCode == 201) {
         return CalendarEvent.fromJson(json.decode(response.body));
       } else {
@@ -53,7 +52,7 @@ class CalendarApiService {
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/events/${event.id}'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: json.encode(event.toJson()),
       );
       
@@ -72,7 +71,7 @@ class CalendarApiService {
     try {
       final response = await http.delete(
         Uri.parse('$baseUrl/events/$eventId'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
       );
       
       if (response.statusCode != 200) {
