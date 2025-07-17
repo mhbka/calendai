@@ -4,19 +4,19 @@ import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/ai_event_api_service.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 
-class AddEventController extends ChangeNotifier {
+class AddAIEventController extends ChangeNotifier {
   // singleton stuff
-  AddEventController._internal() {
+  AddAIEventController._internal() {
     _calendarController = CalendarController.instance;
   }
 
-  static final AddEventController _instance = AddEventController._internal();
+  static final AddAIEventController _instance = AddAIEventController._internal();
 
-  factory AddEventController() {
+  factory AddAIEventController() {
     return _instance;
   }
 
-  static AddEventController get instance => _instance;
+  static AddAIEventController get instance => _instance;
 
   late final CalendarController? _calendarController;
   

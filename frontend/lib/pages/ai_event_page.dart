@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/pages/ai_event_page/ai_event_body.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
@@ -21,14 +22,12 @@ class AddAIEventPage extends StatefulWidget {
 }
 
 class _AddAIEventPageState extends State<AddAIEventPage> {
-  late final AddEventController _controller;
-
-  
+  late final AddAIEventController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AddEventController.instance;
+    _controller = AddAIEventController.instance;
     _controller.addListener(_onControllerStateChanged);
   }
 
@@ -43,7 +42,7 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
   }
 
   /// Handles the pasting of the user's clipboard + processing of text into a calendar event.
-  Future<void> handlePaste() async {
+  Future<void> _handlePaste() async {
     try {
       final text = await _controller.handlePaste();
       if (text != null) {
@@ -140,61 +139,15 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
     );
   }
 
-  Widget _buildMainArea() {
-    if (_controller.isProcessing) {
-      return ProcessingIndicatorWidget(
-        processingType: _controller.processingType,
-      );
-    }
-
-    return EventInputWidget(
-      onPaste: handlePaste,
-      onStartRecording: () => _controller.setRecording(true),
-      audioRecorder: AudioRecordingInput(
-          onRecordingComplete: _processAudioInput,
-          onRecordingStart: () => _controller.setRecording(true),
-          onRecordingStop: () => _controller.setRecording(false),
-        ),
-    );
-  }
-
   @override
 Widget build(BuildContext context) {
   return BasePage(
     title: 'Add event with AI',
-    onBack: () => context.pop(),
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.auto_awesome,
-          size: 64,
-          color: Theme.of(context).primaryColor,
-        ),
-        SizedBox(height: 12),
-        Text(
-          'Create a calendar event with AI',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 12),
-        Text(
-          'Paste text or record audio to automatically generate a calendar event',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-              ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 16),
-        _buildMainArea(),
-        SizedBox(height: 16),
-        if (!_controller.isProcessing && !_controller.isRecording)
-          ExampleTipWidget(),
-      ],
-    ),
+    body: AIEventBody(
+      controller: _controller, 
+      handlePaste: _handlePaste, 
+      onRecordingComplete: _processAudioInput
+      ),
   );
 }
 }

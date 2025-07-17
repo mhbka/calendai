@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/widgets/recurring_events_group_card.dart';
 
@@ -12,7 +14,7 @@ class RecurringEventsPage extends StatefulWidget {
 
 class _RecurringEventsPageState extends State<RecurringEventsPage> {
   // Sample data - replace with your actual data source
-  List<RecurringEventGroup> RecurringEventGroups = [
+  List<RecurringEventGroup> recurringEventGroups = [
     RecurringEventGroup(
       name: "Ungrouped",
       description: null,
@@ -66,9 +68,9 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
   Widget _buildMainArea() {
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: RecurringEventGroups.length,
+      itemCount: recurringEventGroups.length,
       itemBuilder: (context, index) {
-        final group = RecurringEventGroups[index];
+        final group = recurringEventGroups[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
           child: RecurringEventsGroupCard(group: group),
@@ -90,31 +92,4 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
       ),
     );
   }
-}
-
-// Data models
-class RecurringEventGroup {
-  final String name;
-  final String? description;
-  final Color color;
-  final bool isActive;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final List<RecurringEvent> recurringEvents;
-
-  RecurringEventGroup({
-    required this.name,
-    this.description,
-    required this.color,
-    required this.isActive,
-    this.startDate,
-    this.endDate,
-    required this.recurringEvents,
-  });
-}
-
-class RecurringEvent {
-  final String name;
-
-  RecurringEvent({required this.name});
 }

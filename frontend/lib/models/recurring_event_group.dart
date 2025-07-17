@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:namer_app/models/recurring_event.dart';
+
 /// Describes a recurring event group.
 class RecurringEventGroup {
   final String name;
@@ -8,7 +10,7 @@ class RecurringEventGroup {
   final bool isActive;
   final DateTime? startDate;
   final DateTime? endDate;
-  final num recurringEvents;
+  final List<RecurringEvent> recurringEvents;
 
   RecurringEventGroup({
     required this.name,
