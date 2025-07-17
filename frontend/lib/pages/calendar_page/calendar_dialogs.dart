@@ -121,7 +121,7 @@ class CalendarDialogs {
       ),
     );
   }
-
+  
   void showSnackBar(BuildContext context, Widget content) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: content),

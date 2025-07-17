@@ -4,12 +4,12 @@ import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/widgets/event_list.dart';
 
-class CalendarEvents extends StatelessWidget {
+class CalendarEventsList extends StatelessWidget {
   final List<CalendarEvent> events;
   final bool isLoading;
   final Function(CalendarEvent) onEventTap;
 
-  const CalendarEvents({
+  const CalendarEventsList({
     Key? key,
     required this.events,
     required this.isLoading,
