@@ -1,5 +1,5 @@
 use axum::{
-    extract::{State, ContentLengthLimit}, 
+    extract::State, 
     routing::post, 
     Json, Router,
     body::Bytes,
@@ -26,8 +26,8 @@ struct AIEventResponse {
 /// Build the router for AI event routes.
 pub(super) fn router() -> Router<AppState> {
     Router::new()
-        .route("/add_ai_event/text", post(process_text_to_event))
-        .route("/add_ai_event/audio", post(process_audio_to_event))
+        .route("/text", post(process_text_to_event))
+        .route("/audio", post(process_audio_to_event))
 }
 
 async fn process_text_to_event(
@@ -52,7 +52,7 @@ async fn process_text_to_event(
 async fn process_audio_to_event(
     State(app_state): State<AppState>,
     user: AuthUser,
-    ContentLengthLimit(audio_data): ContentLengthLimit<Bytes, { 10 * 1024 * 1024 }>, // 10MB limit
+    // ContentLengthLimit(audio_data): ContentLengthLimit<Bytes, { 10 * 1024 * 1024 }>, // 10MB limit
 ) -> ApiResult<Json<AIEventResponse>> {
     // Implementation:
     // 1. Validate audio data format/size

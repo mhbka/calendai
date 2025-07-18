@@ -25,11 +25,11 @@ struct CreateGroupRequest {
 /// Build the router for recurring event groups routes.
 pub(super) fn router() -> Router<AppState> {
     Router::new()
-        .route("/recurring_event_groups", get(fetch_all_groups))
-        .route("/recurring_event_groups", post(add_group))
-        .route("/recurring_event_groups/{group_id}", delete(delete_group))
-        .route("/recurring_event_groups/{group_id}", get(fetch_events_for_group))
-        .route("/recurring_event_groups/{new_group_id}/move/{event_id}", put(move_event_between_groups))
+        .route("/", get(fetch_all_groups))
+        .route("/", post(add_group))
+        .route("/{group_id}", delete(delete_group))
+        .route("/{group_id}", get(fetch_events_for_group))
+        .route("/{new_group_id}/move/{event_id}", put(move_event_between_groups))
 }
 
 async fn fetch_all_groups(
@@ -54,6 +54,7 @@ async fn add_group(
     // 3. Parse color string to appropriate format
     // 4. Save to database
     // 5. Return created group
+    unimplemented!()
 }
 
 async fn delete_group(
@@ -65,8 +66,7 @@ async fn delete_group(
     // 1. Verify user owns the group
     // 2. Handle cascading deletes (recurring events in group)
     // 3. Delete group from database
-
-    Ok(())
+    unimplemented!()
 }
 
 async fn fetch_events_for_group(

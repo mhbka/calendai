@@ -20,5 +20,6 @@ async fn main() {
         .run(&db)
         .await
         .expect("Migration should succeeed");
-
+    api::run(config, db)
+        .await;
 }

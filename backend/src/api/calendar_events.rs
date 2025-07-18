@@ -14,10 +14,10 @@ struct EventsQuery {
 /// Build the router for calendar event routes.
 pub(super) fn router() -> Router<AppState> {
     Router::new()
-        .route("/events", post(create_event))
-        .route("/events", get(get_events))
-        .route("/events/{event_id}", put(update_event))
-        .route("/events/{event_id}", delete(delete_event))
+        .route("/", post(create_event))
+        .route("/", get(get_events))
+        .route("/{event_id}", put(update_event))
+        .route("/{event_id}", delete(delete_event))
 }
 
 async fn create_event(
