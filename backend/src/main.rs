@@ -11,7 +11,7 @@ mod models;
 async fn main() {
     dotenv().ok();
     let config = Config::parse();
-    let db: sqlx::Pool<sqlx::Postgres> = PgPoolOptions::new()
+    let db = PgPoolOptions::new()
         .max_connections(50)
         .connect(&config.database_url)
         .await
