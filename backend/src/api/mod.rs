@@ -9,6 +9,7 @@ pub(super) mod error;
 mod calendar_events;
 mod recurring_event_groups;
 mod recurring_events;
+mod ai_add_event;
 
 /// State for the app.
 #[derive(Clone)]
