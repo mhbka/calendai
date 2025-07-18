@@ -2,7 +2,7 @@ use axum::{debug_handler, extract::{Path, Query, State}, routing::{delete, get, 
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::{api::{auth::types::AuthUser, error::ApiResult, AppState}, models::calendar_event::CalendarEvent};
+use crate::{api::{auth::types::AuthUser, error::ApiResult, AppState}, models::calendar_event::{CalendarEvent, NewCalendarEvent}};
 
 /// The query params for querying events.
 #[derive(Deserialize)]
@@ -22,8 +22,27 @@ pub(super) fn router() -> Router<AppState> {
 
 async fn create_event(
     State(mut app_state): State<AppState>,
-    user: AuthUser
+    user: AuthUser,
+    Json(mut event): Json<NewCalendarEvent>
 ) -> ApiResult<()> {
+    event.user_id = user.id;
+
+    sqlx::query!(
+        r#"
+            insert into calendar_events 
+            (user_id, title, event_description, start_time, end_time)
+            values
+            ($1, $2, $3, $4, $5)
+        "#,
+        event.user_id,
+        event.title,
+        event.description,
+        event.start_time.naive_utc(),
+        event.end_time.naive_utc()
+    )
+        .execute(&app_state.db)
+        .await?;
+
     Ok(())
 }
 

@@ -29,6 +29,7 @@ pub async fn run(config: Config, db: Pool<Postgres>) {
     let listener = TcpListener::bind("0.0.0.0:80")
         .await
         .expect("Binding to port should succeed");
+    tracing::info!("Running server...");
     axum::serve(listener, router)
         .await
         .expect("The app has been stopped");
