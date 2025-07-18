@@ -1,24 +1,16 @@
 
 
+use crate::api::AppState;
 use super::error::AuthError;
 use super::types::{AuthClaims, AuthUser};
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
+use axum::Extension;
 use axum_extra::headers::authorization::Bearer;
 use axum_extra::headers::{Authorization, HeaderMapExt};
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use once_cell::sync::Lazy;
-use std::env;
-
-/// The JWT secret used for decoding auth-side JWTs.
-/// 
-/// Must be the same as the one used for encoding them.
-static JWT_SECRET: Lazy<String> = Lazy::new(|| {
-    env::var("JWT_SECRET").expect("JWT_SECRET must be set")
-});
 
 /// Automatically extracts and verifies an `AuthUser` from a request.
-//#[async_trait]
 impl<S> FromRequestParts<S> for AuthUser
 where
     S: Send + Sync,
@@ -26,6 +18,11 @@ where
     type Rejection = AuthError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        let app_state: Extension<AppState> = Extension::from_request_parts(parts, _state)
+            .await
+            .expect("AppState should be added as an extension");
+        let jwt_secret = &app_state.config.jwt_secret;
+
         // Extract the token from the authorization header
         let Authorization(bearer) = parts.headers
             .typed_get::<Authorization<Bearer>>()
@@ -38,10 +35,10 @@ where
         // Decode the token
         let token_data = decode::<AuthClaims>(
             bearer.token(),
-            &DecodingKey::from_secret(JWT_SECRET.as_bytes()),
+            &DecodingKey::from_secret(jwt_secret.as_bytes()),
             &validation,
         ).map_err(|e| {
-            tracing::info!("Failed to decode: {:?}", e.kind());
+            tracing::info!("Failed to decode auth claims: {:?}", e.kind());
             AuthError::InvalidToken
         })?;
 

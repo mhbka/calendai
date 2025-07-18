@@ -209,7 +209,6 @@ dependencies = [
  "dotenv",
  "futures",
  "jsonwebtoken",
- "once_cell",
  "reqwest",
  "serde",
  "serde_json",

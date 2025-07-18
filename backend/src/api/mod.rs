@@ -5,6 +5,7 @@ use sqlx::{Pool, Postgres};
 use crate::config::Config;
 
 pub(super) mod auth;
+pub(super) mod error;
 mod calendar_events;
 mod recurring_event_groups;
 mod recurring_events;
