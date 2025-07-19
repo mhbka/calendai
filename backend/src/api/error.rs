@@ -8,7 +8,7 @@ use sqlx::error::DatabaseError;
 use std::borrow::Cow;
 use std::collections::HashMap;
 
-/// An alias for `Result` which returns `ApiError`s.
+/// An alias for `Result` which returns `ApiError`.
 pub type ApiResult<T> = Result<T, ApiError>;
 
 /// A common error type that can be used throughout the API.

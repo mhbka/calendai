@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -6,7 +6,7 @@ use uuid::Uuid;
 pub struct RecurringEventException {
     pub id: Uuid,
     pub recurring_event_id: Uuid,
-    pub exception_date: DateTime<Utc>,
+    pub exception_date: NaiveDateTime,
     pub exception_type: ExceptionType,
     pub modified_event_id: Option<Uuid>,
 }
@@ -14,7 +14,7 @@ pub struct RecurringEventException {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewRecurringEventException {
     pub recurring_event_id: Uuid,
-    pub exception_date: DateTime<Utc>,
+    pub exception_date: NaiveDateTime,
     pub exception_type: ExceptionType,
     pub modified_event_id: Option<Uuid>,
 }

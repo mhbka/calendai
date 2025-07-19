@@ -39,6 +39,7 @@ pub async fn run(config: Config, db: Pool<Postgres>) {
 fn build_app_router(state: AppState) -> Router {
     Router::new()
         .nest("/recurring_event_groups", recurring_event_groups::router())
+        .nest("/recurring_events", recurring_events::router())
         .nest("/calendar_events", calendar_events::router())
         .nest("/ai_add_event", ai_add_event::router())
         .with_state(state)
