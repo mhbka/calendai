@@ -3,13 +3,21 @@ use axum::{
     routing::{delete, get, post, put}, 
     Json, Router,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use crate::{
     api::{auth::types::AuthUser, error::ApiResult, AppState}, 
     models::{recurring_event::RecurringEvent, recurring_event_group::RecurringEventGroup}
 };
+
+/// The response for a group (includes the number of events under the group).
+#[derive(Serialize)]
+struct RecurringEventGroupResponse {
+    #[serde(flatten)]
+    group: RecurringEventGroup,
+    recurring_events: usize
+}
 
 /// The request for creating a new group.
 #[derive(Deserialize)]
@@ -35,10 +43,11 @@ pub(super) fn router() -> Router<AppState> {
 async fn fetch_all_groups(
     State(app_state): State<AppState>,
     user: AuthUser,
-) -> ApiResult<Json<Vec<RecurringEventGroup>>> {
+) -> ApiResult<Json<Vec<RecurringEventGroupResponse>>> {
     // Implementation:
     // 1. Query database for all groups belonging to user
-    // 2. Return list of groups
+    // 2. Query for number of events per group
+    // 3. Return list of groups
 
     Ok(Json(vec![]))
 }
@@ -47,7 +56,7 @@ async fn add_group(
     State(app_state): State<AppState>,
     user: AuthUser,
     Json(payload): Json<CreateGroupRequest>,
-) -> ApiResult<Json<RecurringEventGroup>> {
+) -> ApiResult<()> {
     // Implementation:
     // 1. Validate input data
     // 2. Create new RecurringEventGroup with generated ID

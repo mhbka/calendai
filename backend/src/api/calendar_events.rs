@@ -37,7 +37,6 @@ async fn create_events(
         start_times.push(event.start_time);
         end_times.push(event.end_time);
     }
-
     sqlx::query!(
         r#"
             insert into calendar_events
@@ -53,7 +52,6 @@ async fn create_events(
     )
         .execute(&app_state.db)
         .await?;
-
     Ok(())
 }
 

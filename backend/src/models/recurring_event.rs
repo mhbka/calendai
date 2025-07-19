@@ -17,7 +17,7 @@ pub struct RecurringEvent {
 pub struct NewRecurringEvent {
     pub group_id: Uuid,
     pub title: String,
-    pub event_description: Option<String>,
+    pub description: Option<String>,
     pub start_time: NaiveDateTime,
     pub end_time: Option<NaiveDateTime>,
     pub rrule: Option<String>,
