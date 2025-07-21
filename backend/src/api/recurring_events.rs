@@ -2,7 +2,7 @@ use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Jso
 use chrono::NaiveDateTime;
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringEvent}}};
+use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}}};
 
 /// The query params for querying events.
 #[derive(Deserialize)]
@@ -73,8 +73,20 @@ async fn get_events(
     State(app_state): State<AppState>,
     Query(params): Query<EventsQuery>,
     user: AuthUser
-) -> ApiResult<Json<Vec<CalendarEvent>>> {
+) -> ApiResult<Json<Vec<RecurringCalendarEvent>>> {
+    // TODO: 
+    // - get active events within query dates
+    // - get exceptions for those events within query dates
+    // - convert to RecurringCalendarEvents
+    let active_events = sqlx::query!(
+        r#"
+            SELECT * FROM recurring_events
+            WHERE start_time > $1 AND end_time < $2
+            
+        "#
+    )
 
+    unimplemented!()
 }
 
 async fn update_event(
@@ -84,10 +96,10 @@ async fn update_event(
 ) -> ApiResult<()> {
     let event_record = sqlx::query!(
         r#"
-            select recurring_event_groups.user_id
-            from recurring_events 
-            inner join recurring_event_groups on recurring_events.group_id = recurring_event_groups.id
-            where recurring_events.id = $1
+            SELECT recurring_event_groups.user_id
+            FROM recurring_events 
+            INNER JOIN recurring_event_groups ON recurring_events.group_id = recurring_event_groups.id
+            WHERE recurring_events.id = $1
         "#,
         updated_event.id
     )

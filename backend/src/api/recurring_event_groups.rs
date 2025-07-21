@@ -212,7 +212,7 @@ async fn move_event_between_groups(
         "#,
         event_id,
         user.id
-        )
+    )
         .fetch_optional(&app_state.db)
         .await?;
     match event_info {

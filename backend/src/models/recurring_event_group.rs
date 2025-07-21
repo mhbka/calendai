@@ -2,16 +2,24 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+/// A group of `RecurringEvent`s.
+/// 
+/// Default values can be set for all of a group's events' `is_active` and `group_recurrence_start/end` values.
+/// Do note that these can still be overridden on the event level.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecurringEventGroup {
     pub id: Uuid,
     pub user_id: Uuid,
     pub group_name: String,
     pub group_description: Option<String>,
+    /// The color to represent the group by.
     pub color: i32,
-    pub is_active: Option<bool>,
-    pub start_time: Option<NaiveDateTime>,
-    pub end_time: Option<NaiveDateTime>,
+    /// A default `is_active` for all the group's events.
+    pub group_is_active: Option<bool>,
+    /// A default `group_recurrence_start` for all the group's events.
+    pub group_recurrence_start: Option<NaiveDateTime>,
+    /// A default `group_recurrence_end` for all the group's events.
+    pub group_recurrence_end: Option<NaiveDateTime>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,6 +29,6 @@ pub struct NewRecurringEventGroup {
     pub group_description: Option<String>,
     pub color: i32,
     pub is_active: Option<bool>,
-    pub start_time: Option<NaiveDateTime>,
-    pub end_time: Option<NaiveDateTime>,
+    pub group_recurrence_start: Option<NaiveDateTime>,
+    pub group_recurrence_end: Option<NaiveDateTime>,
 }

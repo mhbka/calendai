@@ -16,18 +16,21 @@ CREATE TABLE recurring_event_groups (
     group_description VARCHAR,
     color INT NOT NULL,
     is_active BOOLEAN,
-    start_time TIMESTAMP,
-    end_time TIMESTAMP
+    group_recurrence_start TIMESTAMP,
+    group_recurrence_end TIMESTAMP
 );
 
 CREATE TABLE recurring_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     group_id UUID NOT NULL REFERENCES recurring_event_groups(id),
+    is_active BOOLEAN NOT NULL,
     title VARCHAR NOT NULL,
     event_description VARCHAR,
+    recurrence_start TIMESTAMP NOT NULL,
+    recurrence_end TIMESTAMP,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
-    rrule VARCHAR -- recurrence rule (check online for format)
+    rrule VARCHAR NOT NULL
 );
 
 CREATE TABLE recurring_event_exceptions (
