@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use sqlx::{Database, Decode, Encode, Type};
 
-/// A wrapper around `RRule` with serde + deserialization-time validation + sqlx support.
+/// A wrapper around `RRule`, with serde + deserialization-time validation + sqlx support.
 #[derive(Debug, Clone, Serialize)]
 pub struct ValidatedRRule {
     rrule: RRule<Validated>
@@ -87,4 +87,8 @@ impl ToString for ValidatedRRule {
     fn to_string(&self) -> String {
         self.rrule.to_string()
     }
+}
+
+impl From<String> for ValidatedRRule {
+    
 }

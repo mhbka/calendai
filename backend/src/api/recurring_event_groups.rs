@@ -44,14 +44,14 @@ async fn fetch_all_groups(
                 g.group_name,
                 g.group_description,
                 g.color,
-                g.is_active,
-                g.start_time,
-                g.end_time,
+                g.group_is_active,
+                g.group_recurrence_start,
+                g.group_recurrence_end,
                 COALESCE(COUNT(e.id), 0) as event_count
             FROM recurring_event_groups g
             LEFT JOIN recurring_events e ON g.id = e.group_id
             WHERE g.user_id = $1
-            GROUP BY g.id, g.user_id, g.group_name, g.group_description, g.color, g.is_active, g.start_time, g.end_time
+            GROUP BY g.id, g.user_id, g.group_name, g.group_description, g.color, g.group_is_active, g.group_recurrence_start, g.group_recurrence_end
             ORDER BY g.group_name
         "#,
         user.id
@@ -68,9 +68,9 @@ async fn fetch_all_groups(
                 group_name: row.group_name,
                 group_description: row.group_description,
                 color: row.color,
-                is_active: row.is_active,
-                start_time: row.start_time,
-                end_time: row.end_time,
+                group_is_active: row.group_is_active,
+                group_recurrence_start: row.group_recurrence_start,
+                group_recurrence_end: row.group_recurrence_end,
             },
             recurring_events: row.event_count.unwrap_or(0) as usize,
         })
@@ -105,7 +105,7 @@ async fn add_group(
     sqlx::query!(
         r#"
             INSERT INTO recurring_event_groups 
-            (user_id, group_name, group_description, color, is_active, start_time, end_time)
+            (user_id, group_name, group_description, color, group_is_active, group_recurrence_start, group_recurrence_end)
             VALUES 
             ($1, $2, $3, $4, $5, $6, $7)
         "#,
@@ -113,9 +113,9 @@ async fn add_group(
         new_group.group_name,
         new_group.group_description,
         new_group.color,
-        new_group.is_active,
-        new_group.start_time,
-        new_group.end_time
+        new_group.group_is_active,
+        new_group.group_recurrence_start,
+        new_group.group_recurrence_end
     )
         .execute(&app_state.db)
         .await?;
@@ -174,7 +174,7 @@ async fn fetch_events_for_group(
     let events = sqlx::query_as!(
         RecurringEvent,
         r#"
-            SELECT id, group_id, title, event_description as "description", start_time, end_time, rrule
+            SELECT id, group_id, title, is_active, event_description as "description", recurrence_start, recurrence_end, start_time, end_time, rrule
             FROM recurring_events
             WHERE group_id = $1
             ORDER BY start_time, title

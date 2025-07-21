@@ -3,6 +3,7 @@ use chrono::NaiveDateTime;
 use serde::Deserialize;
 use uuid::Uuid;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}}};
+use crate::models::rrule::ValidatedRRule;
 
 /// The query params for querying events.
 #[derive(Deserialize)]
@@ -126,7 +127,7 @@ async fn update_event(
             updated_event.description,
             updated_event.start_time,
             updated_event.end_time,
-            updated_event.rrule,
+            updated_event.rrule as ValidatedRRule,
             updated_event.id
         )
             .execute(&app_state.db)

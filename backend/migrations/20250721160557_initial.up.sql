@@ -1,3 +1,4 @@
+-- Add up migration script here
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE calendar_events (
@@ -15,7 +16,7 @@ CREATE TABLE recurring_event_groups (
     group_name VARCHAR NOT NULL,
     group_description VARCHAR,
     color INT NOT NULL,
-    is_active BOOLEAN,
+    group_is_active BOOLEAN,
     group_recurrence_start TIMESTAMP,
     group_recurrence_end TIMESTAMP
 );
@@ -29,7 +30,7 @@ CREATE TABLE recurring_events (
     recurrence_start TIMESTAMP NOT NULL,
     recurrence_end TIMESTAMP,
     start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP,
+    end_time TIMESTAMP NOT NULL,
     rrule VARCHAR NOT NULL
 );
 
