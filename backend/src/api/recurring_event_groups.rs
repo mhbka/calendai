@@ -1,14 +1,17 @@
+use std::collections::HashMap;
 use axum::{
     extract::{Path, State}, 
     routing::{delete, get, post, put}, 
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
-use chrono::{DateTime, Utc};
+use serde::Serialize;
 use uuid::Uuid;
 use crate::{
-    api::{auth::types::AuthUser, error::ApiResult, AppState}, 
-    models::{recurring_event::RecurringEvent, recurring_event_group::RecurringEventGroup}
+    api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, 
+    models::{
+        recurring_event::RecurringEvent, 
+        recurring_event_group::{NewRecurringEventGroup, RecurringEventGroup}
+    }
 };
 
 /// The response for a group (includes the number of events under the group).
@@ -17,17 +20,6 @@ struct RecurringEventGroupResponse {
     #[serde(flatten)]
     group: RecurringEventGroup,
     recurring_events: usize
-}
-
-/// The request for creating a new group.
-#[derive(Deserialize)]
-struct CreateGroupRequest {
-    name: String,
-    description: Option<String>,
-    is_active: bool,
-    color: u32, 
-    start_date: Option<DateTime<Utc>>,
-    end_date: Option<DateTime<Utc>>,
 }
 
 /// Build the router for recurring event groups routes.
@@ -44,26 +36,91 @@ async fn fetch_all_groups(
     State(app_state): State<AppState>,
     user: AuthUser,
 ) -> ApiResult<Json<Vec<RecurringEventGroupResponse>>> {
-    // Implementation:
-    // 1. Query database for all groups belonging to user
-    // 2. Query for number of events per group
-    // 3. Return list of groups
+    let groups_with_counts = sqlx::query!(
+        r#"
+            SELECT 
+                g.id,
+                g.user_id,
+                g.group_name,
+                g.group_description,
+                g.color,
+                g.is_active,
+                g.start_time,
+                g.end_time,
+                COALESCE(COUNT(e.id), 0) as event_count
+            FROM recurring_event_groups g
+            LEFT JOIN recurring_events e ON g.id = e.group_id
+            WHERE g.user_id = $1
+            GROUP BY g.id, g.user_id, g.group_name, g.group_description, g.color, g.is_active, g.start_time, g.end_time
+            ORDER BY g.group_name
+        "#,
+        user.id
+    )
+        .fetch_all(&app_state.db)
+        .await?;
 
-    Ok(Json(vec![]))
+    let response: Vec<RecurringEventGroupResponse> = groups_with_counts
+        .into_iter()
+        .map(|row| RecurringEventGroupResponse {
+            group: RecurringEventGroup {
+                id: row.id,
+                user_id: row.user_id,
+                group_name: row.group_name,
+                group_description: row.group_description,
+                color: row.color,
+                is_active: row.is_active,
+                start_time: row.start_time,
+                end_time: row.end_time,
+            },
+            recurring_events: row.event_count.unwrap_or(0) as usize,
+        })
+        .collect();
+
+    Ok(Json(response))
 }
 
 async fn add_group(
     State(app_state): State<AppState>,
     user: AuthUser,
-    Json(payload): Json<CreateGroupRequest>,
+    Json(new_group): Json<NewRecurringEventGroup>,
 ) -> ApiResult<()> {
-    // Implementation:
-    // 1. Validate input data
-    // 2. Create new RecurringEventGroup with generated ID
-    // 3. Parse color string to appropriate format
-    // 4. Save to database
-    // 5. Return created group
-    unimplemented!()
+    {
+        let mut errors = HashMap::new();
+        if new_group.group_name.trim().is_empty() {
+            errors.insert("name", "is empty");
+        }
+        if new_group.color <= 0 {
+            errors.insert("color", "is less than 0");
+        }
+        if let (Some(start), Some(end)) = (new_group.start_time, new_group.end_time) {
+            if start >= end {
+                errors.insert("start/end time",  "start time is later than end time");
+            }
+        }
+        if !errors.is_empty() {
+            return Err(ApiError::unprocessable_entity(errors));
+        }
+    }
+    
+    sqlx::query!(
+        r#"
+            INSERT INTO recurring_event_groups 
+            (user_id, group_name, group_description, color, is_active, start_time, end_time)
+            VALUES 
+            ($1, $2, $3, $4, $5, $6, $7)
+        "#,
+        new_group.user_id,
+        new_group.group_name,
+        new_group.group_description,
+        new_group.color,
+        new_group.is_active,
+        new_group.start_time,
+        new_group.end_time
+    )
+        .execute(&app_state.db)
+        .await?;
+
+    Ok(())
 }
 
 async fn delete_group(
@@ -71,11 +128,31 @@ async fn delete_group(
     Path(group_id): Path<Uuid>,
     user: AuthUser,
 ) -> ApiResult<()> {
-    // Implementation:
-    // 1. Verify user owns the group
-    // 2. Handle cascading deletes (recurring events in group)
-    // 3. Delete group from database
-    unimplemented!()
+    let group = sqlx::query!(
+        "SELECT id FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
+        group_id,
+        user.id
+    )
+        .fetch_optional(&app_state.db)
+        .await?;
+    if group.is_none() {
+        return Err(ApiError::Forbidden);
+    }
+    sqlx::query!(
+        "DELETE FROM recurring_events WHERE group_id = $1",
+        group_id
+    )
+        .execute(&app_state.db)
+        .await?;
+    sqlx::query!(
+        "DELETE FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
+        group_id,
+        user.id
+    )
+        .execute(&app_state.db)
+        .await?;
+
+    Ok(())
 }
 
 async fn fetch_events_for_group(
@@ -83,12 +160,31 @@ async fn fetch_events_for_group(
     Path(group_id): Path<Uuid>,
     user: AuthUser,
 ) -> ApiResult<Json<Vec<RecurringEvent>>> {
-    // Implementation:
-    // 1. Verify user owns the group
-    // 2. Query database for all recurring events in group
-    // 3. Return list of events
+    let group_exists = sqlx::query!(
+        "SELECT id FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
+        group_id,
+        user.id
+    )
+        .fetch_optional(&app_state.db)
+        .await?;
+    if group_exists.is_none() {
+        return Err(ApiError::Forbidden);
+    }
 
-    Ok(Json(vec![]))
+    let events = sqlx::query_as!(
+        RecurringEvent,
+        r#"
+            SELECT id, group_id, title, event_description as "description", start_time, end_time, rrule
+            FROM recurring_events
+            WHERE group_id = $1
+            ORDER BY start_time, title
+        "#,
+        group_id
+    )
+        .fetch_all(&app_state.db)
+        .await?;
+
+    Ok(Json(events))
 }
 
 async fn move_event_between_groups(
@@ -96,10 +192,45 @@ async fn move_event_between_groups(
     Path((new_group_id, event_id)): Path<(Uuid, Uuid)>,
     user: AuthUser,
 ) -> ApiResult<()> {
-    // Implementation:
-    // 1. Verify user owns both the event and the target group
-    // 2. Update event's group_id in database
-    // 3. Update group counts if needed
+    let target_group = sqlx::query!(
+        "SELECT id FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
+        new_group_id,
+        user.id
+    )
+        .fetch_optional(&app_state.db)
+        .await?;
+    if target_group.is_none() {
+        return Err(ApiError::Forbidden);
+    }
+
+    let event_info = sqlx::query!(
+        r#"
+            SELECT e.id, e.group_id, g.user_id
+            FROM recurring_events e
+            JOIN recurring_event_groups g ON e.group_id = g.id
+            WHERE e.id = $1 AND g.user_id = $2
+        "#,
+        event_id,
+        user.id
+        )
+        .fetch_optional(&app_state.db)
+        .await?;
+    match event_info {
+        None => return Err(ApiError::Forbidden),
+        Some(event) => {
+            if event.group_id == new_group_id {
+                return Err(ApiError::Forbidden);
+            }
+        }
+    }
+
+    sqlx::query!(
+        "UPDATE recurring_events SET group_id = $1 WHERE id = $2",
+        new_group_id,
+        event_id
+    )
+        .execute(&app_state.db)
+        .await?;
 
     Ok(())
 }

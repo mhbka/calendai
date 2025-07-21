@@ -57,12 +57,6 @@ pub enum ApiError {
     /// on unrecoverable (but technically non-fatal) errors which could be highly useful for
     /// debugging. We use it a lot in our code for background tasks or making API calls
     /// to external services so we can use `.context()` to refine the logged error.
-    ///
-    /// Via the generated `From<anyhow::Error> for Error` impl, this allows the
-    /// use of `?` in handler functions to automatically convert `anyhow::Error` into a response.
-    ///
-    /// Like with `Error::Sqlx`, the actual error message is not returned to the client
-    /// for security reasons.
     /// 
     /// NOTE: commented out till I actually need it
     #[error("an internal server error occurred")]
