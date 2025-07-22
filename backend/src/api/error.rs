@@ -50,6 +50,10 @@ pub enum ApiError {
     #[error("an error occurred with the database")]
     Sqlx(#[from] sqlx::Error),
 
+    /// Returns a `500 Internal Server Error`; useful for logical errors etc.
+    #[error("An unexpected internal error occurred: {0}")]
+    Other(String)
+
     /* 
     /// Return `500 Internal Server Error` on a `anyhow::Error`.
     ///
@@ -94,6 +98,7 @@ impl ApiError {
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Other(_) => StatusCode::INTERNAL_SERVER_ERROR
         }
     }
 }
@@ -124,6 +129,9 @@ impl IntoResponse for ApiError {
             }
             Self::Sqlx(ref e) => {
                 tracing::error!("SQLx error: {:?}", e);
+            }
+            Self::Other(ref msg) => {
+                tracing::error!("An unexpected error occurred: {msg}");
             }
             /* 
             Self::Anyhow(ref e) => {

@@ -1,5 +1,6 @@
 use std::str::FromStr;
-use rrule::{RRuleError, RRuleSet};
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use rrule::{RRuleError, RRuleResult, RRuleSet, Tz};
 use serde::{Deserialize, Serialize};
 use sqlx::{Database, Decode, Encode, Type};
 
@@ -10,9 +11,16 @@ pub struct ValidatedRRule {
 }
 
 impl ValidatedRRule {
-    // TODO: do this
-    pub fn next(&self) {
-    }
+    // Returns all instances within the start/end dates.
+    pub fn all_within_period(&self, start: DateTime<Utc>, end: DateTime<Utc>) -> RRuleResult {
+        let start = Tz::from_utc_datetime(&Tz::UTC, &start.naive_utc());
+        let end = Tz::from_utc_datetime(&Tz::UTC, &end.naive_utc());
+        let restricted_rrule = self.rrule
+            .clone()
+            .after(start)
+            .before(end);
+        restricted_rrule.all(100)
+    }   
 }
 
 // For inputting into sqlx as a string

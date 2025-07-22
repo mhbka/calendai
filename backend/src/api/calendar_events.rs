@@ -1,5 +1,5 @@
 use axum::{debug_handler, extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::calendar_event::{CalendarEvent, NewCalendarEvent}};
@@ -7,8 +7,8 @@ use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}
 /// The query params for querying events.
 #[derive(Deserialize)]
 struct EventsQuery {
-    start: NaiveDateTime,
-    end: NaiveDateTime
+    start: DateTime<Utc>,
+    end: DateTime<Utc>
 }
 
 /// Build the router for calendar event routes.

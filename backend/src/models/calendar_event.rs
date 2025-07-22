@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,8 +9,8 @@ pub struct CalendarEvent {
     pub user_id: Uuid,
     pub title: String,
     pub description: Option<String>,
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,6 +18,6 @@ pub struct NewCalendarEvent {
     pub user_id: Uuid,
     pub title: String,
     pub description: Option<String>,
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
 }

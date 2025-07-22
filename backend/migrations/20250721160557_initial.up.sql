@@ -6,8 +6,8 @@ CREATE TABLE calendar_events (
     user_id UUID NOT NULL REFERENCES auth.users(id),
     title VARCHAR NOT NULL,
     "description" VARCHAR,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE recurring_event_groups (
@@ -17,8 +17,8 @@ CREATE TABLE recurring_event_groups (
     "description" VARCHAR,
     color INT NOT NULL,
     group_is_active BOOLEAN,
-    group_recurrence_start TIMESTAMP,
-    group_recurrence_end TIMESTAMP
+    group_recurrence_start TIMESTAMPTZ,
+    group_recurrence_end TIMESTAMPTZ
 );
 
 CREATE TABLE recurring_events (
@@ -27,17 +27,17 @@ CREATE TABLE recurring_events (
     is_active BOOLEAN NOT NULL,
     title VARCHAR NOT NULL,
     "description" VARCHAR,
-    recurrence_start TIMESTAMP NOT NULL,
-    recurrence_end TIMESTAMP,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
+    recurrence_start TIMESTAMPTZ NOT NULL,
+    recurrence_end TIMESTAMPTZ,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     rrule VARCHAR NOT NULL
 );
 
 CREATE TABLE recurring_event_exceptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     recurring_event_id UUID NOT NULL REFERENCES recurring_events(id),
-    exception_date TIMESTAMP NOT NULL,
+    exception_date TIMESTAMPTZ NOT NULL,
     exception_type VARCHAR NOT NULL CHECK (exception_type IN ('cancelled', 'modified')),
     modified_event_id UUID REFERENCES calendar_events(id)
 );

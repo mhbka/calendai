@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,7 +11,7 @@ use uuid::Uuid;
 pub struct RecurringEventException {
     pub id: Uuid,
     pub recurring_event_id: Uuid,
-    pub exception_date: NaiveDateTime,
+    pub exception_date: DateTime<Utc>,
     pub exception_type: ExceptionType,
     pub modified_event_id: Option<Uuid>,
 }
@@ -19,13 +19,14 @@ pub struct RecurringEventException {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewRecurringEventException {
     pub recurring_event_id: Uuid,
-    pub exception_date: NaiveDateTime,
+    pub exception_date: DateTime<Utc>,
     pub exception_type: ExceptionType,
     pub modified_event_id: Option<Uuid>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[derive(sqlx::Type)]
 pub enum ExceptionType {
     Cancelled,
     Modified,

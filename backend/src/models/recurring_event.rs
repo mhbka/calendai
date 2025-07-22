@@ -1,4 +1,5 @@
-use chrono::NaiveDateTime;
+
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::models::{recurring_event_exception::RecurringEventException, recurring_event_group::RecurringEventGroup, rrule::ValidatedRRule};
@@ -11,10 +12,10 @@ pub struct RecurringEvent {
     pub is_active: bool,
     pub title: String,
     pub description: Option<String>,
-    pub recurrence_start: NaiveDateTime,
-    pub recurrence_end: Option<NaiveDateTime>,
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub recurrence_start: DateTime<Utc>,
+    pub recurrence_end: Option<DateTime<Utc>>,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
     pub rrule: ValidatedRRule
 }
 
@@ -23,8 +24,8 @@ pub struct NewRecurringEvent {
     pub group_id: Uuid,
     pub title: String,
     pub description: Option<String>,
-    pub start_time: NaiveDateTime,
-    pub end_time: Option<NaiveDateTime>,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub rrule: Option<ValidatedRRule>,
 }
 
@@ -36,8 +37,8 @@ pub struct RecurringCalendarEvent {
     // details for the event itself
     pub title: String,
     pub description: Option<String>,
-    pub start_time: NaiveDateTime,
-    pub end_time: NaiveDateTime,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
 
     // recurrence metadata
     pub recurring_event_id: Uuid,
