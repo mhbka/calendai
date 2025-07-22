@@ -1,5 +1,6 @@
 use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
 use chrono::NaiveDateTime;
+use futures::future::join_all;
 use serde::Deserialize;
 use uuid::Uuid;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}}};
@@ -55,7 +56,7 @@ async fn create_events(
     sqlx::query!(
         r#"
             insert into recurring_events
-            (group_id, title, event_description, start_time, end_time)
+            (group_id, title, description, start_time, end_time)
             select * from unnest
             ($1::uuid[], $2::varchar[], $3::varchar[], $4::timestamp[], $5::timestamp[])
         "#,
@@ -75,17 +76,29 @@ async fn get_events(
     Query(params): Query<EventsQuery>,
     user: AuthUser
 ) -> ApiResult<Json<Vec<RecurringCalendarEvent>>> {
-    // TODO: 
-    // - get active events within query dates
-    // - get exceptions for those events within query dates
-    // - convert to RecurringCalendarEvents
-    let active_events = sqlx::query!(
+    let recurring_events: Vec<RecurringEvent> = sqlx::query_as!(
+        RecurringEvent,
         r#"
-            SELECT * FROM recurring_events
-            WHERE start_time > $1 AND end_time < $2
-            
-        "#
+            SELECT id, group_id, is_active, title, description, recurrence_start, recurrence_end, start_time, end_time, rrule as "rrule: _"
+            FROM recurring_events
+            WHERE recurrence_start > $1 AND recurrence_end < $2 AND is_active = true
+        "#,
+        params.start,
+        params.end
     )
+        .fetch_all(&app_state.db)
+        .await?;
+    let event_instances = recurring_events
+        .into_iter()
+        .map(|event| {
+
+        });
+    
+    // TODO: 
+    // - get active recurring events within query dates
+    // - get exceptions for those events within query dates (delete events whose exceptions are "cancelled")
+    // - get group data for remaining events
+    // - convert to RecurringCalendarEvents
 
     unimplemented!()
 }
@@ -116,7 +129,7 @@ async fn update_event(
                 set 
                     title = $1,
                     group_id = $2,
-                    event_description = $3,
+                    description = $3,
                     start_time = $4,
                     end_time = $5,
                     rrule = $6

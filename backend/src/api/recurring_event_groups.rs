@@ -42,7 +42,7 @@ async fn fetch_all_groups(
                 g.id,
                 g.user_id,
                 g.group_name,
-                g.group_description,
+                g.description,
                 g.color,
                 g.group_is_active,
                 g.group_recurrence_start,
@@ -51,7 +51,7 @@ async fn fetch_all_groups(
             FROM recurring_event_groups g
             LEFT JOIN recurring_events e ON g.id = e.group_id
             WHERE g.user_id = $1
-            GROUP BY g.id, g.user_id, g.group_name, g.group_description, g.color, g.group_is_active, g.group_recurrence_start, g.group_recurrence_end
+            GROUP BY g.id, g.user_id, g.group_name, g.description, g.color, g.group_is_active, g.group_recurrence_start, g.group_recurrence_end
             ORDER BY g.group_name
         "#,
         user.id
@@ -66,7 +66,7 @@ async fn fetch_all_groups(
                 id: row.id,
                 user_id: row.user_id,
                 group_name: row.group_name,
-                group_description: row.group_description,
+                description: row.description,
                 color: row.color,
                 group_is_active: row.group_is_active,
                 group_recurrence_start: row.group_recurrence_start,
@@ -92,7 +92,7 @@ async fn add_group(
         if new_group.color <= 0 {
             errors.insert("color", "is less than 0");
         }
-        if let (Some(start), Some(end)) = (new_group.start_time, new_group.end_time) {
+        if let (Some(start), Some(end)) = (new_group.group_recurrence_start, new_group.group_recurrence_start) {
             if start >= end {
                 errors.insert("start/end time",  "start time is later than end time");
             }
@@ -101,17 +101,16 @@ async fn add_group(
             return Err(ApiError::unprocessable_entity(errors));
         }
     }
-    
     sqlx::query!(
         r#"
             INSERT INTO recurring_event_groups 
-            (user_id, group_name, group_description, color, group_is_active, group_recurrence_start, group_recurrence_end)
+            (user_id, group_name, description, color, group_is_active, group_recurrence_start, group_recurrence_end)
             VALUES 
             ($1, $2, $3, $4, $5, $6, $7)
         "#,
         new_group.user_id,
         new_group.group_name,
-        new_group.group_description,
+        new_group.description,
         new_group.color,
         new_group.group_is_active,
         new_group.group_recurrence_start,
@@ -174,7 +173,7 @@ async fn fetch_events_for_group(
     let events = sqlx::query_as!(
         RecurringEvent,
         r#"
-            SELECT id, group_id, title, is_active, event_description as "description", recurrence_start, recurrence_end, start_time, end_time, rrule
+            SELECT id, group_id, is_active, title, description, recurrence_start, recurrence_end, start_time, end_time, rrule as "rrule: _"
             FROM recurring_events
             WHERE group_id = $1
             ORDER BY start_time, title

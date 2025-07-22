@@ -1,25 +1,17 @@
 use std::str::FromStr;
-use chrono::{TimeZone, Utc};
-use rrule::{RRule, RRuleError, Tz, Unvalidated, Validated};
+use rrule::{RRuleError, RRuleSet};
 use serde::{Deserialize, Serialize};
-use serde_json::from_str;
 use sqlx::{Database, Decode, Encode, Type};
 
-/// A wrapper around `RRule`, with serde + deserialization-time validation + sqlx support.
+/// A wrapper around a `RRuleSet`, with serde + deserialization-time validation + sqlx support.
 #[derive(Debug, Clone, Serialize)]
 pub struct ValidatedRRule {
-    rrule: RRule<Validated>
+    rrule: RRuleSet
 }
 
 impl ValidatedRRule {
-    /// Validate the `RRule` with the current time. 
-    /// 
-    /// TODO: when will validation fail when using the current time?
-    fn validate_with_now(unvalidated: RRule<Unvalidated>) -> Result<Self, RRuleError> {
-        let tz: Tz = Tz::UTC;
-        let now = tz.from_utc_datetime(&Utc::now().naive_utc());
-        let validated = unvalidated.validate(now)?;
-        Ok(ValidatedRRule { rrule: validated })
+    // TODO: do this
+    pub fn next(&self) {
     }
 }
 
@@ -49,6 +41,7 @@ where
     }
 }
 
+// Represent it as a string in sqlx
 impl<DB: Database> Type<DB> for ValidatedRRule
 where 
     String: Type<DB>  {
@@ -57,29 +50,26 @@ where
     }
 }
 
-// This shifts the validation into the deserialization.
-// However I'm not sure if it makes sense yet.
+// Shift validation into the deserialization
 impl<'de> Deserialize<'de> for ValidatedRRule {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> 
     {
         let s = String::deserialize(deserializer)?;
-        let unvalidated: RRule<Unvalidated> = s
+        let rrule: RRuleSet = s
             .parse()
-            .map_err(|e| serde::de::Error::custom(format!("Failed to parse RRule: {}", e)))?;
-        let validated = ValidatedRRule::validate_with_now(unvalidated)
-            .map_err(|e| serde::de::Error::custom(format!("Failed to validated RRule: {}", e)))?;
-        Ok(validated)
+            .map_err(|e| serde::de::Error::custom(format!("Failed to parse into RRuleSet: {}", e)))?;
+        Ok(Self { rrule })
     }
 }
 
 impl FromStr for ValidatedRRule {
-    type Err = sqlx::error::BoxDynError;
+    type Err = RRuleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let unvalidated: RRule<Unvalidated> = from_str(s).map_err(|e| Box::new(e))?;
-        Ok(ValidatedRRule::validate_with_now(unvalidated).map_err(|e| Box::new(e))?)
+        let rrule: RRuleSet = s.parse()?;
+        Ok(Self { rrule })
     }
 }
 
@@ -87,8 +77,4 @@ impl ToString for ValidatedRRule {
     fn to_string(&self) -> String {
         self.rrule.to_string()
     }
-}
-
-impl From<String> for ValidatedRRule {
-    
 }

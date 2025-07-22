@@ -11,7 +11,7 @@ pub struct RecurringEventGroup {
     pub id: Uuid,
     pub user_id: Uuid,
     pub group_name: String,
-    pub group_description: Option<String>,
+    pub description: Option<String>,
     /// The color to represent the group by.
     pub color: i32,
     /// A default `is_active` for all the group's events.
@@ -26,9 +26,9 @@ pub struct RecurringEventGroup {
 pub struct NewRecurringEventGroup {
     pub user_id: Uuid,
     pub group_name: String,
-    pub group_description: Option<String>,
+    pub description: Option<String>,
     pub color: i32,
-    pub is_active: Option<bool>,
+    pub group_is_active: Option<bool>,
     pub group_recurrence_start: Option<NaiveDateTime>,
     pub group_recurrence_end: Option<NaiveDateTime>,
 }

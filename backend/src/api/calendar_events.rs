@@ -40,7 +40,7 @@ async fn create_events(
     sqlx::query!(
         r#"
             insert into calendar_events
-            (user_id, title, event_description, start_time, end_time)
+            (user_id, title, description, start_time, end_time)
             select * from unnest
             ($1::uuid[], $2::varchar[], $3::varchar[], $4::timestamp[], $5::timestamp[])
         "#,
@@ -63,7 +63,7 @@ async fn get_events(
     let events = sqlx::query_as!(
         CalendarEvent,
         r#"
-            select id, user_id, title, event_description as description, start_time, end_time
+            select id, user_id, title, description, start_time, end_time
             from calendar_events 
             where user_id = $1 and start_time >= $2 and end_time <= $3
             order by start_time
@@ -97,7 +97,7 @@ async fn update_event(
                 update calendar_events
                 set 
                     title = $1,
-                    event_description = $2,
+                    description = $2,
                     start_time = $3,
                     end_time = $4
                 where id = $5
