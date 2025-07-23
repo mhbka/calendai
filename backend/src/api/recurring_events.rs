@@ -4,7 +4,7 @@ use futures::future::join_all;
 use rrule::RRuleResult;
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}}};
+use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
 use crate::models::rrule::ValidatedRRule;
 use crate::models::recurring_event_exception::RecurringEventException;
 
@@ -95,58 +95,65 @@ async fn get_events(
         .await?;
 
     // get actual event instances
-    let event_instances: Vec<RRuleResult> = recurring_events
-        .iter()
+    let events_and_instances: Vec<_> = recurring_events
+        .into_iter()
         .map(|event| {
-            event.rrule.all_within_period(params.start, params.end)
+            let instances = event.rrule.all_within_period(params.start, params.end);
+            (event, instances)
         })
         .collect();
 
     // get exceptions within start/end dates
-    //
-    // TODO: possible to roll into 1 query for performance?
-    let event_exceptions: Vec<Vec<RecurringEventException>> = {
-        let requests = recurring_events
-            .iter()
-            .map(|event| {
-                sqlx::query_as!(
-                    RecurringEventException,
-                    r#"
-                        SELECT id, recurring_event_id, exception_date, exception_type as "exception_type: _", modified_event_id
-                        from recurring_event_exceptions ree
-                        WHERE ree.recurring_event_id = $1
-                    "#,
-                    event.id
-                )
-                    .fetch_all(&app_state.db)
-            });
-        let mut exceptions = Vec::new();
-        for res in join_all(requests).await {
-            exceptions.push(res?);
-        }
-        exceptions        
+    let mut event_exceptions: Vec<RecurringEventException> = {
+        let event_ids: Vec<_> = events_and_instances.iter().map(|(e, _)| e.id).collect();
+        sqlx::query_as!(
+            RecurringEventException,
+            r#"
+                SELECT 
+                    id, 
+                    recurring_event_id, 
+                    exception_date, 
+                    exception_type as "exception_type: _",
+                    modified_title,
+                    modified_description,
+                    modified_start_time,
+                    modified_end_time
+                FROM recurring_event_exceptions ree
+                WHERE ree.recurring_event_id = ANY($1)
+            "#,
+            &event_ids
+        )
+            .fetch_all(&app_state.db)
+            .await?      
     };
-    if event_exceptions.len() != event_instances.len() {
-        return Err(
-            ApiError::Other("Number of exceptions doesn't match number of events (this shouldn't happen)".into())
-        );
+
+    // resolve instances and exceptions
+    //
+    // we remove "cancelled" + "modified" dates from each event, but retain "modified" exceptions for later use
+    for (event, mut instances) in events_and_instances {
+        event_exceptions = event_exceptions
+            .into_iter()
+            .filter(|exception| {
+                if exception.recurring_event_id == event.id {
+                    if let Some(pos) = instances.dates
+                        .iter()
+                        .position(|d| d.to_utc() == exception.exception_date) 
+                    {   
+                        instances.dates.swap_remove(pos);
+                        match exception.exception_type {
+                            ExceptionType::Cancelled => return false,
+                            ExceptionType::Modified => return true
+                        }
+                    }
+                }
+                true
+            }) 
+            .collect();
     }
 
-    // - delete events whose exceptions are "cancelled" + replace events whose exceptions are "modified"
-    let resolved_instances: Vec<_> = event_instances
-        .into_iter()
-        .zip(event_exceptions.into_iter())
-        .map(|(instances, exceptions)| {
-            for date in instances.dates {
-                date.to_utc()
-            }
-        })
-        .collect();
+    // get group data for remaining instances
 
-    // - get group data for remaining events
-    // - convert to RecurringCalendarEvents
-
-    unimplemented!()
+    unimplemented!();
 }
 
 async fn update_event(

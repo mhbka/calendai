@@ -42,7 +42,7 @@ async fn create_events(
             insert into calendar_events
             (user_id, title, description, start_time, end_time)
             select * from unnest
-            ($1::uuid[], $2::varchar[], $3::varchar[], $4::timestamp[], $5::timestamp[])
+            ($1::uuid[], $2::varchar[], $3::varchar[], $4::timestamptz[], $5::timestamptz[])
         "#,
         &user_ids[..],
         &titles[..],

@@ -34,7 +34,7 @@ pub struct NewRecurringEvent {
 /// *Note to self*: This isn't represented in the database but is constructed in backend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecurringCalendarEvent {
-    // details for the event itself
+    // event metadata
     pub title: String,
     pub description: Option<String>,
     pub start_time: DateTime<Utc>,
@@ -42,7 +42,7 @@ pub struct RecurringCalendarEvent {
 
     // recurrence metadata
     pub recurring_event_id: Uuid,
+    pub exception_id: Option<Uuid>,
     pub group: Option<RecurringEventGroup>,
-    pub exception: Option<RecurringEventException>
 }
 
