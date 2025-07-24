@@ -1,7 +1,10 @@
+use std::collections::HashSet;
+
 use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
-use chrono::{Date, DateTime, Utc};
+use chrono::{Date, DateTime, Duration, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
+use crate::models::recurring_event_group::RecurringEventGroup;
 use crate::models::time::Second;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
 use crate::models::rrule::ValidatedRRule;
@@ -100,7 +103,7 @@ async fn get_events(
         .await?;
 
     // get actual event instances
-    let events_and_instances: Vec<_> = recurring_events
+    let mut events_and_instances: Vec<_> = recurring_events
         .into_iter()
         .map(|event| {
             let instances = event.rrule.all_within_period(params.start, params.end);
@@ -132,46 +135,101 @@ async fn get_events(
             .await?      
     };
 
-    // resolve instances and exceptions
-    //
-    // we remove "cancelled" + "modified" dates from each event, but retain "modified" exceptions for later use
-    let mut event_instances = Vec::new();
-    for (event, mut instances) in events_and_instances {
-        // first, collect exceptions for the event
+    // resolve events' instances and exceptions
+    let mut instances_with_group_ids = Vec::new();
+
+    for (event, instances) in &mut events_and_instances {
+        // first, extract exceptions for this event
         let relevant_exceptions: Vec<_> = event_exceptions
-            .iter()
-            .filter(|exception| {
+            .extract_if(.., |exception| {
                 if exception.recurring_event_id == event.id {
                     return instances.dates
                         .iter()
                         .any(|d| d.to_utc() == exception.exception_date);
                 }
                 false
-            }) 
+            })
             .collect();
 
         // delete all "cancelled" instances
-        instances.dates = instances.dates
-            .into_iter()
-            .filter(|date| relevant_exceptions
+        instances.dates.retain(|date| relevant_exceptions
                 .iter()
-                .any(|&e| e.exception_type == ExceptionType::Cancelled && e.exception_date == date.to_utc())
-            )
-            .collect();
+                .any(|e| e.exception_type == ExceptionType::Cancelled && e.exception_date == date.to_utc())
+            );
 
         // create the actual calendar events
-        let calendar_events: Vec<_> = instances.dates
+        let mut calendar_events: Vec<_> = instances.dates
             .iter()
             .map(|date| RecurringCalendarEvent {
+                recurring_event_id: event.id,
                 title: event.title.clone(),
                 description: event.description.clone(),
-                start_time: event.start_time,
+                start_time: date.to_utc(),
+                end_time: date.to_utc() + Duration::seconds(event.event_duration_seconds.0.into()),
+                exception_id: None,
+                group: None
             })
+            .collect();
+
+        // replace any "modified" exceptions' metadata
+        for exception in relevant_exceptions {
+            if let ExceptionType::Modified = exception.exception_type {
+                if let Some(event) = calendar_events
+                    .iter_mut()
+                    .find(|e| e.start_time == exception.exception_date)
+                {   
+                    // **NOTE**: if more modifiable metadata is added to recurring events, they should be replaced here as well
+                    if let Some(modified_title) = exception.modified_title { event.title = modified_title; }
+                    if let Some(modified_description) = exception.modified_description { event.description = modified_description; }
+                    if let Some(modified_start) = exception.modified_start_time { event.start_time = modified_start; }
+                    if let Some(modified_end) = exception.modified_end_time { event.end_time = modified_end; }
+                }
+            }
+        };
+
+        // collect calendar events + group IDs
+        instances_with_group_ids.push((event.group_id, calendar_events));
     }
 
-    // get group data for remaining instances
+    // don't query for groups whose events have 0 instances
+    instances_with_group_ids.retain(|(g, i)| i.len() > 0);
 
-    unimplemented!();
+    // get group data for remaining instances
+    let group_ids: Vec<_> = instances_with_group_ids
+        .iter()
+        .map(|(g, _)| *g)
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect();
+    let groups: Vec<RecurringEventGroup> = sqlx::query_as!(
+        RecurringEventGroup,
+        r#"
+            SELECT *
+            FROM recurring_event_groups
+            WHERE id = ANY($1)
+        "#,
+        &group_ids
+    )
+        .fetch_all(&app_state.db)
+        .await?;
+
+    // fill in group data for instances
+    for (group_id, events) in &mut instances_with_group_ids {
+        if let Some(group) = groups.iter().find(|&g| g.id == *group_id) {
+            for event in events {
+                event.group = Some(group.clone());
+            }
+        }
+    }   
+
+    // concatenate all events and return
+    let events: Vec<_> = instances_with_group_ids
+        .into_iter()
+        .map(|(_, events)| events)
+        .flatten()
+        .collect();
+
+    Ok(Json(events))
 }
 
 async fn update_event(

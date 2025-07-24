@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// An exception to a recurring event.
+/// An exception (modification or cancellation) for a recurring event.
 /// 
 /// For example, if we have a weekly recurring event which will occur on 1 Aug,
 /// but we want to move it to 2 Aug,
@@ -17,7 +17,7 @@ pub struct RecurringEventException {
     pub exception_date: DateTime<Utc>,
     pub exception_type: ExceptionType,
     pub modified_title: Option<String>,
-    pub modified_description: Option<String>,
+    pub modified_description: Option<Option<String>>,
     pub modified_start_time: Option<DateTime<Utc>>,
     pub modified_end_time: Option<DateTime<Utc>>
 }
