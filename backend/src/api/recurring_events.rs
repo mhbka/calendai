@@ -1,9 +1,8 @@
 use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
 use chrono::{Date, DateTime, Utc};
-use futures::future::join_all;
-use rrule::RRuleResult;
 use serde::Deserialize;
 use uuid::Uuid;
+use crate::models::time::Second;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
 use crate::models::rrule::ValidatedRRule;
 use crate::models::recurring_event_exception::RecurringEventException;
@@ -31,14 +30,18 @@ async fn create_events(
     let mut group_ids = Vec::with_capacity(events.len());
     let mut titles = Vec::with_capacity(events.len());
     let mut descriptions = Vec::with_capacity(events.len());
-    let mut start_times = Vec::with_capacity(events.len());
-    let mut end_times = Vec::with_capacity(events.len());
+    let mut durations = Vec::with_capacity(events.len());
+    let mut recurrence_starts = Vec::with_capacity(events.len());
+    let mut recurrence_ends = Vec::with_capacity(events.len());
+    let mut rrules = Vec::with_capacity(events.len());
     for event in events {
         group_ids.push(event.group_id);
         titles.push(event.title);
         descriptions.push(event.description);
-        start_times.push(event.start_time);
-        end_times.push(event.end_time);
+        durations.push(event.event_duration_seconds.0 as i32);
+        recurrence_starts.push(event.recurrence_start);
+        recurrence_ends.push(event.recurrence_end);
+        rrules.push(event.rrule.to_string());
     }
 
     let authorized_groups = sqlx::query!(
@@ -58,15 +61,17 @@ async fn create_events(
     sqlx::query!(
         r#"
             insert into recurring_events
-            (group_id, title, description, start_time, end_time)
+            (group_id, title, description, event_duration_seconds, recurrence_start, recurrence_end, rrule)
             select * from unnest
-            ($1::uuid[], $2::varchar[], $3::varchar[], $4::timestamptz[], $5::timestamptz[])
+            ($1::uuid[], $2::varchar[], $3::varchar[], $4::int[], $5::timestamptz[], $6::timestamptz[], $7::varchar[])
         "#,
         &group_ids[..],
         &titles[..],
         &descriptions[..] as &[Option<String>],
-        &start_times[..],
-        &end_times[..] as &[Option<DateTime<Utc>>]
+        &durations[..],
+        &recurrence_starts[..],
+        &recurrence_ends[..] as &[Option<DateTime<Utc>>],
+        &rrules[..]
     )
         .execute(&app_state.db)
         .await?;
@@ -82,7 +87,7 @@ async fn get_events(
     let recurring_events: Vec<RecurringEvent> = sqlx::query_as!(
         RecurringEvent,
         r#"
-            SELECT re.id, re.group_id, re.is_active, re.title, re.description, re.recurrence_start, re.recurrence_end, re.start_time, re.end_time, re.rrule as "rrule: _"
+            SELECT re.id, re.group_id, re.is_active, re.title, re.description, re.recurrence_start, re.recurrence_end, re.event_duration_seconds as "event_duration_seconds: _", re.rrule as "rrule: _"
             FROM recurring_events re
             INNER JOIN recurring_event_groups reg ON reg.id = re.group_id
             WHERE reg.user_id = $1 AND re.recurrence_start > $2 AND re.recurrence_end < $3 AND re.is_active = true
@@ -130,25 +135,38 @@ async fn get_events(
     // resolve instances and exceptions
     //
     // we remove "cancelled" + "modified" dates from each event, but retain "modified" exceptions for later use
+    let mut event_instances = Vec::new();
     for (event, mut instances) in events_and_instances {
-        event_exceptions = event_exceptions
-            .into_iter()
+        // first, collect exceptions for the event
+        let relevant_exceptions: Vec<_> = event_exceptions
+            .iter()
             .filter(|exception| {
                 if exception.recurring_event_id == event.id {
-                    if let Some(pos) = instances.dates
+                    return instances.dates
                         .iter()
-                        .position(|d| d.to_utc() == exception.exception_date) 
-                    {   
-                        instances.dates.swap_remove(pos);
-                        match exception.exception_type {
-                            ExceptionType::Cancelled => return false,
-                            ExceptionType::Modified => return true
-                        }
-                    }
+                        .any(|d| d.to_utc() == exception.exception_date);
                 }
-                true
+                false
             }) 
             .collect();
+
+        // delete all "cancelled" instances
+        instances.dates = instances.dates
+            .into_iter()
+            .filter(|date| relevant_exceptions
+                .iter()
+                .any(|&e| e.exception_type == ExceptionType::Cancelled && e.exception_date == date.to_utc())
+            )
+            .collect();
+
+        // create the actual calendar events
+        let calendar_events: Vec<_> = instances.dates
+            .iter()
+            .map(|date| RecurringCalendarEvent {
+                title: event.title.clone(),
+                description: event.description.clone(),
+                start_time: event.start_time,
+            })
     }
 
     // get group data for remaining instances
@@ -183,16 +201,18 @@ async fn update_event(
                     title = $1,
                     group_id = $2,
                     description = $3,
-                    start_time = $4,
-                    end_time = $5,
-                    rrule = $6
-                where id = $7
+                    event_duration_seconds = $4,
+                    recurrence_start = $5,
+                    recurrence_end = $6,
+                    rrule = $7
+                where id = $8
             "#,
             updated_event.title,
             updated_event.group_id,
             updated_event.description,
-            updated_event.start_time,
-            updated_event.end_time,
+            updated_event.event_duration_seconds as Second,
+            updated_event.recurrence_start,
+            updated_event.recurrence_end,
             updated_event.rrule as ValidatedRRule,
             updated_event.id
         )

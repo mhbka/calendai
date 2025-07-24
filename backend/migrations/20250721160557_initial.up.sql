@@ -1,11 +1,10 @@
--- Add up migration script here
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE calendar_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id),
     title VARCHAR NOT NULL,
-    "description" VARCHAR,
+    description VARCHAR,
     start_time TIMESTAMPTZ NOT NULL,
     end_time TIMESTAMPTZ NOT NULL,
     
@@ -18,7 +17,7 @@ CREATE TABLE recurring_event_groups (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id),
     group_name VARCHAR NOT NULL,
-    "description" VARCHAR,
+    description VARCHAR,
     color INT NOT NULL,
     group_is_active BOOLEAN,
     group_recurrence_start TIMESTAMPTZ,
@@ -36,18 +35,16 @@ CREATE TABLE recurring_event_groups (
 CREATE TABLE recurring_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     group_id UUID NOT NULL REFERENCES recurring_event_groups(id),
-    is_active BOOLEAN NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     title VARCHAR NOT NULL,
-    "description" VARCHAR,
+    description VARCHAR,
+    event_duration_seconds INT NOT NULL,
     recurrence_start TIMESTAMPTZ NOT NULL,
     recurrence_end TIMESTAMPTZ,
-    start_time TIMESTAMPTZ NOT NULL,
-    end_time TIMESTAMPTZ NOT NULL,
     rrule VARCHAR NOT NULL,
-    
-    -- Ensure valid time ordering
-    CONSTRAINT check_recurring_event_time_order 
-        CHECK (start_time < end_time),
+
+    -- Ensure valid time values
+    CONSTRAINT check_duration CHECK (event_duration_seconds >= 0),
     
     -- Ensure valid recurrence period ordering if end date is provided
     CONSTRAINT check_recurrence_period_order

@@ -2,7 +2,7 @@ use std::str::FromStr;
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use rrule::{RRuleError, RRuleResult, RRuleSet, Tz};
 use serde::{Deserialize, Serialize};
-use sqlx::{Database, Decode, Encode, Type};
+use sqlx::{postgres::PgHasArrayType, Database, Decode, Encode, Type};
 
 /// A wrapper around a `RRuleSet`, with serde + deserialization-time validation + sqlx support.
 #[derive(Debug, Clone, Serialize)]
@@ -55,6 +55,12 @@ where
     String: Type<DB>  {
     fn type_info() -> DB::TypeInfo {
         <String as Type<DB>>::type_info()
+    }
+}
+
+impl PgHasArrayType for ValidatedRRule {
+    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
+        <&str as PgHasArrayType>::array_type_info()
     }
 }
 
