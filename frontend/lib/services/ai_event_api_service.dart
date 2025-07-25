@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/base_api_service.dart';
+
 // For interacting with the AI Event API.
 class AIEventService extends BaseApiService {
   static String baseUrl = "${envVars['api_base_url']!}/add_ai_event";

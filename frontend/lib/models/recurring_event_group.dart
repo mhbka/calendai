@@ -14,7 +14,7 @@ class RecurringEventGroup {
   @ColorConverter()
   final Color color;
 
-  final bool isActive;
+  final bool? isActive;
   final DateTime? startDate;
   final DateTime? endDate;
   final num recurringEvents;

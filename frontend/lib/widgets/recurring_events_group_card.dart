@@ -84,11 +84,11 @@ class RecurringEventsGroupCard extends StatelessWidget {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: group.isActive ? Colors.green : Colors.red,
+        color: (group.isActive ?? false) ? Colors.green : Colors.red,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        group.isActive ? 'Active' : 'Inactive',
+        (group.isActive ?? false) ? 'Active' : 'Inactive',
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,

@@ -21,11 +21,6 @@ void main() async {
   await initSystemTray();
   await initWindowSettings();
 
-  await Supabase.initialize(
-    url: envVars['supabase_url']!,
-    anonKey: envVars['supabase_anon_key']!
-  );
-
   runApp(App());
 }
 

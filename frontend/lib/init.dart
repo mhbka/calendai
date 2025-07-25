@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
+import 'package:namer_app/main.dart';
 import 'package:namer_app/services/notification_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -12,6 +14,12 @@ Future<void> initDeps() async {
   DartPluginRegistrant.ensureInitialized();
   await NotificationService.initialize();
   await windowManager.ensureInitialized();
+
+  await Supabase.initialize(
+    url: envVars['supabase_url']!,
+    anonKey: envVars['supabase_anon_key']!
+  );
+  await Supabase.instance.client.auth.refreshSession();
 }
 
 /// Validates and returns the env vars for the app.

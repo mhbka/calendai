@@ -52,7 +52,7 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
   // Filter out inactive groups with 0 events
   List<RecurringEventGroup> get _filteredGroups {
     return recurringEventGroups.where((group) {
-      return !(group.recurringEvents == 0 && !group.isActive);
+      return !(group.recurringEvents == 0 && !(group.isActive ?? false));
     }).toList();
   }
 

@@ -9,7 +9,7 @@ import 'package:namer_app/pages/calendar_page.dart';
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
-    redirect: (BuildContext context, GoRouterState state) {
+    redirect: (BuildContext context, GoRouterState state) async {
       final session = Supabase.instance.client.auth.currentSession;
       final isLoggedIn = session != null;
       final isLoggingIn = state.matchedLocation == '/login';
@@ -48,7 +48,7 @@ class AppRouter {
       GoRoute(
         path: '/recurring_events',
         name: 'recurring_events',
-        builder: (context, state) => RecurringEventsPage()
+        builder: (context, state) => RecurringEventGroupsPage()
       )
     ],
   );

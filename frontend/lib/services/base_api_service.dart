@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:namer_app/services/service_exception.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Base class for API services with common error handling.
 abstract class BaseApiService {
   static Map<String, String> get headers => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    // 'Authorization': 'Bearer ${AuthService.getToken()}',
+    'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
   };
 
   /// Generic method to handle HTTP requests with consistent error handling
