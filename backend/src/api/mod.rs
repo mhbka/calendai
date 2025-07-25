@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::Router;
 use sqlx::{Pool, Postgres};
 use tokio::net::TcpListener;
+use tower_http::trace::TraceLayer;
 use crate::config::Config;
 
 pub(super) mod auth;
@@ -43,5 +44,6 @@ fn build_app_router(state: AppState) -> Router {
         .nest("/calendar_events", calendar_events::router())
         .nest("/ai_add_event", ai_add_event::router())
         .with_state(state)
+        .layer(TraceLayer::new_for_http())
 }
 

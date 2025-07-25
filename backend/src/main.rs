@@ -1,17 +1,18 @@
 use clap::Parser;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
-
 use crate::config::StartupConfig;
 
+mod telemetry;
 mod config;
 mod api;
 mod models;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
     dotenv().ok();
+    telemetry::init_tracing();
+    
     let config = StartupConfig::parse()
         .to_config()
         .expect("Failed to load config");

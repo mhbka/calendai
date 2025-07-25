@@ -105,14 +105,10 @@ impl ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
+        tracing::debug!("Returning API error: {self:?}");
         match self {
             Self::UnprocessableEntity { errors } => {
-                #[derive(serde::Serialize)]
-                struct Errors {
-                    errors: HashMap<Cow<'static, str>, Vec<Cow<'static, str>>>,
-                }
-
-                return (StatusCode::UNPROCESSABLE_ENTITY, Json(Errors { errors })).into_response();
+                return (StatusCode::UNPROCESSABLE_ENTITY, Json(errors)).into_response();
             }
             Self::Unauthorized => {
                 return (

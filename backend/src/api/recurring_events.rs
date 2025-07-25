@@ -1,12 +1,11 @@
 use std::collections::HashSet;
-
 use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
-use chrono::{Date, DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 use crate::models::recurring_event_group::RecurringEventGroup;
 use crate::models::time::Second;
-use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{calendar_event::CalendarEvent, recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
+use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
 use crate::models::rrule::ValidatedRRule;
 use crate::models::recurring_event_exception::RecurringEventException;
 
@@ -137,7 +136,6 @@ async fn get_events(
 
     // resolve events' instances and exceptions
     let mut instances_with_group_ids = Vec::new();
-
     for (event, instances) in &mut events_and_instances {
         // first, extract exceptions for this event
         let relevant_exceptions: Vec<_> = event_exceptions

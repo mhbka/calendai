@@ -1,8 +1,10 @@
 use std::str::FromStr;
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use rrule::{RRuleError, RRuleResult, RRuleSet, Tz};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgHasArrayType, Database, Decode, Encode, Type};
+
+static INSTANCE_LIMIT: u16 = 100;
 
 /// A wrapper around a `RRuleSet`, with serde + deserialization-time validation + sqlx support.
 #[derive(Debug, Clone, Serialize)]
@@ -11,15 +13,18 @@ pub struct ValidatedRRule {
 }
 
 impl ValidatedRRule {
-    // Returns all instances within the start/end dates.
+    /// Returns all instances of the reccurence rule within the start/end dates.
+    /// 
+    /// **Note**: The maximum number of instances is set to 100 (for now).
     pub fn all_within_period(&self, start: DateTime<Utc>, end: DateTime<Utc>) -> RRuleResult {
+        // 
         let start = Tz::from_utc_datetime(&Tz::UTC, &start.naive_utc());
         let end = Tz::from_utc_datetime(&Tz::UTC, &end.naive_utc());
         let restricted_rrule = self.rrule
             .clone()
             .after(start)
             .before(end);
-        restricted_rrule.all(100)
+        restricted_rrule.all(INSTANCE_LIMIT)
     }   
 }
 
@@ -58,6 +63,7 @@ where
     }
 }
 
+// allows to insert arrays of it
 impl PgHasArrayType for ValidatedRRule {
     fn array_type_info() -> sqlx::postgres::PgTypeInfo {
         <&str as PgHasArrayType>::array_type_info()

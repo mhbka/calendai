@@ -5,28 +5,26 @@ use super::error::AuthError;
 use super::types::{AuthClaims, AuthUser};
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use axum::Extension;
 use axum_extra::headers::authorization::Bearer;
 use axum_extra::headers::{Authorization, HeaderMapExt};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 
 /// Automatically extracts and verifies an `AuthUser` from a request.
-impl<S> FromRequestParts<S> for AuthUser
-where
-    S: Send + Sync,
+impl FromRequestParts<AppState> for AuthUser
 {
     type Rejection = AuthError;
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        let app_state: Extension<AppState> = Extension::from_request_parts(parts, _state)
-            .await
-            .expect("AppState should be added as an extension");
+    async fn from_request_parts(parts: &mut Parts, app_state: &AppState) -> Result<Self, Self::Rejection> {
         let jwt_secret = &app_state.config.jwt_secret;
 
         // Extract the token from the authorization header
         let Authorization(bearer) = parts.headers
             .typed_get::<Authorization<Bearer>>()
-            .ok_or_else(|| AuthError::Auth)?;
+            .ok_or_else(|| {
+                tracing::debug!("failed to extract Bearer token; headers: {:?}", parts.headers);
+                AuthError::Auth
+            })?;
+        tracing::trace!("Successfully extracted bearer token: {bearer:?}");
 
         // HACK: set aud validation to false for now
         let mut validation = Validation::default();
@@ -38,9 +36,10 @@ where
             &DecodingKey::from_secret(jwt_secret.as_bytes()),
             &validation,
         ).map_err(|e| {
-            tracing::info!("Failed to decode auth claims: {:?}", e.kind());
+            tracing::debug!("Failed to decode auth claims: {:?}", e.kind());
             AuthError::InvalidToken
         })?;
+        tracing::trace!("Successfully decoded auth claims");
 
         // Extract user data from claims
         let claims = token_data.claims;

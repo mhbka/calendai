@@ -1,4 +1,4 @@
-use axum::{debug_handler, extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
+use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;

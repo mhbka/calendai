@@ -1,8 +1,8 @@
 
-use chrono::{DateTime, Duration, NaiveTime, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::{recurring_event_group::RecurringEventGroup, rrule::ValidatedRRule, time::{Hour, Minute, Second}};
+use crate::models::{recurring_event_group::RecurringEventGroup, rrule::ValidatedRRule, time::Second};
 
 /// Describes an event which can recur periodically.
 /// 
