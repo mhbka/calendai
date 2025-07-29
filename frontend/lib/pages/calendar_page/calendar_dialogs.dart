@@ -44,9 +44,14 @@ class CalendarDialogs {
   Future<void> deleteEvent(BuildContext context, CalendarEvent event) async {
     try {
       await controller.deleteEvent(event);
-      _showSuccessMessage(context, CalendarConstants.eventDeletedMessage);
+      if (context.mounted) _showSuccessMessage(context, CalendarConstants.eventDeletedMessage);
     } catch (e) {
-      _showErrorMessage(context, '${CalendarConstants.failedToDeleteMessage}: $e');
+      if (context.mounted) {
+        _showErrorMessage(context, '${CalendarConstants.failedToDeleteMessage}: $e');
+      }
+      else {
+        print("context was not mounted");
+      }
     }
   }
 

@@ -26,3 +26,15 @@ pub struct NewCalendarEvent {
     #[serde(alias = "endTime")]
     pub end_time: DateTime<Utc>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdatedCalendarEvent {
+    pub id: Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub location: Option<String>,
+    #[serde(alias = "startTime")]
+    pub start_time: DateTime<Utc>,
+    #[serde(alias = "endTime")]
+    pub end_time: DateTime<Utc>,
+}

@@ -2,7 +2,7 @@ use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Jso
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::calendar_event::{CalendarEvent, NewCalendarEvent}};
+use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::calendar_event::{CalendarEvent, NewCalendarEvent, UpdatedCalendarEvent}};
 
 /// The query params for querying events.
 #[derive(Deserialize)]
@@ -82,7 +82,7 @@ async fn get_events(
 async fn update_event(
     State(app_state): State<AppState>,
     user: AuthUser,
-    Json(updated_event): Json<CalendarEvent>
+    Json(updated_event): Json<UpdatedCalendarEvent>
 ) -> ApiResult<()> {
     let event_record = sqlx::query!(
         r#"select user_id from calendar_events where id = $1"#,
