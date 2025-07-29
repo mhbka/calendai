@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:namer_app/utils/color_converter.dart';
+import 'package:namer_app/utils/datetime_converter.dart';
 
 part 'recurring_event_group.g.dart';
 
@@ -15,8 +16,12 @@ class RecurringEventGroup {
   final Color color;
 
   final bool? isActive;
+  
+  @DatetimeConverter()
   final DateTime? startDate;
+  @DatetimeConverter()
   final DateTime? endDate;
+  
   final num recurringEvents;
 
   RecurringEventGroup({

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-
+import 'package:namer_app/utils/datetime_converter.dart';
+ 
 part 'calendar_event.g.dart';
 
 /// Describes a singular calendar event.
@@ -8,9 +9,12 @@ class CalendarEvent {
   final String id;
   final String title;
   final String description;
-  final DateTime startTime;
-  final DateTime endTime;
   final String? location;
+
+  @DatetimeConverter()
+  final DateTime startTime;
+  @DatetimeConverter()
+  final DateTime endTime;
 
   CalendarEvent({
     required this.id,

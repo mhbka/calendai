@@ -28,13 +28,13 @@ class CalendarDialogs {
         startTime: startTime,
         endTime: endTime,
       );
-
       _showSuccessMessage(
         context,
         existingEvent != null
             ? CalendarConstants.eventUpdatedMessage
             : CalendarConstants.eventAddedMessage,
       );
+      Navigator.pop(context);
     } catch (e) {
       _showErrorMessage(context, '${CalendarConstants.failedToSaveMessage}: $e');
     }
@@ -136,7 +136,7 @@ class CalendarDialogs {
 
   void _showErrorMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 }

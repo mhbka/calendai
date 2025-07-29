@@ -131,13 +131,13 @@ class _EventDialogState extends State<EventDialog> {
             ),
             SizedBox(height: 16),
             ListTile(
-              title: Text('Start Time'),
+              title: Text('Start'),
               subtitle: Text('${_startTime.day}/${_startTime.month}/${_startTime.year} ${_startTime.hour}:${_startTime.minute.toString().padLeft(2, '0')}'),
               trailing: Icon(Icons.edit),
               onTap: _selectStartTime,
             ),
             ListTile(
-              title: Text('End Time'),
+              title: Text('End'),
               subtitle: Text('${_endTime.day}/${_endTime.month}/${_endTime.year} ${_endTime.hour}:${_endTime.minute.toString().padLeft(2, '0')}'),
               trailing: Icon(Icons.edit),
               onTap: _selectEndTime,

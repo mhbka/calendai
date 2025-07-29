@@ -56,17 +56,15 @@ class _CalendarPageState extends State<CalendarPage> {
     DateTime startTime,
     DateTime endTime,
   ) async {
-    Navigator.pop(context); // Close the dialog
-    
-    await _calendarDialogs.saveEvent(
-      context,
-      existingEvent: existingEvent,
-      title: title,
-      description: description,
-      location: location,
-      startTime: startTime,
-      endTime: endTime,
-    );
+      await _calendarDialogs.saveEvent(
+        context,
+        existingEvent: existingEvent,
+        title: title,
+        description: description,
+        location: location,
+        startTime: startTime,
+        endTime: endTime,
+      );
   }
 
   Future<void> _showEventOptions(CalendarEvent event) async {

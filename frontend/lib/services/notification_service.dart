@@ -32,15 +32,17 @@ class NotificationService {
     await _notifications.initialize(initializationSettings);
   }
 
+  /// Schedules a reminder for an event, or updates it if it's already been scheduled.
   static void scheduleEventReminder(CalendarEvent event) {
     final reminderTime = event.startTime.subtract(Duration(minutes: 10));
     final now = DateTime.now();
     
+    // Cancel existing timer if any (this handles the update case)
+    _activeTimers[event.id]?.cancel();
+    _activeTimers.remove(event.id);
+    
     if (reminderTime.isAfter(now)) {
       final duration = reminderTime.difference(now);
-      
-      // Cancel existing timer if any
-      _activeTimers[event.id]?.cancel();
       
       // Schedule new reminder
       _activeTimers[event.id] = Timer(duration, () {

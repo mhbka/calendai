@@ -20,28 +20,30 @@ class CalendarApiService extends BaseApiService {
     );
   }
 
-  /// Create a new calendar event.
-  static Future<CalendarEvent> createEvent(CalendarEvent event) async {
+  /// Creates new calendar events.
+  static Future<void> createEvents(List<CalendarEvent> events) async {
+    final eventsJson = events.map((event) => event.toJson()).toList();
+    print(eventsJson);
     return BaseApiService.handleRequest(
       () => http.post(
         Uri.parse(baseUrl),
         headers: BaseApiService.headers,
-        body: json.encode(event.toJson()),
+        body: json.encode(events.map((event) => event.toJson()).toList()),
       ),
-      (response) => CalendarEvent.fromJson(json.decode(response.body)),
-      validStatusCodes: [201],
+      (response) => {},
+      validStatusCodes: [200, 201],
     );
   }
 
   /// Update an existing calendar event.
-  static Future<CalendarEvent> updateEvent(CalendarEvent event) async {
+  static Future<void> updateEvent(CalendarEvent event) async {
     return BaseApiService.handleRequest(
       () => http.put(
         Uri.parse(baseUrl),
         headers: BaseApiService.headers,
         body: json.encode(event.toJson()),
       ),
-      (response) => CalendarEvent.fromJson(json.decode(response.body)),
+      (response) => {},
     );
   }
 

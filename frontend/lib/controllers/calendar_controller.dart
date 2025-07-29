@@ -76,8 +76,8 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
-  /// Saves a new event.
-  Future<CalendarEvent> saveEvent({
+  /// Saves a new event/updates the current event.
+  Future<void> saveEvent({
     CalendarEvent? existingEvent,
     required String title,
     required String description,
@@ -98,14 +98,9 @@ class CalendarController extends ChangeNotifier {
           endTime: endTime,
         );
         await CalendarApiService.updateEvent(savedEvent);
-        
-        // Update local list
-        final index = _events.indexWhere((e) => e.id == existingEvent.id);
-        if (index != -1) {
-          _events[index] = savedEvent;
-        }
-      } else {
-        // Create new event
+        await loadEvents();
+      } 
+      else {
         final newEvent = CalendarEvent(
           id: uuid.v4(),
           title: title,
@@ -114,15 +109,9 @@ class CalendarController extends ChangeNotifier {
           startTime: startTime,
           endTime: endTime,
         );
-        savedEvent = await CalendarApiService.createEvent(newEvent);
-        _events.add(savedEvent);
+        await CalendarApiService.createEvents([newEvent]);
+        await loadEvents();
       }
-
-      // Schedule reminder
-      NotificationService.scheduleEventReminder(savedEvent);
-      notifyListeners();
-      
-      return savedEvent;
     } catch (e) {
       rethrow;
     } finally {
