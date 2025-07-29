@@ -10,12 +10,12 @@ CalendarEvent _$CalendarEventFromJson(Map<String, dynamic> json) =>
     CalendarEvent(
       id: json['id'] as String,
       title: json['title'] as String,
-      description: json['description'] as String,
-      startTime: const DatetimeConverter().fromJson(
-        json['startTime'] as String,
-      ),
-      endTime: const DatetimeConverter().fromJson(json['endTime'] as String),
+      description: json['description'] as String?,
       location: json['location'] as String?,
+      startTime: const DatetimeConverter().fromJson(
+        json['start_time'] as String,
+      ),
+      endTime: const DatetimeConverter().fromJson(json['end_time'] as String),
     );
 
 Map<String, dynamic> _$CalendarEventToJson(CalendarEvent instance) =>
@@ -24,6 +24,6 @@ Map<String, dynamic> _$CalendarEventToJson(CalendarEvent instance) =>
       'title': instance.title,
       'description': instance.description,
       'location': instance.location,
-      'startTime': const DatetimeConverter().toJson(instance.startTime),
-      'endTime': const DatetimeConverter().toJson(instance.endTime),
+      'start_time': const DatetimeConverter().toJson(instance.startTime),
+      'end_time': const DatetimeConverter().toJson(instance.endTime),
     };

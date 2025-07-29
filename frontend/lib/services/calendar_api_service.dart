@@ -10,20 +10,17 @@ class CalendarApiService extends BaseApiService {
 
   /// Fetch events for a date range.
   static Future<List<CalendarEvent>> fetchEvents(DateTime start, DateTime end) async {
-    print(BaseApiService.headers);
     return BaseApiService.handleRequest(
       () => http.get(
         Uri.parse('$baseUrl?start=${start.toUtc().toIso8601String()}&end=${end.toUtc().toIso8601String()}'),
         headers: BaseApiService.headers,
       ),
-      (response) => BaseApiService.parseJsonList(response.body, CalendarEvent.fromJson),
+      (response) {print(response.body); return BaseApiService.parseJsonList(response.body, CalendarEvent.fromJson);},
     );
   }
 
   /// Creates new calendar events.
   static Future<void> createEvents(List<CalendarEvent> events) async {
-    final eventsJson = events.map((event) => event.toJson()).toList();
-    print(eventsJson);
     return BaseApiService.handleRequest(
       () => http.post(
         Uri.parse(baseUrl),

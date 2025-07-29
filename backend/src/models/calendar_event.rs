@@ -10,16 +10,19 @@ pub struct CalendarEvent {
     pub title: String,
     pub description: Option<String>,
     pub location: Option<String>,
+    #[serde(alias = "startTime")]
     pub start_time: DateTime<Utc>,
+    #[serde(alias = "endTime")]
     pub end_time: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewCalendarEvent {
-    pub user_id: Uuid,
     pub title: String,
     pub description: Option<String>,
+    pub location: Option<String>,
+    #[serde(alias = "startTime")]
     pub start_time: DateTime<Utc>,
+    #[serde(alias = "endTime")]
     pub end_time: DateTime<Utc>,
-    pub location: Option<String>
 }

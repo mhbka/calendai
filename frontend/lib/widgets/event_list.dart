@@ -78,8 +78,8 @@ class EventListItem extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (event.description.isNotEmpty) ...[
-              Text(event.description),
+            if (event.description?.isNotEmpty == true) ...[
+              Text(event.description ?? ''),
               SizedBox(height: 4),
             ],
             Text(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/main.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/services/calendar_api_service.dart';
 import 'package:namer_app/services/notification_service.dart';
@@ -102,7 +101,7 @@ class CalendarController extends ChangeNotifier {
       } 
       else {
         final newEvent = CalendarEvent(
-          id: uuid.v4(),
+          id: "-1", // new events don't have IDs
           title: title,
           description: description,
           location: location,

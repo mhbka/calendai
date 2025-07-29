@@ -25,14 +25,13 @@ async fn create_events(
     user: AuthUser,
     Json(events): Json<Vec<NewCalendarEvent>>
 ) -> ApiResult<()> {
-    let mut user_ids = Vec::with_capacity(events.len());
+    let user_ids = vec![user.id; events.len()];
     let mut titles = Vec::with_capacity(events.len());
     let mut descriptions = Vec::with_capacity(events.len());
     let mut start_times = Vec::with_capacity(events.len());
     let mut end_times = Vec::with_capacity(events.len());
     let mut locations = Vec::with_capacity(events.len());
     for event in events {
-        user_ids.push(user.id);
         titles.push(event.title);
         descriptions.push(event.description);
         start_times.push(event.start_time);

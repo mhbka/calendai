@@ -8,21 +8,23 @@ part 'calendar_event.g.dart';
 class CalendarEvent {
   final String id;
   final String title;
-  final String description;
+  final String? description;
   final String? location;
 
   @DatetimeConverter()
+  @JsonKey(name: 'start_time')
   final DateTime startTime;
   @DatetimeConverter()
+  @JsonKey(name: 'end_time')
   final DateTime endTime;
 
   CalendarEvent({
     required this.id,
     required this.title,
-    required this.description,
+    this.description,
+    this.location,
     required this.startTime,
     required this.endTime,
-    this.location,
   });
 
   CalendarEvent copyWith({
