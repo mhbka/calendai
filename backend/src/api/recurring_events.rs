@@ -32,6 +32,7 @@ async fn create_events(
     let mut group_ids = Vec::with_capacity(events.len());
     let mut titles = Vec::with_capacity(events.len());
     let mut descriptions = Vec::with_capacity(events.len());
+    let mut locations = Vec::with_capacity(events.len());
     let mut durations = Vec::with_capacity(events.len());
     let mut recurrence_starts = Vec::with_capacity(events.len());
     let mut recurrence_ends = Vec::with_capacity(events.len());
@@ -40,6 +41,7 @@ async fn create_events(
         group_ids.push(event.group_id);
         titles.push(event.title);
         descriptions.push(event.description);
+        locations.push(event.location);
         durations.push(event.event_duration_seconds.0 as i32);
         recurrence_starts.push(event.recurrence_start);
         recurrence_ends.push(event.recurrence_end);
@@ -63,13 +65,14 @@ async fn create_events(
     sqlx::query!(
         r#"
             insert into recurring_events
-            (group_id, title, description, event_duration_seconds, recurrence_start, recurrence_end, rrule)
+            (group_id, title, description, location, event_duration_seconds, recurrence_start, recurrence_end, rrule)
             select * from unnest
-            ($1::uuid[], $2::varchar[], $3::varchar[], $4::int[], $5::timestamptz[], $6::timestamptz[], $7::varchar[])
+            ($1::uuid[], $2::varchar[], $3::varchar[], $4::varchar[], $5::int[], $6::timestamptz[], $7::timestamptz[], $8::varchar[])
         "#,
         &group_ids[..],
         &titles[..],
         &descriptions[..] as &[Option<String>],
+        &locations[..] as &[Option<String>],
         &durations[..],
         &recurrence_starts[..],
         &recurrence_ends[..] as &[Option<DateTime<Utc>>],
@@ -89,7 +92,17 @@ async fn get_events(
     let recurring_events: Vec<RecurringEvent> = sqlx::query_as!(
         RecurringEvent,
         r#"
-            SELECT re.id, re.group_id, re.is_active, re.title, re.description, re.recurrence_start, re.recurrence_end, re.event_duration_seconds as "event_duration_seconds: _", re.rrule as "rrule: _"
+            SELECT 
+                re.id, 
+                re.group_id, 
+                re.is_active, 
+                re.title, 
+                re.description, 
+                re.location, 
+                re.recurrence_start, 
+                re.recurrence_end, 
+                re.event_duration_seconds as "event_duration_seconds: _", 
+                re.rrule as "rrule: _"
             FROM recurring_events re
             INNER JOIN recurring_event_groups reg ON reg.id = re.group_id
             WHERE reg.user_id = $1 AND re.recurrence_start > $2 AND re.recurrence_end < $3 AND re.is_active = true
@@ -123,6 +136,7 @@ async fn get_events(
                     exception_type as "exception_type: _",
                     modified_title,
                     modified_description,
+                    modified_location,
                     modified_start_time,
                     modified_end_time
                 FROM recurring_event_exceptions ree
@@ -162,6 +176,7 @@ async fn get_events(
                 recurring_event_id: event.id,
                 title: event.title.clone(),
                 description: event.description.clone(),
+                location: event.location.clone(),
                 start_time: date.to_utc(),
                 end_time: date.to_utc() + Duration::seconds(event.event_duration_seconds.0.into()),
                 exception_id: None,
@@ -257,15 +272,17 @@ async fn update_event(
                     title = $1,
                     group_id = $2,
                     description = $3,
-                    event_duration_seconds = $4,
-                    recurrence_start = $5,
-                    recurrence_end = $6,
-                    rrule = $7
-                where id = $8
+                    location = $4,
+                    event_duration_seconds = $5,
+                    recurrence_start = $6,
+                    recurrence_end = $7,
+                    rrule = $8
+                where id = $9
             "#,
             updated_event.title,
             updated_event.group_id,
             updated_event.description,
+            updated_event.location,
             updated_event.event_duration_seconds as Second,
             updated_event.recurrence_start,
             updated_event.recurrence_end,

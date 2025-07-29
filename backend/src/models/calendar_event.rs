@@ -9,6 +9,7 @@ pub struct CalendarEvent {
     pub user_id: Uuid,
     pub title: String,
     pub description: Option<String>,
+    pub location: Option<String>,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
 }
@@ -20,4 +21,5 @@ pub struct NewCalendarEvent {
     pub description: Option<String>,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
+    pub location: Option<String>
 }

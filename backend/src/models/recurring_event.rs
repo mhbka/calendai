@@ -17,6 +17,7 @@ pub struct RecurringEvent {
     pub is_active: bool,
     pub title: String,
     pub description: Option<String>,
+    pub location: Option<String>,
     pub event_duration_seconds: Second,
     pub recurrence_start: DateTime<Utc>,
     pub recurrence_end: Option<DateTime<Utc>>,
@@ -29,6 +30,7 @@ pub struct NewRecurringEvent {
     pub is_active: bool,
     pub title: String,
     pub description: Option<String>,
+    pub location: Option<String>,
     pub event_duration_seconds: Second,
     pub recurrence_start: DateTime<Utc>,
     pub recurrence_end: Option<DateTime<Utc>>,
@@ -43,6 +45,7 @@ pub struct RecurringCalendarEvent {
     // event metadata
     pub title: String,
     pub description: Option<String>,
+    pub location: Option<String>,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
 

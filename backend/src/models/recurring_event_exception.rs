@@ -18,6 +18,7 @@ pub struct RecurringEventException {
     pub exception_type: ExceptionType,
     pub modified_title: Option<String>,
     pub modified_description: Option<Option<String>>,
+    pub modified_location: Option<Option<String>>,
     pub modified_start_time: Option<DateTime<Utc>>,
     pub modified_end_time: Option<DateTime<Utc>>
 }
@@ -29,6 +30,7 @@ pub struct NewRecurringEventException {
     pub exception_type: ExceptionType,
     pub modified_title: Option<String>,
     pub modified_description: Option<String>,
+    pub modified_location: Option<Option<String>>,
     pub modified_start_time: Option<DateTime<Utc>>,
     pub modified_end_time: Option<DateTime<Utc>>
 }

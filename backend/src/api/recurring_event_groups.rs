@@ -173,7 +173,17 @@ async fn fetch_events_for_group(
     let events = sqlx::query_as!(
         RecurringEvent,
         r#"
-            SELECT id, group_id, is_active, title, description, event_duration_seconds as "event_duration_seconds: _", recurrence_start, recurrence_end, rrule as "rrule: _"
+            SELECT 
+                id, 
+                group_id, 
+                is_active, 
+                title, 
+                description, 
+                location, 
+                event_duration_seconds as "event_duration_seconds: _", 
+                recurrence_start, 
+                recurrence_end, 
+                rrule as "rrule: _"
             FROM recurring_events
             WHERE group_id = $1
         "#,
