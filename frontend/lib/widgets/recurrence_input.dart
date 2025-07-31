@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:namer_app/widgets/date_picker.dart';
@@ -6,15 +5,60 @@ import 'package:namer_app/widgets/date_picker.dart';
 enum RecurrenceType { daily, weekly, monthly, yearly }
 enum MonthlyType { byDay, byWeekday }
 
+/// Describes a daily recurrence.
+class DailyRecurrence {
+  /// How many days between each event.
+  int dayPeriodicity = 1;
+
+  DailyRecurrence();
+}
+
+/// Describes a weekly recurrence.
+class WeeklyRecurrence {
+  /// To occur every _ week(s).
+  int weekPeriodicity = 1;
+  /// Which days of the week the event should occur on (between 0-6).
+  Set<int> weekdays = {};
+
+  WeeklyRecurrence();
+}
+
+/// Describes a monthly recurrence.
+class MonthlyRecurrence {
+  /// To occur every _ month(s).
+  int monthPeriodicity = 1;
+  /// MODE 1: Day of the month the event should occur on (between 1-31; if greater than the month's latest day, defaults to the latest day).
+  int mode1DayOfMonth = 1;
+  /// MODE 2: Week of the month the event should occur on (between 1-4).
+  int mode2WeekOfMonth = 1;
+  /// MODE 2: Weekday of the chosen week the event should occur on (between 0-6).
+  int mode2Weekday = 0;
+  /// Whether to use MODE 1 (simple, day of month 1-31) or MODE 2 (choose week of month + day of that week).
+  bool useMode1 = true;
+  
+  MonthlyRecurrence();
+}
+
+/// Describes a yearly recurrence.
+class YearlyRecurrence {
+  /// Day of the year the event should occur on (note: the year is ignored here).
+  DateTime dayOfYear = DateTime.now();
+
+  YearlyRecurrence();
+}
+
 /// Represents a recurrence, or how often and when something should occur.
 class RecurrenceData {
+  // The chosen type of recurrence
   RecurrenceType type;
-  int interval;
-  Set<int> weekdays;
-  MonthlyType monthlyType;
-  int monthDay;
-  int weekdayOccurrence;
-  int weekday;
+
+  // Input data for each type
+  DailyRecurrence dailyRecurrence = DailyRecurrence();
+  WeeklyRecurrence weeklyRecurrence = WeeklyRecurrence();
+  MonthlyRecurrence monthlyRecurrence = MonthlyRecurrence();
+  YearlyRecurrence yearlyRecurrence = YearlyRecurrence();
+
+  // Start/end times and dates
   TimeOfDay startTime;
   TimeOfDay endTime;
   DateTime startDate;
@@ -22,17 +66,11 @@ class RecurrenceData {
 
   RecurrenceData({
     this.type = RecurrenceType.daily,
-    this.interval = 1,
-    Set<int>? weekdays,
-    this.monthlyType = MonthlyType.byDay,
-    this.monthDay = 1,
-    this.weekdayOccurrence = 1,
-    this.weekday = 1,
     required this.startTime,
     required this.endTime,
     required this.startDate,
     this.endDate,
-  }) : weekdays = weekdays ?? {};
+  });
 }
 
 /// A widget for describing something's recurrence.
@@ -61,15 +99,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
 
   RecurrenceData _getDefaultData() {
-    final weekday = widget.eventDate.weekday;
-    final day = widget.eventDate.day;
-    final weekdayOccurrence = ((day - 1) ~/ 7) + 1;
-
     return RecurrenceData(
-      weekdays: {weekday},
-      monthDay: day,
-      weekday: weekday,
-      weekdayOccurrence: weekdayOccurrence,
       startTime: TimeOfDay.now(),
       endTime: TimeOfDay.now(),
       startDate: DateTime.now()
@@ -130,7 +160,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
     return Row(
       spacing: 8,
       children: [
-        chosenOption,
+        Expanded(child: chosenOption),
         Tooltip(
           message: "The default periodicity for the group's events",
           child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
@@ -147,17 +177,17 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         SizedBox(
           width: 60,
           child: TextFormField(
-            initialValue: _data.interval.toString(),
+            initialValue: _data.dailyRecurrence.dayPeriodicity.toString(),
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             textAlign: TextAlign.center,
             onChanged: (value) => setState(() {
-              _data.interval = int.tryParse(value) ?? 1;
+              _data.dailyRecurrence.dayPeriodicity = int.tryParse(value) ?? 1;
             }),
           ),
         ),
         const SizedBox(width: 8),
-        Text(_data.interval == 1 ? 'day' : 'days'),
+        Text(_data.dailyRecurrence.dayPeriodicity == 1 ? 'day' : 'days'),
       ],
     );
   }
@@ -173,17 +203,17 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
             SizedBox(
               width: 60,
               child: TextFormField(
-                initialValue: _data.interval.toString(),
+                initialValue: _data.weeklyRecurrence.weekPeriodicity.toString(),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 textAlign: TextAlign.center,
                 onChanged: (value) => setState(() {
-                  _data.interval = int.tryParse(value) ?? 1;
+                  _data.weeklyRecurrence.weekPeriodicity = int.tryParse(value) ?? 1;
                 }),
               ),
             ),
             const SizedBox(width: 8),
-            Text(_data.interval == 1 ? 'week on:' : 'weeks on:'),
+            Text(_data.weeklyRecurrence.weekPeriodicity == 1 ? 'week on:' : 'weeks on:'),
           ],
         ),
         const SizedBox(height: 8),
@@ -191,7 +221,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
           spacing: 8,
           children: List.generate(7, (index) {
             final weekday = index + 1;
-            final selected = _data.weekdays.contains(weekday);
+            final selected = _data.weeklyRecurrence.weekdays.contains(weekday);
 
             return FilterChip(
               label: Text(_weekdayNames[index]),
@@ -199,11 +229,11 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
               onSelected: (isSelected) {
                 setState(() {
                   if (isSelected) {
-                    _data.weekdays.add(weekday);
+                    _data.weeklyRecurrence.weekdays.add(weekday);
                   } else {
-                    _data.weekdays.remove(weekday);
-                    if (_data.weekdays.isEmpty) {
-                      _data.weekdays.add(widget.eventDate.weekday);
+                    _data.weeklyRecurrence.weekdays.remove(weekday);
+                    if (_data.weeklyRecurrence.weekdays.isEmpty) {
+                      _data.weeklyRecurrence.weekdays.add(widget.eventDate.weekday);
                     }
                   }
                 });
@@ -217,22 +247,106 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
 
   Widget _buildMonthlyOptions() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        RadioListTile<MonthlyType>(
-          title: Text('On day ${_data.monthDay} of the month'),
-          value: MonthlyType.byDay,
-          groupValue: _data.monthlyType,
-          onChanged: (value) => setState(() {
-            _data.monthlyType = value!;
-          }),
+        // Period selector
+        Row(
+          children: [
+            const Text('Every'),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 60,
+              child: TextFormField(
+                initialValue: _data.monthlyRecurrence.monthPeriodicity.toString(),
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                ),
+                onChanged: (value) {
+                  final period = int.tryParse(value) ?? 1;
+                  if (period >= 1) {
+                    _data.monthlyRecurrence.monthPeriodicity = period;
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(_data.monthlyRecurrence.monthPeriodicity == 1 ? 'month' : 'months'),
+          ],
         ),
-        RadioListTile<MonthlyType>(
-          title: Text('On the ${_getOrdinal(_data.weekdayOccurrence)} ${_weekdayNames[_data.weekday - 1]} of the month'),
-          value: MonthlyType.byWeekday,
-          groupValue: _data.monthlyType,
-          onChanged: (value) => setState(() {
-            _data.monthlyType = value!;
-          }),
+        const SizedBox(height: 16),
+        Column(
+          children: [
+            // Mode 1: Day of month
+            RadioListTile<bool>(
+              title: Row(
+                children: [
+                  const Text('On day'),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 60,
+                    child: TextFormField(
+                      initialValue: _data.monthlyRecurrence.mode1DayOfMonth.toString(),
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      enabled: _data.monthlyRecurrence.useMode1,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      ),
+                      onChanged: (value) {
+                        final day = int.tryParse(value) ?? 1;
+                        if (day >= 1 && day <= 31) {
+                          _data.monthlyRecurrence.mode1DayOfMonth = day;
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('of the month'),
+                ],
+              ),
+              value: true,
+              groupValue: _data.monthlyRecurrence.useMode1,
+              onChanged: (value) => setState(() => _data.monthlyRecurrence.useMode1 = true),
+            ),
+            // Mode 2: Week + weekday
+            RadioListTile<bool>(
+              title: Row(
+                children: [
+                  const Text('On the'),
+                  const SizedBox(width: 8),
+                  DropdownButton<int>(
+                    value: _data.monthlyRecurrence.mode2WeekOfMonth,
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text('1st')),
+                      DropdownMenuItem(value: 2, child: Text('2nd')),
+                      DropdownMenuItem(value: 3, child: Text('3rd')),
+                      DropdownMenuItem(value: 4, child: Text('4th')),
+                    ],
+                    onChanged: _data.monthlyRecurrence.useMode1 ? null : (value) => setState(() => _data.monthlyRecurrence.mode2WeekOfMonth = value ?? 1),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownButton<int>(
+                    value: _data.monthlyRecurrence.mode2Weekday,
+                    items: const [
+                      DropdownMenuItem(value: 0, child: Text('Monday')),
+                      DropdownMenuItem(value: 1, child: Text('Tuesday')),
+                      DropdownMenuItem(value: 2, child: Text('Wednesday')),
+                      DropdownMenuItem(value: 3, child: Text('Thursday')),
+                      DropdownMenuItem(value: 4, child: Text('Friday')),
+                    ],
+                    onChanged: _data.monthlyRecurrence.useMode1 ? null : (value) => setState(() => _data.monthlyRecurrence.mode2Weekday = value ?? 0),
+                  ),
+                ],
+              ),
+              value: false,
+              groupValue: _data.monthlyRecurrence.useMode1,
+              onChanged: (value) => setState(() => _data.monthlyRecurrence.useMode1 = false),
+            ),
+          ],
         ),
       ],
     );
@@ -259,7 +373,6 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
           children: [
             Text(
               'Time',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             Tooltip(
               message: "The default start and end time for this group's events",
@@ -355,6 +468,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
       children: [
         DatePicker(
           label: 'Start Date',
+          tooltipText: "The default date this group's events start recurring on",
           selectedDate: _data.startDate,
           firstDate: DateTime.now(),
           accentColor: Colors.blue,
@@ -371,6 +485,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         const SizedBox(height: 16),
         DatePicker(
           label: 'End Date',
+          tooltipText: "The default date this group's events stop recurring",
           selectedDate: _data.endDate,
           firstDate: _data.startDate,
           isNullable: true,
@@ -407,7 +522,9 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   String _generatePreviewText() {
     final dates = <String>[];
     var current = widget.eventDate;
-
+    
+    // TODO: implement rrule then use that to generate these
+    /*
     while (dates.length < 4) {
       if (_data.endDate != null && current.isAfter(_data.endDate!)) {
         break;
@@ -428,6 +545,8 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
     }
 
     return dates.join(', ');
+    */
+    return ('FIX THIS');
   }
 
   String _getOrdinal(int number) {

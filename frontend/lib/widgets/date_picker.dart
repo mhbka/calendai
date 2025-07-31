@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// A opinionated nullable date picker.
+/// An opinionated nullable date picker.
 class DatePicker extends StatelessWidget {
   final String label;
+  final String? tooltipText;
   final DateTime? selectedDate;
   final DateTime? firstDate;
   final DateTime? lastDate;
@@ -12,20 +13,20 @@ class DatePicker extends StatelessWidget {
   final Color? accentColor;
 
   const DatePicker({
-    Key? key,
+    super.key,
     required this.label,
     required this.selectedDate,
     required this.onDateChanged,
+    this.tooltipText,
     this.firstDate,
     this.lastDate,
     this.isNullable = false,
     this.nullText,
     this.accentColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = accentColor ?? Colors.blue;
     final isSelected = selectedDate != null;
 
     return Container(
@@ -37,13 +38,14 @@ class DatePicker extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-            ),
+          Row(
+            spacing: 8,
+            children: [
+              Text(label, style: TextStyle(color: Colors.black)),
+              tooltipText != null ?
+                Tooltip(message: tooltipText, child: Icon(Icons.help_outline, size: 16, color: Colors.grey)) : 
+                SizedBox.shrink()
+            ],
           ),
           const SizedBox(height: 8),
           InkWell(
@@ -67,9 +69,7 @@ class DatePicker extends StatelessWidget {
                   Text(
                     _getDisplayText(),
                     style: TextStyle(
-                      fontSize: 16,
                       color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const Spacer(),
