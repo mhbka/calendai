@@ -24,6 +24,7 @@ dependencies:
   record: 6.0.0
   json_annotation: ^4.9.0
   flutter_colorpicker: ^1.1.0
+  rrule: ^0.2.17
 
 dev_dependencies:
   flutter_test:

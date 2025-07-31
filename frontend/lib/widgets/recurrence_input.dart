@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:namer_app/widgets/date_picker.dart';
+import 'package:rrule/rrule.dart';
 
-enum RecurrenceType { daily, weekly, monthly, yearly }
 enum MonthlyType { byDay, byWeekday }
 
 /// Describes a daily recurrence.
@@ -41,8 +41,14 @@ class MonthlyRecurrence {
 
 /// Describes a yearly recurrence.
 class YearlyRecurrence {
-  /// Day of the year the event should occur on (note: the year is ignored here).
-  DateTime dayOfYear = DateTime.now();
+  /// Day of the year the event should occur on 
+  /// (NOTE: the year is ignored here).
+  DateTime _dayOfYear = DateTime.now();
+
+  // `rrule` expects UTC while we represent DateTimes in app as local (this is why Rust is fucking better btw),
+  // so we must be careful with any DateTimes members.
+  DateTime get dayOfYear => _dayOfYear.toLocal();
+  set dayOfYear(DateTime date) => _dayOfYear = date.toUtc();
 
   YearlyRecurrence();
 }
@@ -50,7 +56,7 @@ class YearlyRecurrence {
 /// Represents a recurrence, or how often and when something should occur.
 class RecurrenceData {
   // The chosen type of recurrence
-  RecurrenceType type;
+  Frequency type;
 
   // Input data for each type
   DailyRecurrence dailyRecurrence = DailyRecurrence();
@@ -61,16 +67,112 @@ class RecurrenceData {
   // Start/end times and dates
   TimeOfDay startTime;
   TimeOfDay endTime;
-  DateTime startDate;
-  DateTime? endDate;
+  DateTime _startDate;
+  DateTime? _endDate;
+
+  // `rrule` expects UTC while we represent DateTimes in app as local (this is why Rust is fucking better btw),
+  // so we must be careful with any DateTimes members.
+  DateTime get startDate => _startDate.toLocal();
+  set startDate(DateTime date) => _startDate = date.toUtc();
+  DateTime? get endDate => _endDate?.toLocal();
+  set endDate(DateTime? date) => _endDate = date?.toUtc();
 
   RecurrenceData({
-    this.type = RecurrenceType.daily,
+    this.type = Frequency.daily,
     required this.startTime,
     required this.endTime,
-    required this.startDate,
-    this.endDate,
-  });
+    required DateTime startDate,
+    DateTime? endDate,
+  }) : _startDate = startDate.toUtc(),
+       _endDate = endDate?.toUtc();
+
+  /// Gets the next `n` occurrences.
+  List<DateTime> getNextOccurrences(int num) {
+    var rrule = getRRule();
+    return rrule.getInstances(start: _startDate).take(num).toList();
+  }
+
+  /// Converts this `RecurrenceData` into a `RecurrenceRule`.
+  RecurrenceRule getRRule() {
+    RecurrenceRule rrule;
+    switch (type) {
+      case Frequency.daily:
+        rrule = RecurrenceRule(
+          frequency: Frequency.daily,
+          interval: dailyRecurrence.dayPeriodicity,
+          until: _endDate != null ? DateTime(
+            _endDate!.year,
+            _endDate!.month,
+            _endDate!.day,
+            23, 59, 59, // End of day
+          ).toUtc() : null,
+        );
+      case Frequency.weekly:
+        // Convert weekdays from 0-6 to ByWeekDay format
+        final byWeekDays = weeklyRecurrence.weekdays
+            .map((day) => ByWeekDayEntry(day == 0 ? DateTime.sunday : day))
+            .toList();
+        rrule = RecurrenceRule(
+          frequency: Frequency.weekly,
+          interval: weeklyRecurrence.weekPeriodicity,
+          byWeekDays: byWeekDays,
+          until: _endDate != null ? DateTime(
+            _endDate!.year,
+            _endDate!.month,
+            _endDate!.day,
+            23, 59, 59,
+          ).toUtc() : null,
+        );
+      case Frequency.monthly:
+        if (monthlyRecurrence.useMode1) {
+          // Mode 1: By day of month (1-31)
+          rrule = RecurrenceRule(
+            frequency: Frequency.monthly,
+            interval: monthlyRecurrence.monthPeriodicity,
+            byMonthDays: [monthlyRecurrence.mode1DayOfMonth],
+            until: _endDate != null ? DateTime(
+              _endDate!.year,
+              _endDate!.month,
+              _endDate!.day,
+              23, 59, 59,
+            ).toUtc() : null,
+          );
+        } else {
+          // Mode 2: By week of month + weekday
+          final weekday = monthlyRecurrence.mode2Weekday == 0 
+              ? DateTime.sunday 
+              : monthlyRecurrence.mode2Weekday;
+          rrule = RecurrenceRule(
+            frequency: Frequency.monthly,
+            interval: monthlyRecurrence.monthPeriodicity,
+            byWeekDays: [ByWeekDayEntry(weekday, monthlyRecurrence.mode2WeekOfMonth)],
+            until: _endDate != null ? DateTime(
+              _endDate!.year,
+              _endDate!.month,
+              _endDate!.day,
+              23, 59, 59,
+            ).toUtc() : null,
+          );
+        }
+      case Frequency.yearly:
+        final yearlyDate = yearlyRecurrence.dayOfYear;
+        rrule = RecurrenceRule(
+          frequency: Frequency.yearly,
+          interval: 1, // Yearly recurrence is typically every year
+          byMonths: [yearlyDate.month],
+          byMonthDays: [yearlyDate.day],
+          until: _endDate != null ? DateTime(
+            _endDate!.year,
+            _endDate!.month,
+            _endDate!.day,
+            23, 59, 59,
+          ).toUtc() : null,
+        );
+      default:
+        throw ArgumentError('Unsupported frequency type: $type');
+    }
+    return rrule;
+  }
 }
 
 /// A widget for describing something's recurrence.
@@ -107,7 +209,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContetext) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -125,17 +227,17 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
 
   Widget _buildFrequencySelector() {
-    return DropdownButtonFormField<RecurrenceType>(
+    return DropdownButtonFormField<Frequency>(
       value: _data.type,
       decoration: const InputDecoration(
         labelText: 'Repeat',
         border: OutlineInputBorder(),
       ),
       items: const [
-        DropdownMenuItem(value: RecurrenceType.daily, child: Text('Daily')),
-        DropdownMenuItem(value: RecurrenceType.weekly, child: Text('Weekly')),
-        DropdownMenuItem(value: RecurrenceType.monthly, child: Text('Monthly')),
-        DropdownMenuItem(value: RecurrenceType.yearly, child: Text('Yearly')),
+        DropdownMenuItem(value: Frequency.daily, child: Text('Daily')),
+        DropdownMenuItem(value: Frequency.weekly, child: Text('Weekly')),
+        DropdownMenuItem(value: Frequency.monthly, child: Text('Monthly')),
+        DropdownMenuItem(value: Frequency.yearly, child: Text('Yearly')),
       ],
       onChanged: (value) {
         if (value != null) {
@@ -148,14 +250,17 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   Widget _buildFrequencyOptions() {
     Widget chosenOption;
     switch (_data.type) {
-      case RecurrenceType.daily:
+      case Frequency.daily:
         chosenOption = _buildDailyOptions();
-      case RecurrenceType.weekly:
+      case Frequency.weekly:
         chosenOption = _buildWeeklyOptions();
-      case RecurrenceType.monthly:
+      case Frequency.monthly:
         chosenOption = _buildMonthlyOptions();
-      case RecurrenceType.yearly:
+      case Frequency.yearly:
         chosenOption = _buildYearlyOptions();
+      default:
+        // not supporting other Frequencies for now.
+        chosenOption = _buildDailyOptions();
       }
     return Row(
       spacing: 8,
@@ -520,8 +625,8 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
   
   String _generatePreviewText() {
-    final dates = <String>[];
-    var current = widget.eventDate;
+    var dates = _data.getNextOccurrences(4);
+    return dates.join(', ');
     
     // TODO: implement rrule then use that to generate these
     /*
