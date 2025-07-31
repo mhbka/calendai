@@ -208,7 +208,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     );
   }
 
-  Widget _buildRecurringEventGroupInput() {
+  Widget _buildRecurrenceInput() {
   return SizedBox(
     width: double.infinity,
     child: RecurrenceInput(eventDate: DateTime.now())
@@ -217,6 +217,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
 
   Widget _buildColorPicker() {
     return Row(
+      spacing: 8,
       children: [
         const Text('Color: '),
         GestureDetector(
@@ -231,7 +232,6 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
             ),
           ),
         ),
-        const SizedBox(width: 8),
         Tooltip(
           message: "To visually identify this group's events in the calendar",
           child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
@@ -242,6 +242,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
 
   Widget _buildActiveSwitch() {
     return Row(
+      spacing: 8,
       children: [
         const Text('Active: '),
         Switch(
@@ -252,7 +253,6 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
             });
           },
         ),
-        const SizedBox(width: 8),
         Tooltip(
           message: 'When inactive, events in this group will be disabled by default',
           child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
@@ -293,7 +293,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
               const SizedBox(height: 16),
               _buildActiveSwitch(),
               const SizedBox(height: 16),
-              _buildRecurringEventGroupInput()
+              _buildRecurrenceInput()
             ],
           ),
         ),

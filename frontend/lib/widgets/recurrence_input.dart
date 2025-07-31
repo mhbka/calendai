@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:namer_app/widgets/date_picker.dart';
 
 enum RecurrenceType { daily, weekly, monthly, yearly }
 enum MonthlyType { byDay, byWeekday }
@@ -14,7 +15,8 @@ class RecurrenceData {
   int monthDay;
   int weekdayOccurrence;
   int weekday;
-  TimeOfDay occurrenceTime;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
   DateTime startDate;
   DateTime? endDate;
 
@@ -26,7 +28,8 @@ class RecurrenceData {
     this.monthDay = 1,
     this.weekdayOccurrence = 1,
     this.weekday = 1,
-    required this.occurrenceTime,
+    required this.startTime,
+    required this.endTime,
     required this.startDate,
     this.endDate,
   }) : weekdays = weekdays ?? {};
@@ -67,7 +70,8 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
       monthDay: day,
       weekday: weekday,
       weekdayOccurrence: weekdayOccurrence,
-      occurrenceTime: TimeOfDay.now(),
+      startTime: TimeOfDay.now(),
+      endTime: TimeOfDay.now(),
       startDate: DateTime.now()
     );
   }
@@ -81,9 +85,9 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         const SizedBox(height: 16),
         _buildFrequencyOptions(),
         const SizedBox(height: 16),
-        _buildTimeOption(),
+        _buildTimeOptions(),
         const SizedBox(height: 16),
-        _buildEndDateOptions(),
+        _buildDateOptions(),
         const SizedBox(height: 16),
         _buildPreview(),
       ],
@@ -112,16 +116,27 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
 
   Widget _buildFrequencyOptions() {
+    Widget chosenOption;
     switch (_data.type) {
       case RecurrenceType.daily:
-        return _buildDailyOptions();
+        chosenOption = _buildDailyOptions();
       case RecurrenceType.weekly:
-        return _buildWeeklyOptions();
+        chosenOption = _buildWeeklyOptions();
       case RecurrenceType.monthly:
-        return _buildMonthlyOptions();
+        chosenOption = _buildMonthlyOptions();
       case RecurrenceType.yearly:
-        return _buildYearlyOptions();
+        chosenOption = _buildYearlyOptions();
       }
+    return Row(
+      spacing: 8,
+      children: [
+        chosenOption,
+        Tooltip(
+          message: "The default periodicity for the group's events",
+          child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
+        )
+      ],
+    );
   }
 
   Widget _buildDailyOptions() {
@@ -235,70 +250,140 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
     );
   }
 
-  Widget _buildTimeOption() {
-  return SizedBox(
-    height: 150, // Try 150–200 depending on your layout
-    child: CupertinoDatePicker(
-      mode: CupertinoDatePickerMode.time,
-      initialDateTime: DateTime.now(),
-      use24hFormat: false,
-      onDateTimeChanged: (DateTime newTime) {
-        setState(() {
-          _data.occurrenceTime = TimeOfDay.fromDateTime(newTime);
-        });
-      },
-    ),
-  );
-}
-
-  Widget _buildEndDateOptions() {
+  Widget _buildTimeOptions() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        RadioListTile<bool>(
-          title: const Text('Repeat forever'),
-          value: false,
-          groupValue: _data.endDate != null,
-          onChanged: (_) => setState(() {
-            _data.endDate = null;
-          }),
+        Row(
+          spacing: 8,
+          children: [
+            Text(
+              'Time',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            Tooltip(
+              message: "The default start and end time for this group's events",
+              child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
+            )
+          ],
         ),
-        RadioListTile<bool>(
-          title: Row(
-            children: [
-              const Text('End on '),
-              TextButton(
-                onPressed: (_data.endDate != null) ? _selectEndDate : null,
-                child: Text(
-                  _data.endDate != null
-                      ? '${_data.endDate!.day}/${_data.endDate!.month}/${_data.endDate!.year}'
-                      : 'Select date',
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () async {
+                  final TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: _data.startTime,
+                  );
+                  
+                  if (pickedTime != null) {
+                    setState(() {
+                      _data.startTime = pickedTime;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.access_time, size: 18, color: Colors.grey.shade600),
+                      SizedBox(width: 8),
+                      Text(
+                        _data.startTime?.format(context) ?? 'Start time',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
-          value: true,
-          groupValue: _data.endDate != null,
-          onChanged: (_) => setState(() {
-            if (_data.endDate == null) _selectEndDate();
-          }),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text('—', style: TextStyle(color: Colors.grey.shade600)),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () async {
+                  final TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: _data.endTime,
+                  );
+                  
+                  if (pickedTime != null) {
+                    setState(() {
+                      _data.endTime = pickedTime;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.access_time, size: 18, color: Colors.grey.shade600),
+                      SizedBox(width: 8),
+                      Text(
+                        _data.endTime.format(context),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
-  }
+  } 
 
-  Future<void> _selectEndDate() async {
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: _data.endDate ?? widget.eventDate.add(const Duration(days: 30)),
-      firstDate: widget.eventDate,
-      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+  Widget _buildDateOptions() {
+    return Column(
+      children: [
+        DatePicker(
+          label: 'Start Date',
+          selectedDate: _data.startDate,
+          firstDate: DateTime.now(),
+          accentColor: Colors.blue,
+          onDateChanged: (date) {
+            setState(() {
+              _data.startDate = date!; // Non-nullable, so safe to use !
+              // Reset end date if it's before the new start date
+              if (_data.endDate != null && _data.endDate!.isBefore(date)) {
+                _data.endDate = null;
+              }
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        DatePicker(
+          label: 'End Date',
+          selectedDate: _data.endDate,
+          firstDate: _data.startDate,
+          isNullable: true,
+          nullText: 'Repeat forever',
+          accentColor: Colors.green,
+          onDateChanged: (date) {
+            setState(() {
+              _data.endDate = date;
+            });
+          },
+        ),
+      ],
     );
-
-    if (selected != null) {
-      setState(() {
-        _data.endDate = selected;
-      });
-    }
   }
 
   Widget _buildPreview() {
