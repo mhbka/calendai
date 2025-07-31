@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum RecurrenceType { none, daily, weekly, monthly, yearly }
+enum RecurrenceType { daily, weekly, monthly, yearly }
 enum MonthlyType { byDay, byWeekday }
 
+/// Represents how often and when something should occur.
 class RecurrenceData {
   RecurrenceType type;
   int interval;
@@ -12,19 +13,19 @@ class RecurrenceData {
   int monthDay;
   int weekdayOccurrence;
   int weekday;
+  DateTime startDate;
   DateTime? endDate;
-  bool hasEndDate;
 
   RecurrenceData({
-    this.type = RecurrenceType.none,
+    this.type = RecurrenceType.daily,
     this.interval = 1,
     Set<int>? weekdays,
     this.monthlyType = MonthlyType.byDay,
     this.monthDay = 1,
     this.weekdayOccurrence = 1,
     this.weekday = 1,
+    required this.startDate,
     this.endDate,
-    this.hasEndDate = false,
   }) : weekdays = weekdays ?? {};
 }
 
@@ -62,6 +63,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
       monthDay: day,
       weekday: weekday,
       weekdayOccurrence: weekdayOccurrence,
+      startDate: DateTime.now()
     );
   }
 
@@ -75,10 +77,8 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         _buildFrequencyOptions(),
         const SizedBox(height: 16),
         _buildEndDateOptions(),
-        if (_data.type != RecurrenceType.none) ...[
-          const SizedBox(height: 16),
-          _buildPreview(),
-        ],
+        const SizedBox(height: 16),
+        _buildPreview(),
       ],
     );
   }
@@ -91,7 +91,6 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         border: OutlineInputBorder(),
       ),
       items: const [
-        DropdownMenuItem(value: RecurrenceType.none, child: Text('Does not repeat')),
         DropdownMenuItem(value: RecurrenceType.daily, child: Text('Daily')),
         DropdownMenuItem(value: RecurrenceType.weekly, child: Text('Weekly')),
         DropdownMenuItem(value: RecurrenceType.monthly, child: Text('Monthly')),
@@ -105,6 +104,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
     );
   }
 
+  /// Builds the options 
   Widget _buildFrequencyOptions() {
     switch (_data.type) {
       case RecurrenceType.daily:
@@ -115,10 +115,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         return _buildMonthlyOptions();
       case RecurrenceType.yearly:
         return _buildYearlyOptions();
-      case RecurrenceType.none:
-      default:
-        return const SizedBox.shrink();
-    }
+      }
   }
 
   Widget _buildDailyOptions() {
@@ -233,16 +230,13 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
 
   Widget _buildEndDateOptions() {
-    if (_data.type == RecurrenceType.none) return const SizedBox.shrink();
-
     return Column(
       children: [
         RadioListTile<bool>(
           title: const Text('Repeat forever'),
           value: false,
-          groupValue: _data.hasEndDate,
+          groupValue: _data.endDate != null,
           onChanged: (_) => setState(() {
-            _data.hasEndDate = false;
             _data.endDate = null;
           }),
         ),
@@ -251,7 +245,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
             children: [
               const Text('End on '),
               TextButton(
-                onPressed: _data.hasEndDate ? _selectEndDate : null,
+                onPressed: (_data.endDate != null) ? _selectEndDate : null,
                 child: Text(
                   _data.endDate != null
                       ? '${_data.endDate!.day}/${_data.endDate!.month}/${_data.endDate!.year}'
@@ -261,9 +255,8 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
             ],
           ),
           value: true,
-          groupValue: _data.hasEndDate,
+          groupValue: _data.endDate != null,
           onChanged: (_) => setState(() {
-            _data.hasEndDate = true;
             if (_data.endDate == null) _selectEndDate();
           }),
         ),
@@ -282,7 +275,6 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
     if (selected != null) {
       setState(() {
         _data.endDate = selected;
-        _data.hasEndDate = true;
       });
     }
   }
@@ -304,13 +296,13 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
       ),
     );
   }
-
+  
   String _generatePreviewText() {
     final dates = <String>[];
     var current = widget.eventDate;
 
     while (dates.length < 4) {
-      if (_data.hasEndDate && _data.endDate != null && current.isAfter(_data.endDate!)) {
+      if (_data.endDate != null && current.isAfter(_data.endDate!)) {
         break;
       }
 
@@ -325,8 +317,6 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
           current = DateTime(current.year, current.month + _data.interval, current.day);
         case RecurrenceType.yearly:
           current = DateTime(current.year + 1, current.month, current.day);
-        case RecurrenceType.none:
-          return dates.first;
       }
     }
 

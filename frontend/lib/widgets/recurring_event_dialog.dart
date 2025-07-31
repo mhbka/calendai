@@ -287,7 +287,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
           child: RecurrenceInput(eventDate: DateTime.now())
         ),
         Tooltip(
-          message: 'Describe how often/when this group should occur',
+          message: "Describe how often/when this group's events should occur by default",
           child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
         ),
       ],
@@ -312,7 +312,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
         ),
         const SizedBox(width: 8),
         Tooltip(
-          message: "Choose a color to visually identify this group's events in the calendar",
+          message: "To visually identify this group's events in the calendar",
           child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
         ),
       ],
@@ -407,22 +407,11 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
               const SizedBox(height: 16),
               _buildDescriptionField(),
               const SizedBox(height: 16),
-              _buildRecurringEventsField(),
-              const SizedBox(height: 16),
               _buildColorPicker(),
               const SizedBox(height: 16),
               _buildActiveSwitch(),
               const SizedBox(height: 16),
-              _buildDateField(
-                label: 'Start',
-                date: _startDate,
-                isStartDate: true,
-              ),
-              _buildDateField(
-                label: 'End',
-                date: _endDate,
-                isStartDate: false,
-              ),
+              _buildRecurringEventsField()
             ],
           ),
         ),
