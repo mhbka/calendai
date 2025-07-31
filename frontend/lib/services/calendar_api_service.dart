@@ -15,7 +15,7 @@ class CalendarApiService extends BaseApiService {
         Uri.parse('$baseUrl?start=${start.toUtc().toIso8601String()}&end=${end.toUtc().toIso8601String()}'),
         headers: BaseApiService.headers,
       ),
-      (response) {print(response.body); return BaseApiService.parseJsonList(response.body, CalendarEvent.fromJson);},
+      (response) => BaseApiService.parseJsonList(response.body, CalendarEvent.fromJson),
     );
   }
 

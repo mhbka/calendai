@@ -26,6 +26,11 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
+    _controller
+      .loadEvents()
+      .catchError((err) {
+
+      });
     _calendarDialogs = CalendarDialogs(controller: _controller);
     _controller.addListener(() {
       if (mounted) setState(() {});

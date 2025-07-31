@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/calendar_event.dart';
 
+/// Dialog for creating a new event/updating a selected event.
 class EventDialog extends StatefulWidget {
   final CalendarEvent? event;
   final DateTime? selectedDay;

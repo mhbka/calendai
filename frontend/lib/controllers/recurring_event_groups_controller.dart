@@ -21,13 +21,15 @@ class RecurringEventGroupsController extends ChangeNotifier {
   // members
   List<RecurringEventGroup> _groups = [];
   List<RecurringEvent> _currentGroupEvents = [];
+  bool _filterActiveGroups = false;
   bool _isLoading = false;
-
-  List<RecurringEventGroup> get groups => _groups;
+  
   List<RecurringEvent> get currentGroupEvents => _currentGroupEvents; 
+  bool get filterActiveGroups => _filterActiveGroups;
   bool get isLoading => _isLoading;
 
   // methods
+  
   /// Loads all recurring event groups.
   Future<void> loadGroups() async {
     _setLoading(true);
@@ -39,7 +41,31 @@ class RecurringEventGroupsController extends ChangeNotifier {
     _setLoading(true);
     _currentGroupEvents = await RecurringEventGroupsApiService.fetchEventsForGroup(groupId);
   }
+
+  /// Creates a new group/updates a group.
+  Future<void> saveGroup(RecurringEventGroup groupData, bool isNewGroup) async {
+    _setLoading(true);
+    if (isNewGroup) {
+      await RecurringEventGroupsApiService.createGroup(groupData);
+      await loadGroups();
+    }
+    else {
+      await RecurringEventGroupsApiService.updateGroup(groupData);
+      await loadGroups();
+    }
+  }
+
+  /// Returns recurring groups, filtering to only active groups if `filterActiveGroups` is true.
+  List<RecurringEventGroup> get groups {
+    return _groups.where((group) {
+      return !(group.recurringEvents == 0 && !(group.isActive ?? false));
+    }).toList();
+  }
+
+  /// Toggle whether to only display groups with active status.
+  void toggleFilterActiveGroups() => _filterActiveGroups = !_filterActiveGroups;
   
+  /// Set the loading value.
   void _setLoading(bool value) {
     _isLoading = value;
   }

@@ -21,31 +21,25 @@ class RecurringEventGroupsApiService extends BaseApiService {
     );
   }
 
-  /// Adds a new empty group.
-  static Future<void> addGroup(
-    String name,
-    String? description,
-    bool isActive,
-    Color color,
-    DateTime? startDate,
-    DateTime? endDate
-  ) async {
-    final newGroup = RecurringEventGroup(
-      name: name,
-      id: "",
-      description: description,
-      isActive: isActive,
-      color: color,
-      startDate: startDate,
-      endDate: endDate,
-      recurringEvents: 0
-    );
-    final jsonGroup = json.encode(newGroup);
-
+  /// Create a new (empty) group.
+  static Future<void> createGroup(RecurringEventGroup group) async {
     return BaseApiService.handleRequest(
       () => http.post(
         Uri.parse(baseUrl), 
-        body: jsonGroup, 
+        body: json.encode(group), 
+        headers: BaseApiService.headers
+      ),
+      (response) => {},
+      validStatusCodes: [200, 201],
+    );
+  }
+
+  /// Update a group.
+  static Future<void> updateGroup(RecurringEventGroup group) async {
+    return BaseApiService.handleRequest(
+      () => http.put(
+        Uri.parse(baseUrl), 
+        body: json.encode(group), 
         headers: BaseApiService.headers
       ),
       (response) => {},

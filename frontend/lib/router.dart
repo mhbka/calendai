@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:namer_app/pages/ai_event_page.dart';
-import 'package:namer_app/pages/recurring_events_page.dart';
+import 'package:namer_app/pages/recurring_event_groups_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:namer_app/pages/login_page.dart';
 import 'package:namer_app/pages/calendar_page.dart';

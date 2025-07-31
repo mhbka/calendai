@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 class CalendarController extends ChangeNotifier {
   // singleton stuff
+
   CalendarController._internal() {
     _selectedDay = DateTime.now();
     loadEvents();
@@ -20,6 +21,7 @@ class CalendarController extends ChangeNotifier {
   static CalendarController get instance => _instance;
 
   // members
+
   List<CalendarEvent> _events = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -31,13 +33,15 @@ class CalendarController extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // methods
-  ///
+
+  /// Gets all events for the selected day.
   List<CalendarEvent> getEventsForDay(DateTime day) {
     return _events.where((event) {
       return isSameDay(event.startTime, day);
     }).toList();
   }
 
+  /// Sets the selected day.
   void setSelectedDay(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       _selectedDay = selectedDay;
