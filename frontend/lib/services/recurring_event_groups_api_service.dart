@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/recurring_event.dart';

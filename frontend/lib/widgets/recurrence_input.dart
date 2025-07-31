@@ -1,10 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 enum RecurrenceType { daily, weekly, monthly, yearly }
 enum MonthlyType { byDay, byWeekday }
 
-/// Represents how often and when something should occur.
+/// Represents a recurrence, or how often and when something should occur.
 class RecurrenceData {
   RecurrenceType type;
   int interval;
@@ -13,6 +14,7 @@ class RecurrenceData {
   int monthDay;
   int weekdayOccurrence;
   int weekday;
+  TimeOfDay occurrenceTime;
   DateTime startDate;
   DateTime? endDate;
 
@@ -24,11 +26,13 @@ class RecurrenceData {
     this.monthDay = 1,
     this.weekdayOccurrence = 1,
     this.weekday = 1,
+    required this.occurrenceTime,
     required this.startDate,
     this.endDate,
   }) : weekdays = weekdays ?? {};
 }
 
+/// A widget for describing something's recurrence.
 class RecurrenceInput extends StatefulWidget {
   final DateTime eventDate;
   final RecurrenceData? initialData;
@@ -63,6 +67,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
       monthDay: day,
       weekday: weekday,
       weekdayOccurrence: weekdayOccurrence,
+      occurrenceTime: TimeOfDay.now(),
       startDate: DateTime.now()
     );
   }
@@ -75,6 +80,8 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
         _buildFrequencySelector(),
         const SizedBox(height: 16),
         _buildFrequencyOptions(),
+        const SizedBox(height: 16),
+        _buildTimeOption(),
         const SizedBox(height: 16),
         _buildEndDateOptions(),
         const SizedBox(height: 16),
@@ -104,7 +111,6 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
     );
   }
 
-  /// Builds the options 
   Widget _buildFrequencyOptions() {
     switch (_data.type) {
       case RecurrenceType.daily:
@@ -228,6 +234,22 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
       style: Theme.of(context).textTheme.bodyMedium,
     );
   }
+
+  Widget _buildTimeOption() {
+  return SizedBox(
+    height: 150, // Try 150–200 depending on your layout
+    child: CupertinoDatePicker(
+      mode: CupertinoDatePickerMode.time,
+      initialDateTime: DateTime.now(),
+      use24hFormat: false,
+      onDateTimeChanged: (DateTime newTime) {
+        setState(() {
+          _data.occurrenceTime = TimeOfDay.fromDateTime(newTime);
+        });
+      },
+    ),
+  );
+}
 
   Widget _buildEndDateOptions() {
     return Column(

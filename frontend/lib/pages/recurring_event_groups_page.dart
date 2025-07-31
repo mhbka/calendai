@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/constants.dart';
 import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/pages/base_page.dart';
-import 'package:namer_app/widgets/recurring_event_dialog.dart';
+import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
 import 'package:namer_app/widgets/recurring_events_group_card.dart';
 
 class RecurringEventGroupsPage extends StatefulWidget {
@@ -52,7 +53,28 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
         ),
       );
     }
-    
+  }
+
+  Widget _buildFloatingActions() {
+    if (_controller.groups.isEmpty) {
+      return SizedBox.shrink();
+    }
+    else {
+      return FloatingActionButton.extended(
+          onPressed: () async {
+          await showDialog(
+              context: context, 
+              builder: (context) => RecurringEventGroupDialog(
+                onSave: _saveGroup
+                )
+              );
+          },
+          heroTag: "recurring_event_group_create",
+          icon: Icon(Icons.add, color: Colors.white),
+          backgroundColor: CalendarConstants.primaryColor,
+          label: Text("Create a new group", style: CalendarConstants.whiteTextStyle),
+        );
+    } 
   }
 
   @override
@@ -60,19 +82,7 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
     return BasePage(
       title: "Recurring events",
       body: _buildMainArea(),
-      floatingActions: FloatingActionButton(
-        onPressed: () async {
-          await showDialog(
-            context: context, 
-            builder: (context) => RecurringEventGroupDialog(
-              onSave: _saveGroup
-              )
-            );
-        },
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
+      floatingActions: _buildFloatingActions(),
     );
   }
 }

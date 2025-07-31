@@ -124,37 +124,15 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: isStartDate 
-          ? (_startDate ?? DateTime.now())
-          : (_endDate ?? DateTime.now()),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    
-    if (picked != null) {
-      setState(() {
-        if (isStartDate) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
-
   void _showColorPicker() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Color'),
+        title: const Text("Select color"),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Color wheel picker
               ColorPicker(
                 pickerColor: _selectedColor,
                 onColorChanged: (color) {
@@ -164,66 +142,16 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
                 },
                 colorPickerWidth: 300,
                 pickerAreaHeightPercent: 0.8,
-                enableAlpha: false, // Disable alpha since Color doesn't support it in your model
+                enableAlpha: false, 
                 displayThumbColor: true,
-                paletteType: PaletteType.hsvWithHue,
-                labelTypes: const [ColorLabelType.rgb, ColorLabelType.hsv],
+                paletteType: PaletteType.hueWheel,
+                labelTypes: const [],
                 portraitOnly: true,
-              ),
-              const SizedBox(height: 16),
-              // Quick color presets
-              const Text('Quick Colors:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  Colors.red,
-                  Colors.pink,
-                  Colors.purple,
-                  Colors.deepPurple,
-                  Colors.indigo,
-                  Colors.blue,
-                  Colors.lightBlue,
-                  Colors.cyan,
-                  Colors.teal,
-                  Colors.green,
-                  Colors.lightGreen,
-                  Colors.lime,
-                  Colors.yellow,
-                  Colors.amber,
-                  Colors.orange,
-                  Colors.deepOrange,
-                  Colors.brown,
-                  Colors.grey,
-                  Colors.blueGrey,
-                ].map((color) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = color;
-                    });
-                  },
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: _selectedColor == color
-                          ? Border.all(color: Colors.black, width: 2)
-                          : Border.all(color: Colors.grey.shade300),
-                    ),
-                  ),
-                )).toList(),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Select'),
@@ -280,19 +208,12 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     );
   }
 
-  Widget _buildRecurringEventsField() {
-    return Row(
-      children: [
-        Expanded(
-          child: RecurrenceInput(eventDate: DateTime.now())
-        ),
-        Tooltip(
-          message: "Describe how often/when this group's events should occur by default",
-          child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
-        ),
-      ],
-    );
-  }
+  Widget _buildRecurringEventGroupInput() {
+  return SizedBox(
+    width: double.infinity,
+    child: RecurrenceInput(eventDate: DateTime.now())
+  );
+}
 
   Widget _buildColorPicker() {
     return Row(
@@ -340,45 +261,6 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     );
   }
 
-  Widget _buildDateField({
-    required String label,
-    required DateTime? date,
-    required bool isStartDate,
-  }) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            date != null
-                ? '$label: ${date.toLocal().toString().split(' ')[0]}'
-                : '$label Date: Not set',
-          ),
-        ),
-        TextButton(
-          onPressed: () => _selectDate(context, isStartDate),
-          child: Text(date != null ? 'Change' : 'Set'),
-        ),
-        if (date != null)
-          IconButton(
-            onPressed: () => setState(() {
-              if (isStartDate) {
-                _startDate = null;
-              } else {
-                _endDate = null;
-              }
-            }),
-            icon: const Icon(Icons.clear),
-          ),
-        Tooltip(
-          message: isStartDate
-              ? 'Optional start date for when this event group becomes active'
-              : 'Optional end date for when this event group expires',
-          child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-
   List<Widget> _buildDialogActions() {
     return [
       TextButton(
@@ -411,7 +293,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
               const SizedBox(height: 16),
               _buildActiveSwitch(),
               const SizedBox(height: 16),
-              _buildRecurringEventsField()
+              _buildRecurringEventGroupInput()
             ],
           ),
         ),
