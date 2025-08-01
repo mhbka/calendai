@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
+import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/recurrence_input.dart';
 import 'package:uuid/uuid.dart';
 
 /// Dialog for creating a new recurring event group/updating a selected group.
 class RecurringEventGroupDialog extends StatefulWidget {
   final RecurringEventGroup? currentGroup;
-  final Function(RecurringEventGroup, bool) onSave;
+  final Future<void> Function(RecurringEventGroup, bool) onSave;
 
   const RecurringEventGroupDialog({
     Key? key,
@@ -20,12 +21,9 @@ class RecurringEventGroupDialog extends StatefulWidget {
 }
 
 class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
-  // Controllers for form editors
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
-  late TextEditingController _recurringEventsController;
   
-  // Form state
   Color _selectedColor = Colors.blue;
   bool _isActive = true;
   DateTime? _startDate;
@@ -39,7 +37,6 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     
     _nameController = TextEditingController(text: widget.currentGroup?.name ?? '');
     _descriptionController = TextEditingController(text: widget.currentGroup?.description ?? '');
-    _recurringEventsController = TextEditingController(text: widget.currentGroup?.recurringEvents.toString() ?? '0');
     
     if (widget.currentGroup != null) {
       _selectedColor = widget.currentGroup!.color;
@@ -53,7 +50,6 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _recurringEventsController.dispose();
     super.dispose();
   }
 
@@ -63,19 +59,13 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    // Validate date range
     if (_startDate != null && _endDate != null && _startDate!.isAfter(_endDate!)) {
       _showErrorDialog('Start date must be before end date');
       return;
     }
-
-    final recurringEvents = num.tryParse(_recurringEventsController.text) ?? 0;
     
     RecurringEventGroup group;
-    
     if (_isEditing) {
-      // Update existing group
       group = RecurringEventGroup(
         id: widget.currentGroup!.id,
         name: _nameController.text.trim(),
@@ -86,12 +76,11 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
         isActive: _isActive,
         startDate: _startDate,
         endDate: _endDate,
-        recurringEvents: recurringEvents,
+        recurringEvents: widget.currentGroup!.recurringEvents,
       );
     } else {
-      // Create new group
       group = RecurringEventGroup(
-        id: const Uuid().v4(),
+        id: "-1",
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim().isEmpty 
             ? null 
@@ -100,12 +89,21 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
         isActive: _isActive,
         startDate: _startDate,
         endDate: _endDate,
-        recurringEvents: recurringEvents,
+        recurringEvents: 0,
       );
     }
-
-    widget.onSave(group, _isEditing);
-    Navigator.pop(context);
+    widget.onSave(group, !_isEditing)
+      .then((v) => {if (mounted) Navigator.pop(context)})
+      .catchError((err) async {
+        if (mounted)  {
+          await Alerts.showErrorDialog(
+            context, 
+            "Error", 
+            "Failed to save the group: $err. Please try again later."
+          );
+        }
+        return <dynamic>{};
+      });
   }
 
   void _showErrorDialog(String message) {

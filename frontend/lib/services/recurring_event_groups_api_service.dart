@@ -20,7 +20,7 @@ class RecurringEventGroupsApiService extends BaseApiService {
     );
   }
 
-  /// Create a new (empty) group.
+  /// Create new groups.
   static Future<void> createGroup(RecurringEventGroup group) async {
     return BaseApiService.handleRequest(
       () => http.post(

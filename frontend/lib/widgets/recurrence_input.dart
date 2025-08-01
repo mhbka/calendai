@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
 import 'package:namer_app/widgets/date_picker.dart';
 import 'package:rrule/rrule.dart';
 
@@ -94,84 +96,7 @@ class RecurrenceData {
 
   /// Converts this `RecurrenceData` into a `RecurrenceRule`.
   RecurrenceRule getRRule() {
-    RecurrenceRule rrule;
-    switch (type) {
-      case Frequency.daily:
-        rrule = RecurrenceRule(
-          frequency: Frequency.daily,
-          interval: dailyRecurrence.dayPeriodicity,
-          until: _endDate != null ? DateTime(
-            _endDate!.year,
-            _endDate!.month,
-            _endDate!.day,
-            23, 59, 59, // End of day
-          ).toUtc() : null,
-        );
-      case Frequency.weekly:
-        // Convert weekdays from 0-6 to ByWeekDay format
-        final byWeekDays = weeklyRecurrence.weekdays
-            .map((day) => ByWeekDayEntry(day == 0 ? DateTime.sunday : day))
-            .toList();
-        rrule = RecurrenceRule(
-          frequency: Frequency.weekly,
-          interval: weeklyRecurrence.weekPeriodicity,
-          byWeekDays: byWeekDays,
-          until: _endDate != null ? DateTime(
-            _endDate!.year,
-            _endDate!.month,
-            _endDate!.day,
-            23, 59, 59,
-          ).toUtc() : null,
-        );
-      case Frequency.monthly:
-        if (monthlyRecurrence.useMode1) {
-          // Mode 1: By day of month (1-31)
-          rrule = RecurrenceRule(
-            frequency: Frequency.monthly,
-            interval: monthlyRecurrence.monthPeriodicity,
-            byMonthDays: [monthlyRecurrence.mode1DayOfMonth],
-            until: _endDate != null ? DateTime(
-              _endDate!.year,
-              _endDate!.month,
-              _endDate!.day,
-              23, 59, 59,
-            ).toUtc() : null,
-          );
-        } else {
-          // Mode 2: By week of month + weekday
-          final weekday = monthlyRecurrence.mode2Weekday == 0 
-              ? DateTime.sunday 
-              : monthlyRecurrence.mode2Weekday;
-          rrule = RecurrenceRule(
-            frequency: Frequency.monthly,
-            interval: monthlyRecurrence.monthPeriodicity,
-            byWeekDays: [ByWeekDayEntry(weekday, monthlyRecurrence.mode2WeekOfMonth)],
-            until: _endDate != null ? DateTime(
-              _endDate!.year,
-              _endDate!.month,
-              _endDate!.day,
-              23, 59, 59,
-            ).toUtc() : null,
-          );
-        }
-      case Frequency.yearly:
-        final yearlyDate = yearlyRecurrence.dayOfYear;
-        rrule = RecurrenceRule(
-          frequency: Frequency.yearly,
-          interval: 1, // Yearly recurrence is typically every year
-          byMonths: [yearlyDate.month],
-          byMonthDays: [yearlyDate.day],
-          until: _endDate != null ? DateTime(
-            _endDate!.year,
-            _endDate!.month,
-            _endDate!.day,
-            23, 59, 59,
-          ).toUtc() : null,
-        );
-      default:
-        throw ArgumentError('Unsupported frequency type: $type');
-    }
-    return rrule;
+    return convertToRRule(this);
   }
 }
 
@@ -625,42 +550,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   }
   
   String _generatePreviewText() {
-    var dates = _data.getNextOccurrences(4);
-    return dates.join(', ');
-    
-    // TODO: implement rrule then use that to generate these
-    /*
-    while (dates.length < 4) {
-      if (_data.endDate != null && current.isAfter(_data.endDate!)) {
-        break;
-      }
-
-      dates.add('${current.day}/${current.month}/${current.year}');
-
-      switch (_data.type) {
-        case RecurrenceType.daily:
-          current = current.add(Duration(days: _data.interval));
-        case RecurrenceType.weekly:
-          current = current.add(Duration(days: 7 * _data.interval));
-        case RecurrenceType.monthly:
-          current = DateTime(current.year, current.month + _data.interval, current.day);
-        case RecurrenceType.yearly:
-          current = DateTime(current.year + 1, current.month, current.day);
-      }
-    }
-
-    return dates.join(', ');
-    */
-    return ('FIX THIS');
-  }
-
-  String _getOrdinal(int number) {
-    if (number >= 11 && number <= 13) return '${number}th';
-    switch (number % 10) {
-      case 1: return '${number}st';
-      case 2: return '${number}nd';
-      case 3: return '${number}rd';
-      default: return '${number}th';
-    }
+    var dates = _data.getNextOccurrences(5);
+    return dates.map((date) => DateFormat('dd/MM/yyyy').format(date)).toList().join(', ');
   }
 }

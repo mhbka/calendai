@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/pages/ai_event_page/ai_event_body.dart';
 import 'package:namer_app/pages/base_page.dart';
-import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
-import 'package:namer_app/widgets/processing_indicator.dart';
-import 'package:namer_app/widgets/event_input.dart';
-import 'package:namer_app/widgets/example_tip.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
 

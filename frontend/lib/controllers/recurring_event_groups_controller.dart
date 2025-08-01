@@ -34,31 +34,46 @@ class RecurringEventGroupsController extends ChangeNotifier {
   Future<void> loadGroups() async {
     _setLoading(true);
     _groups =  await RecurringEventGroupsApiService.fetchAllGroups();
+    notifyListeners();
+    _setLoading(false);
   }
 
   /// Loads the chosen group's events.
   Future<void> loadEventsForGroup(String groupId) async {
     _setLoading(true);
     _currentGroupEvents = await RecurringEventGroupsApiService.fetchEventsForGroup(groupId);
+    _setLoading(false);
   }
 
   /// Creates a new group/updates a group.
   Future<void> saveGroup(RecurringEventGroup groupData, bool isNewGroup) async {
     _setLoading(true);
-    if (isNewGroup) {
-      await RecurringEventGroupsApiService.createGroup(groupData);
-      await loadGroups();
+    try {
+      if (isNewGroup) {
+        await RecurringEventGroupsApiService.createGroup(groupData);
+      }
+      else {
+        await RecurringEventGroupsApiService.updateGroup(groupData);
+      }
     }
-    else {
-      await RecurringEventGroupsApiService.updateGroup(groupData);
+    catch (e) {
+      rethrow;
+    }
+    finally {
       await loadGroups();
+      _setLoading(false);
     }
   }
 
   /// Returns recurring groups, filtering to only active groups if `filterActiveGroups` is true.
   List<RecurringEventGroup> get groups {
+    print(_groups.length);
     var groups = _groups.where((group) {
-      return !(group.recurringEvents == 0 && !(group.isActive ?? false));
+      if (filterActiveGroups) {
+        return group.isActive ?? true;
+      } else {
+        return true;
+      }
     }).toList();
      
     // Deal with the "Ungrouped" group case, which aggregates all events without groups 

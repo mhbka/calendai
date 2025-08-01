@@ -9,6 +9,7 @@ import 'package:namer_app/pages/calendar_page/calendar_action_widgets.dart';
 import 'package:namer_app/pages/calendar_page/calendar_events.dart';
 import 'package:namer_app/pages/calendar_page/calendar_dialogs.dart';
 import 'package:namer_app/pages/calendar_page/calendar.dart';
+import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -29,7 +30,7 @@ class _CalendarPageState extends State<CalendarPage> {
     _controller
       .loadEvents()
       .catchError((err) {
-
+        if (mounted) Alerts.showErrorSnackBar(context, "Failed to load events: $err. Please try again later");
       });
     _calendarDialogs = CalendarDialogs(controller: _controller);
     _controller.addListener(() {
