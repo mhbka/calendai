@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
+import 'package:namer_app/utils/alerts.dart';
 
 class RecurringEventsGroupCard extends StatelessWidget {
   final RecurringEventGroup group;
+  final RecurringEventGroupsController _controller = RecurringEventGroupsController.instance;
 
-  const RecurringEventsGroupCard({Key? key, required this.group}) : super(key: key);
+  RecurringEventsGroupCard({Key? key, required this.group}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +15,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
       elevation: 2,
       margin: EdgeInsets.zero, 
       child: SizedBox(
-        height: 130, // Fixed height for equal heights
+        height: 140, // Fixed height for equal heights
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -30,8 +33,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (group.description != null) _buildDescription(context),
-                          if (group.startDate != null || group.endDate != null) 
-                            _buildDateRange(context),
+                          _buildDateRange(context),
                           _buildRecurringEventsCount(context),
                         ],
                       ),
@@ -73,27 +75,90 @@ class RecurringEventsGroupCard extends StatelessWidget {
           ),
         ),
         _buildStatusBadge(),
+        SizedBox(width: 8),
+        _buildDeleteButton(context)
       ],
     );
   }
 
   Widget _buildStatusBadge() {
+    Color color; 
+    String text;
+    if (group.isActive == null) {
+      color = Colors.grey;
+      text = 'Not set';
+    }
+    else if (group.isActive!) {
+      color = Colors.green;
+      text = 'Active';
+    }
+    else {
+      color = Colors.red;
+      text = 'Inactive';
+    }
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: (group.isActive ?? false) ? Colors.green : Colors.red,
+        color: color,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        (group.isActive ?? false) ? 'Active' : 'Inactive',
+        text,
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: group.name == "Ungrouped" ? null : () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Delete group"),
+            content: Text("Are you sure you want to delete this group and all its events? This action is irreversible."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Back"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _controller.deleteGroup(group.id)
+                    .then((value) => {if (context.mounted) Navigator.pop(context)})
+                    .catchError((err) {
+                      if (context.mounted) {
+                        Alerts.showErrorDialog(
+                          context, 
+                          "Error", 
+                          "Failed to delete event: $err. Please try again later."
+                        );
+                      }
+                      return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
+                    });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text("Delete"),
+              ),
+            ],
+          ),
+        );
+      },
+      icon: Icon(Icons.delete),
+      label: Text("Delete"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -125,11 +190,10 @@ class RecurringEventsGroupCard extends StatelessWidget {
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              _formatDateRange(group.startDate, group.endDate),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              (group.startDate != null || group.endDate != null) ? 
+                _formatDateRange(group.startDate, group.endDate) :
+                "No specified start/end date",
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               overflow: TextOverflow.ellipsis,
             ),
           ),

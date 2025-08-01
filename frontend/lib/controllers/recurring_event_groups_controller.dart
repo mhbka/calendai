@@ -29,6 +29,41 @@ class RecurringEventGroupsController extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // methods
+
+  /// Returns recurring groups, filtering to only active groups if `filterActiveGroups` is true.
+  List<RecurringEventGroup> get groups {
+    print(_groups.length);
+    var groups = _groups.where((group) {
+      if (filterActiveGroups) {
+        return group.isActive ?? true;
+      } else {
+        return true;
+      }
+    }).toList();
+     
+    // Deal with the "Ungrouped" group case, which aggregates all events without groups 
+    if (groups.isEmpty) {
+      groups.add(RecurringEventGroup(
+        name: "Ungrouped", 
+        id: "-1", 
+        description: "Contains all events without a group.",
+        color: Colors.white, 
+        isActive: true, 
+        recurringEvents: 0
+        )
+      );
+    }
+    else {
+      groups.sort((a, b) {
+        if (a.name == "Ungrouped") {
+          return 100000;
+        } else {
+          return a.name.compareTo(b.name);
+        } 
+      });
+    }
+    return groups;
+  }
   
   /// Loads all recurring event groups.
   Future<void> loadGroups() async {
@@ -65,39 +100,19 @@ class RecurringEventGroupsController extends ChangeNotifier {
     }
   }
 
-  /// Returns recurring groups, filtering to only active groups if `filterActiveGroups` is true.
-  List<RecurringEventGroup> get groups {
-    print(_groups.length);
-    var groups = _groups.where((group) {
-      if (filterActiveGroups) {
-        return group.isActive ?? true;
-      } else {
-        return true;
-      }
-    }).toList();
-     
-    // Deal with the "Ungrouped" group case, which aggregates all events without groups 
-    if (groups.isEmpty) {
-      groups.add(RecurringEventGroup(
-        name: "Ungrouped", 
-        id: "-1", 
-        description: "Contains all events without a group.",
-        color: Colors.white, 
-        isActive: true, 
-        recurringEvents: 0
-        )
-      );
+  /// Delete a group.
+  Future<void> deleteGroup(String groupId) async {
+    _setLoading(true);
+    try {
+      await RecurringEventGroupsApiService.deleteGroup(groupId);
     }
-    else {
-      groups.sort((a, b) {
-        if (a.name == "Ungrouped") {
-          return 100000;
-        } else {
-          return a.name.compareTo(b.name);
-        } 
-      });
+    catch (e) {
+      rethrow;
     }
-    return groups;
+    finally {
+      await loadGroups();
+      _setLoading(false);
+    }
   }
 
   /// Toggle whether to only display groups with active status.
