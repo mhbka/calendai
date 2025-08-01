@@ -17,9 +17,9 @@ CREATE TABLE calendar_events (
 CREATE TABLE recurring_event_groups (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id),
-    group_name VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
     description VARCHAR,
-    color INT NOT NULL,
+    color BIGINT NOT NULL,
     group_is_active BOOLEAN,
     group_recurrence_start TIMESTAMPTZ,
     group_recurrence_end TIMESTAMPTZ,
@@ -35,7 +35,8 @@ CREATE TABLE recurring_event_groups (
 
 CREATE TABLE recurring_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    group_id UUID NOT NULL REFERENCES recurring_event_groups(id),
+    group_id UUID REFERENCES recurring_event_groups(id),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
     is_active BOOLEAN NOT NULL DEFAULT true,
     title VARCHAR NOT NULL,
     description VARCHAR,

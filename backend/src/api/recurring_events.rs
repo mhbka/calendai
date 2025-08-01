@@ -30,6 +30,7 @@ async fn create_events(
     Json(events): Json<Vec<NewRecurringEvent>>
 ) -> ApiResult<()> {
     let mut group_ids = Vec::with_capacity(events.len());
+    let mut user_ids = vec![user.id; events.len()];
     let mut titles = Vec::with_capacity(events.len());
     let mut descriptions = Vec::with_capacity(events.len());
     let mut locations = Vec::with_capacity(events.len());
@@ -53,7 +54,7 @@ async fn create_events(
         select id from recurring_event_groups 
         where id = any($1) and user_id = $2
     "#,
-    &group_ids[..],
+    &group_ids[..] as &[Option<Uuid>],
     user.id
     )
         .fetch_all(&app_state.db)
@@ -65,11 +66,12 @@ async fn create_events(
     sqlx::query!(
         r#"
             insert into recurring_events
-            (group_id, title, description, location, event_duration_seconds, recurrence_start, recurrence_end, rrule)
+            (group_id, user_id, title, description, location, event_duration_seconds, recurrence_start, recurrence_end, rrule)
             select * from unnest
-            ($1::uuid[], $2::varchar[], $3::varchar[], $4::varchar[], $5::int[], $6::timestamptz[], $7::timestamptz[], $8::varchar[])
+            ($1::uuid[], $2::uuid[], $3::varchar[], $4::varchar[], $5::varchar[], $6::int[], $7::timestamptz[], $8::timestamptz[], $9::varchar[])
         "#,
-        &group_ids[..],
+        &group_ids[..] as &[Option<Uuid>],
+        &user_ids[..],
         &titles[..],
         &descriptions[..] as &[Option<String>],
         &locations[..] as &[Option<String>],
@@ -95,6 +97,7 @@ async fn get_events(
             SELECT 
                 re.id, 
                 re.group_id, 
+                re.user_id,
                 re.is_active, 
                 re.title, 
                 re.description, 
@@ -221,14 +224,14 @@ async fn get_events(
             FROM recurring_event_groups
             WHERE id = ANY($1)
         "#,
-        &group_ids
+        &group_ids as &[Option<Uuid>]
     )
         .fetch_all(&app_state.db)
         .await?;
 
     // fill in group data for instances
     for (group_id, events) in &mut instances_with_group_ids {
-        if let Some(group) = groups.iter().find(|&g| g.id == *group_id) {
+        if let Some(group) = groups.iter().find(|&g| Some(g.id) == *group_id) {
             for event in events {
                 event.group = Some(group.clone());
             }

@@ -13,7 +13,8 @@ use crate::models::{recurring_event_group::RecurringEventGroup, rrule::Validated
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecurringEvent {
     pub id: Uuid,
-    pub group_id: Uuid,
+    pub group_id: Option<Uuid>,
+    pub user_id: Uuid,
     pub is_active: bool,
     pub title: String,
     pub description: Option<String>,
@@ -26,7 +27,7 @@ pub struct RecurringEvent {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewRecurringEvent {
-    pub group_id: Uuid,
+    pub group_id: Option<Uuid>,
     pub is_active: bool,
     pub title: String,
     pub description: Option<String>,
