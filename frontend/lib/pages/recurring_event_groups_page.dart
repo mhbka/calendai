@@ -28,11 +28,6 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
     });
   }
 
-  /// Update/create the group.
-  Future<void> _saveGroup(RecurringEventGroup groupData, bool isNewGroup) async {
-      await _controller.saveGroup(groupData, isNewGroup);
-  }
-
   Widget _buildMainArea() {
     return RefreshIndicator(
       onRefresh: () async {
@@ -60,11 +55,9 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
       return FloatingActionButton.extended(
           onPressed: () async {
           await showDialog(
-              context: context, 
-              builder: (dialogContext) => RecurringEventGroupDialog(
-                onSave: _saveGroup,
-                )
-              );
+            context: context, 
+            builder: (dialogContext) => RecurringEventGroupDialog()
+          );
           },
           heroTag: "recurring_event_group_create",
           icon: Icon(Icons.add, color: Colors.white),

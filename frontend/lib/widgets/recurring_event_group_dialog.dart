@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/recurrence_input.dart';
-import 'package:uuid/uuid.dart';
 
 /// Dialog for creating a new recurring event group/updating a selected group.
 class RecurringEventGroupDialog extends StatefulWidget {
   final RecurringEventGroup? currentGroup;
-  final Future<void> Function(RecurringEventGroup, bool) onSave;
 
   const RecurringEventGroupDialog({
     Key? key,
     this.currentGroup,
-    required this.onSave,
   }) : super(key: key);
 
   @override
@@ -21,6 +19,7 @@ class RecurringEventGroupDialog extends StatefulWidget {
 }
 
 class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
+  final RecurringEventGroupsController _controller = RecurringEventGroupsController.instance;
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   
@@ -92,7 +91,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
         recurringEvents: 0,
       );
     }
-    widget.onSave(group, !_isEditing)
+    _controller.saveGroup(group, !_isEditing)
       .then((v) => {if (mounted) Navigator.pop(context)})
       .catchError((err) async {
         if (mounted)  {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
 
 class RecurringEventsGroupCard extends StatelessWidget {
   final RecurringEventGroup group;
@@ -13,8 +14,17 @@ class RecurringEventsGroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      margin: EdgeInsets.zero, 
-      child: SizedBox(
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () {print("123123");},
+        borderRadius: BorderRadius.circular(4),
+        child: _buildCardBody(context)
+      )
+    );
+  }
+
+  Widget _buildCardBody(BuildContext context) {
+    return SizedBox(
         height: 140, // Fixed height for equal heights
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,8 +54,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildColorIndicator() {
@@ -75,6 +84,8 @@ class RecurringEventsGroupCard extends StatelessWidget {
           ),
         ),
         _buildStatusBadge(),
+        SizedBox(width: 8),
+        _buildEditButton(context),
         SizedBox(width: 8),
         _buildDeleteButton(context)
       ],
@@ -112,6 +123,23 @@ class RecurringEventsGroupCard extends StatelessWidget {
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
+      ),
+    );
+  }
+
+  Widget _buildEditButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: group.name == "Ungrouped" ? null : () async {
+        await showDialog(
+          context: context, 
+          builder: (dialogContext) => RecurringEventGroupDialog(currentGroup: group)
+        );
+      },
+      label: Text("Edit"),
+      icon: Icon(Icons.edit),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.purple,
+        foregroundColor: Colors.white,
       ),
     );
   }

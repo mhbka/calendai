@@ -27,11 +27,9 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    _controller
-      .loadEvents()
-      .catchError((err) {
-        if (mounted) Alerts.showErrorSnackBar(context, "Failed to load events: $err. Please try again later");
-      });
+    _controller.loadEvents().catchError((err) {
+      if (mounted) Alerts.showErrorSnackBar(context, "Failed to load events: $err. Please try again later");
+    });
     _calendarDialogs = CalendarDialogs(controller: _controller);
     _controller.addListener(() {
       if (mounted) setState(() {});
