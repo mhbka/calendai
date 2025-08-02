@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/constants.dart';
-import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
+import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/widgets/recurring_event_card.dart';
 import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
 import 'package:namer_app/widgets/recurring_events_group_card.dart';
 
-class RecurringEventGroupsPage extends StatefulWidget {
-  const RecurringEventGroupsPage({Key? key}) : super(key: key);
+class RecurringEventsPage extends StatefulWidget {
+  final String? groupId;
+  const RecurringEventsPage({super.key, this.groupId});
 
   @override
-  State<RecurringEventGroupsPage> createState() => _RecurringEventGroupsPageState();
+  State<RecurringEventsPage> createState() => _RecurringEventsPageState();
 }
 
-class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
-  final RecurringEventGroupsController _controller = RecurringEventGroupsController.instance;
+class _RecurringEventsPageState extends State<RecurringEventsPage> {
+  final RecurringEventsController _controller = RecurringEventsController.instance;
 
   @override
   void initState() {
     super.initState();
-    _controller.loadGroups().catchError((err) {
+    _controller.loadEvents().catchError((err) {
       if (mounted) Alerts.showErrorSnackBar(context, "Failed to load groups: $err. Please try again later.");
     });
     _controller.addListener(() {
@@ -30,16 +32,16 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
   Widget _buildMainArea() {
     return RefreshIndicator(
       onRefresh: () async {
-        await _controller.loadGroups();
+        await _controller.loadEvents();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: _controller.groups.length,
+        itemCount: _controller.events.length,
         itemBuilder: (context, index) {
-          final group = _controller.groups[index];
+          final event = _controller.events[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
-            child: RecurringEventsGroupCard(group: group),
+            child: RecurringEventCard(event: event),
           );
         },
       ),
@@ -47,7 +49,7 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
   }
 
   Widget _buildFloatingActions() {
-    if (_controller.groups.isEmpty) {
+    if (_controller.events.isEmpty) {
       return SizedBox.shrink();
     }
     else {
@@ -69,7 +71,7 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Recurring event groups",
+      title: "Recurring events",
       body: _buildMainArea(),
       floatingActions: _buildFloatingActions(),
     );

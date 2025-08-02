@@ -30,7 +30,7 @@ async fn create_events(
     Json(events): Json<Vec<NewRecurringEvent>>
 ) -> ApiResult<()> {
     let mut group_ids = Vec::with_capacity(events.len());
-    let mut user_ids = vec![user.id; events.len()];
+    let user_ids = vec![user.id; events.len()];
     let mut titles = Vec::with_capacity(events.len());
     let mut descriptions = Vec::with_capacity(events.len());
     let mut locations = Vec::with_capacity(events.len());

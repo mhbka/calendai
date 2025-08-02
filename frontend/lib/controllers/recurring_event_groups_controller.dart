@@ -73,13 +73,6 @@ class RecurringEventGroupsController extends ChangeNotifier {
     _setLoading(false);
   }
 
-  /// Loads the chosen group's events.
-  Future<void> loadEventsForGroup(String groupId) async {
-    _setLoading(true);
-    _currentGroupEvents = await RecurringEventGroupsApiService.fetchEventsForGroup(groupId);
-    _setLoading(false);
-  }
-
   /// Creates a new group/updates a group.
   Future<void> saveGroup(RecurringEventGroup groupData, bool isNewGroup) async {
     _setLoading(true);

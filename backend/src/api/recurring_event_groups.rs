@@ -30,7 +30,8 @@ pub(super) fn router() -> Router<AppState> {
         .route("/", post(add_group))
         .route("/", put(update_group))
         .route("/{group_id}", delete(delete_group))
-        .route("/{group_id}", get(fetch_events_for_group))
+        .route("/{group_id}", get(fetch_group))
+        .route("/{group_id}/events", get(fetch_events_for_group))
         .route("/{new_group_id}/move/{event_id}", put(move_event_between_groups))
 }
 
@@ -100,6 +101,49 @@ async fn fetch_all_groups(
     };
     response.push(RecurringEventGroupResponse { group: ungrouped_group, recurring_events: groupless_event_count as usize });
 
+    Ok(Json(response))
+}
+
+async fn fetch_group(
+    State(app_state): State<AppState>,
+    user: AuthUser,
+    Path(group_id): Path<Uuid>,
+) -> ApiResult<Json<RecurringEventGroupResponse>> {
+    let row = sqlx::query!(
+        r#"
+            SELECT 
+                g.id,
+                g.user_id,
+                g.name,
+                g.description,
+                g.color,
+                g.group_is_active,
+                g.group_recurrence_start,
+                g.group_recurrence_end,
+                COALESCE(COUNT(e.id), 0) as event_count
+            FROM recurring_event_groups g
+            LEFT JOIN recurring_events e ON g.id = e.group_id
+            WHERE g.user_id = $1 AND g.id = $2
+            GROUP BY g.id, g.user_id, g.name, g.description, g.color, g.group_is_active, g.group_recurrence_start, g.group_recurrence_end
+        "#,
+        user.id,
+        group_id
+    )
+        .fetch_one(&app_state.db)
+        .await?;
+    let response = RecurringEventGroupResponse {
+            group: RecurringEventGroup {
+                id: row.id,
+                user_id: row.user_id,
+                name: row.name,
+                description: row.description,
+                color: row.color,
+                group_is_active: row.group_is_active,
+                group_recurrence_start: row.group_recurrence_start,
+                group_recurrence_end: row.group_recurrence_end,
+            },
+            recurring_events: row.event_count.unwrap_or(0) as usize,
+        };
     Ok(Json(response))
 }
 

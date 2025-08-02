@@ -4,6 +4,7 @@ import 'package:namer_app/main.dart';
 import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/services/base_api_service.dart';
+import 'package:uuid/enums.dart';
 
 /// For interacting with the recurring event groups' API.
 class RecurringEventGroupsApiService extends BaseApiService {
@@ -17,6 +18,29 @@ class RecurringEventGroupsApiService extends BaseApiService {
         headers: BaseApiService.headers
       ),
       (response) => BaseApiService.parseJsonList(response.body, RecurringEventGroup.fromJson),
+    );
+  }
+
+  /// Fetch a group's data.
+  static Future<RecurringEventGroup> fetchGroup(String groupId) async {
+    return BaseApiService.handleRequest(
+      () => http.get(
+        Uri.parse("$baseUrl/$groupId"), 
+        headers: BaseApiService.headers
+      ),
+      (response) => jsonDecode(response.body),
+    );
+  }
+
+  /// Fetch all recurring events under a group.
+  /// If `groupId` is null, fetch all ungrouped events.
+  static Future<List<RecurringEvent>> fetchEventsUnderGroup(String? groupId) async {
+    return BaseApiService.handleRequest(
+      () => http.get(
+        Uri.parse("$baseUrl/${groupId ?? Namespace.nil.value}/events"), 
+        headers: BaseApiService.headers
+      ),
+      (response) => BaseApiService.parseJsonList(response.body, RecurringEvent.fromJson),
     );
   }
 
@@ -55,17 +79,6 @@ class RecurringEventGroupsApiService extends BaseApiService {
       ),
       (response) => {},
       validStatusCodes: [200, 204],
-    );
-  }
-
-  /// Fetch recurring events under a group.
-  static Future<List<RecurringEvent>> fetchEventsForGroup(String groupId) async {
-    return BaseApiService.handleRequest(
-      () => http.get(
-        Uri.parse("$baseUrl/$groupId"), 
-        headers: BaseApiService.headers
-      ),
-      (response) => BaseApiService.parseJsonList(response.body, RecurringEvent.fromJson),
     );
   }
 

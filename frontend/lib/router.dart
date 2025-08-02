@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:namer_app/pages/ai_event_page.dart';
 import 'package:namer_app/pages/recurring_event_groups_page.dart';
+import 'package:namer_app/pages/recurring_events_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:namer_app/pages/login_page.dart';
 import 'package:namer_app/pages/calendar_page.dart';
+import 'package:uuid/enums.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -46,9 +48,16 @@ class AppRouter {
         builder: (context, state) => AddAIEventPage()
       ),
       GoRoute(
-        path: '/recurring_events',
-        name: 'recurring_events',
+        path: '/recurring_event_groups',
+        name: 'recurring_event_groups',
         builder: (context, state) => RecurringEventGroupsPage()
+      ),
+      GoRoute( 
+        path: '/recurring_events/:groupId',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId'] ?? Namespace.nil.value;
+          return RecurringEventsPage(groupId: groupId);
+        }
       )
     ],
   );
