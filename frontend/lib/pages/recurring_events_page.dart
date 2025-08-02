@@ -5,7 +5,6 @@ import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/recurring_event_card.dart';
 import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
-import 'package:namer_app/widgets/recurring_events_group_card.dart';
 
 class RecurringEventsPage extends StatefulWidget {
   final String? groupId;
@@ -21,7 +20,8 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
   @override
   void initState() {
     super.initState();
-    _controller.loadEvents().catchError((err) {
+    _controller.resetGroup();
+    _controller.setGroupLoadEvents(widget.groupId).catchError((err) {
       if (mounted) Alerts.showErrorSnackBar(context, "Failed to load groups: $err. Please try again later.");
     });
     _controller.addListener(() {
@@ -71,7 +71,7 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Recurring events",
+      title: "Recurring events - ${_controller.currentGroup?.name ?? "Ungrouped"}",
       body: _buildMainArea(),
       floatingActions: _buildFloatingActions(),
     );

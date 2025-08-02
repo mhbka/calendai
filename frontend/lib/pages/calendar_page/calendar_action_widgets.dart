@@ -14,7 +14,7 @@ List<Widget> buildCalendarAppbarActions(
         onPressed: handleRefresh,
       ),
       TextButton(
-        onPressed: () => context.push('/recurring_events'),
+        onPressed: () => context.push('/recurring_event_groups'),
         style: CalendarTheme.primaryButtonStyle,
         child: Text(
           CalendarConstants.viewRecurringEventsLabel,

@@ -28,16 +28,19 @@ class RecurringEventGroupsApiService extends BaseApiService {
         Uri.parse("$baseUrl/$groupId"), 
         headers: BaseApiService.headers
       ),
-      (response) => jsonDecode(response.body),
+      (response) => RecurringEventGroup.fromJson(jsonDecode(response.body)),
     );
   }
 
   /// Fetch all recurring events under a group.
   /// If `groupId` is null, fetch all ungrouped events.
   static Future<List<RecurringEvent>> fetchEventsUnderGroup(String? groupId) async {
+    if (groupId == null || groupId == Namespace.nil.value) {
+      groupId = "ungrouped";
+    }
     return BaseApiService.handleRequest(
       () => http.get(
-        Uri.parse("$baseUrl/${groupId ?? Namespace.nil.value}/events"), 
+        Uri.parse("$baseUrl/$groupId/events"), 
         headers: BaseApiService.headers
       ),
       (response) => BaseApiService.parseJsonList(response.body, RecurringEvent.fromJson),

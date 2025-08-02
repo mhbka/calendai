@@ -3,6 +3,7 @@ import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/services/recurring_event_groups_api_service.dart';
 import 'package:namer_app/services/recurring_events_api_service.dart';
+import 'package:uuid/enums.dart';
 
 /// Controller for recurring events under a group.
 class RecurringEventsController extends ChangeNotifier {
@@ -43,10 +44,17 @@ class RecurringEventsController extends ChangeNotifier {
     }).toList();
   }
 
-  /// Sets the current group.
-  Future<void> setGroup(String? groupId) async {
+  /// Resets the current group
+  /// 
+  /// This is just to ensure the previous group's name isn't shown when a new group is loaded.
+  void resetGroup() {
+    _currentGroup = null;
+  }
+
+  /// Sets the current group and loads its events.
+  Future<void> setGroupLoadEvents(String? groupId) async {
     _currentGroupId = groupId;
-    if (groupId != null) {
+    if (groupId != null && groupId != Namespace.nil.value) {
       _currentGroup = await RecurringEventGroupsApiService.fetchGroup(groupId);
     } else {
       _currentGroup = null;

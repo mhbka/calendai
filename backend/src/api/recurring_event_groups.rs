@@ -32,6 +32,7 @@ pub(super) fn router() -> Router<AppState> {
         .route("/{group_id}", delete(delete_group))
         .route("/{group_id}", get(fetch_group))
         .route("/{group_id}/events", get(fetch_events_for_group))
+        .route("/ungrouped/events", get(fetch_ungrouped_events))
         .route("/{new_group_id}/move/{event_id}", put(move_event_between_groups))
 }
 
@@ -300,6 +301,36 @@ async fn fetch_events_for_group(
             WHERE group_id = $1
         "#,
         group_id
+    )
+        .fetch_all(&app_state.db)
+        .await?;
+
+    Ok(Json(events))
+}
+
+async fn fetch_ungrouped_events(
+    State(app_state): State<AppState>,
+    user: AuthUser,
+) -> ApiResult<Json<Vec<RecurringEvent>>> {
+    let events = sqlx::query_as!(
+        RecurringEvent,
+        r#"
+            SELECT 
+                id, 
+                group_id, 
+                user_id,
+                is_active, 
+                title, 
+                description, 
+                location, 
+                event_duration_seconds as "event_duration_seconds: _", 
+                recurrence_start, 
+                recurrence_end, 
+                rrule as "rrule: _"
+            FROM recurring_events
+            WHERE user_id = $1 AND group_id IS NULL
+        "#,
+        user.id
     )
         .fetch_all(&app_state.db)
         .await?;

@@ -54,7 +54,7 @@ class AppRouter {
       ),
       GoRoute( 
         path: '/recurring_events/:groupId',
-        builder: (context, state) {
+        builder: (context, state) { 
           final groupId = state.pathParameters['groupId'] ?? Namespace.nil.value;
           return RecurringEventsPage(groupId: groupId);
         }
