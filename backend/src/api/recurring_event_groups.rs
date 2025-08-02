@@ -10,7 +10,7 @@ use crate::{
     api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, 
     models::{
         recurring_event::RecurringEvent, 
-        recurring_event_group::{NewRecurringEventGroup, RecurringEventGroup}
+        recurring_event_group::{NewRecurringEventGroup, RecurringEventGroup, UpdatedRecurringEventGroup}
     }
 };
 
@@ -28,6 +28,7 @@ pub(super) fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(fetch_all_groups))
         .route("/", post(add_group))
+        .route("/", put(update_group))
         .route("/{group_id}", delete(delete_group))
         .route("/{group_id}", get(fetch_events_for_group))
         .route("/{new_group_id}/move/{event_id}", put(move_event_between_groups))
@@ -145,6 +146,48 @@ async fn add_group(
     Ok(())
 }
 
+async fn update_group(
+    State(app_state): State<AppState>,
+    user: AuthUser,
+    Json(updated_group): Json<UpdatedRecurringEventGroup>,
+) -> ApiResult<()> {
+    let group = sqlx::query!(
+        "SELECT id FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
+        updated_group.id,
+        user.id
+    )
+        .fetch_optional(&app_state.db)
+        .await?;
+    if group.is_none() {
+        return Err(ApiError::Forbidden);
+    }
+    else {
+        sqlx::query!(
+            r#"
+                UPDATE recurring_event_groups
+                SET
+                    name = $1,
+                    description = $2,
+                    color = $3,
+                    group_is_active = $4,
+                    group_recurrence_start = $5,
+                    group_recurrence_end = $6
+                WHERE id = $7
+            "#,
+            updated_group.name,
+            updated_group.description,
+            updated_group.color,
+            updated_group.group_is_active,
+            updated_group.group_recurrence_start,
+            updated_group.group_recurrence_end,
+            updated_group.id
+        )
+            .execute(&app_state.db)
+            .await?;
+        Ok(())
+    }
+}
+
 async fn delete_group(
     State(app_state): State<AppState>,
     Path(group_id): Path<Uuid>,
@@ -160,21 +203,22 @@ async fn delete_group(
     if group.is_none() {
         return Err(ApiError::Forbidden);
     }
-    sqlx::query!(
-        "DELETE FROM recurring_events WHERE group_id = $1",
-        group_id
-    )
-        .execute(&app_state.db)
-        .await?;
-    sqlx::query!(
-        "DELETE FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
-        group_id,
-        user.id
-    )
-        .execute(&app_state.db)
-        .await?;
-
-    Ok(())
+    else {
+        sqlx::query!(
+            "DELETE FROM recurring_events WHERE group_id = $1",
+            group_id
+        )
+            .execute(&app_state.db)
+            .await?;
+        sqlx::query!(
+            "DELETE FROM recurring_event_groups WHERE id = $1 AND user_id = $2",
+            group_id,
+            user.id
+        )
+            .execute(&app_state.db)
+            .await?;
+        Ok(())
+    }
 }
 
 async fn fetch_events_for_group(
