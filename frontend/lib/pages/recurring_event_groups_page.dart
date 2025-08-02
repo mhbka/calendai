@@ -54,10 +54,10 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
     else {
       return FloatingActionButton.extended(
           onPressed: () async {
-          await showDialog(
-            context: context, 
-            builder: (dialogContext) => RecurringEventGroupDialog()
-          );
+            await showDialog(
+              context: context, 
+              builder: (dialogContext) => RecurringEventGroupDialog()
+            );
           },
           heroTag: "recurring_event_group_create",
           icon: Icon(Icons.add, color: Colors.white),

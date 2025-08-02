@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/widgets/date_picker.dart';
 import 'package:namer_app/widgets/recurrence_input.dart';
 
 /// Dialog for creating a new recurring event group/updating a selected group.
@@ -205,12 +206,42 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
     );
   }
 
-  Widget _buildRecurrenceInput() {
-  return SizedBox(
-    width: double.infinity,
-    child: RecurrenceInput(eventDate: DateTime.now())
-  );
-}
+  Widget _buildDateOptions() {
+    return Column(
+      children: [
+        DatePicker(
+          label: 'Start Date',
+          tooltipText: "The default date this group's events start recurring on",
+          selectedDate: _startDate,
+          firstDate: DateTime.now(),
+          accentColor: Colors.blue,
+          onDateChanged: (date) {
+            setState(() {
+              _startDate = date;
+              if (_endDate != null && date != null && _endDate!.isBefore(date)) {
+                _endDate = null;
+              }
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        DatePicker(
+          label: 'End Date',
+          tooltipText: "The default date this group's events stop recurring",
+          selectedDate: _endDate,
+          firstDate: _startDate,
+          isNullable: true,
+          nullText: 'Repeat forever',
+          accentColor: Colors.green,
+          onDateChanged: (date) {
+            setState(() {
+              _endDate = date;
+            });
+          },
+        ),
+      ],
+    );
+  }
 
   Widget _buildColorPicker() {
     return Row(
@@ -290,7 +321,7 @@ class _RecurringEventGroupDialogState extends State<RecurringEventGroupDialog> {
               const SizedBox(height: 16),
               _buildActiveSwitch(),
               const SizedBox(height: 16),
-              _buildRecurrenceInput()
+              _buildDateOptions()
             ],
           ),
         ),

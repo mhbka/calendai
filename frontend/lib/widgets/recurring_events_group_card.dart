@@ -229,7 +229,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
       ),
     );
   }
-
+  
   Widget _buildRecurringEventsCount(BuildContext context) {
     return Row(
       children: [
