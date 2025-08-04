@@ -157,7 +157,7 @@ class RecurrenceInputController extends ChangeNotifier {
   int getEventDurationSeconds() {
     DateTime x = DateTime(2000, 1, 1, _data.startTime.hour, _data.startTime.minute);
     DateTime y = DateTime(2000, 1, 1, _data.endTime.hour, _data.endTime.minute);
-    return x.difference(y).inSeconds;
+    return y.difference(x).inSeconds;
   }
 }
 

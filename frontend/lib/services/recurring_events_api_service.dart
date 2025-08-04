@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:namer_app/main.dart';
+import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/services/base_api_service.dart';
 import 'package:namer_app/services/recurring_event_groups_api_service.dart';
@@ -15,6 +16,17 @@ class RecurringEventsApiService extends BaseApiService {
   /// If `groupId` is null, fetch all ungrouped events.
   static Future<List<RecurringEvent>> fetchEvents(String? groupId) async {
     return await RecurringEventGroupsApiService.fetchEventsUnderGroup(groupId);
+  }
+
+  /// Fetch recurring calendar events for a date range.
+  static Future<List<RecurringCalendarEvent>> fetchCalendarEvents(DateTime start, DateTime end) async {
+    return BaseApiService.handleRequest(
+      () => http.get(
+        Uri.parse('$baseUrl?start=${start.toUtc().toIso8601String()}&end=${end.toUtc().toIso8601String()}'),
+        headers: BaseApiService.headers,
+      ),
+      (response) => BaseApiService.parseJsonList(response.body, RecurringCalendarEvent.fromJson),
+    );
   }
 
   /// Create events.

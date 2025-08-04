@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/services/calendar_api_service.dart';
 import 'package:namer_app/services/notification_service.dart';
+import 'package:namer_app/services/recurring_events_api_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarController extends ChangeNotifier {
@@ -23,6 +25,7 @@ class CalendarController extends ChangeNotifier {
   // members
 
   List<CalendarEvent> _events = [];
+  List<RecurringCalendarEvent> _recurringEvents = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _isLoading = false;
@@ -36,9 +39,14 @@ class CalendarController extends ChangeNotifier {
 
   /// Gets all events for the selected day.
   List<CalendarEvent> getEventsForDay(DateTime day) {
-    return _events.where((event) {
-      return isSameDay(event.startTime, day);
-    }).toList();
+    var normalEvents = _events
+      .where((event) => isSameDay(event.startTime, day))
+      .toList();
+    var recurringEvents = _recurringEvents
+      .where((event) => isSameDay(event.startTime, day))
+      .map((e) => e.recurringToCalendarEvent())
+      .toList();
+    return [...normalEvents, ...recurringEvents];
   }
 
   /// Sets the selected day.
@@ -56,19 +64,22 @@ class CalendarController extends ChangeNotifier {
     loadEvents();
   }
 
-  /// Loads all calendar events between the start and end datetimes.
+  /// Loads all calendar events and recurring calendar events between the start and end datetimes.
   Future<void> loadEvents() async {
     _setLoading(true);
     try {
       final startOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
       final endOfMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
       
-      final events = await CalendarApiService.fetchEvents(startOfMonth, endOfMonth);
-      _events = events;
+      _events = await CalendarApiService.fetchEvents(startOfMonth, endOfMonth);
+      _recurringEvents = await RecurringEventsApiService.fetchCalendarEvents(startOfMonth, endOfMonth);
       
       // Schedule reminders for all events
-      for (final event in events) {
+      for (final event in _events) {
         NotificationService.scheduleEventReminder(event);
+      }
+      for (final event in _recurringEvents) {
+        NotificationService.scheduleEventReminder(event.recurringToCalendarEvent());
       }
       
       notifyListeners();
