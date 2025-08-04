@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/services/base_api_service.dart';
@@ -5,26 +8,47 @@ import 'package:namer_app/services/recurring_event_groups_api_service.dart';
 
 /// For interacting with the recurring events' API.
 class RecurringEventsApiService extends BaseApiService {
-  static String baseUrl = "${envVars['api_base_url']!}/recurring_event_groups";
+  static String baseUrl = "${envVars['api_base_url']!}/recurring_events";
 
   /// Fetch recurring events under a group.
+  /// 
   /// If `groupId` is null, fetch all ungrouped events.
   static Future<List<RecurringEvent>> fetchEvents(String? groupId) async {
     return await RecurringEventGroupsApiService.fetchEventsUnderGroup(groupId);
   }
 
-  /// Create an event, optionally under a group.
-  static Future<void> createEvent(RecurringEvent event, String? groupId) async {
-
+  /// Create events.
+  static Future<void> createEvents(List<RecurringEvent> events) async {
+    return BaseApiService.handleRequest(
+      () => http.post(
+        Uri.parse(baseUrl), 
+        body: json.encode(events),
+        headers: BaseApiService.headers
+      ),
+      (response) {},
+    );
   }
 
   /// Update an event.
   static Future<void> updateEvent(RecurringEvent event) async {
-
+    return BaseApiService.handleRequest(
+      () => http.put(
+        Uri.parse(baseUrl), 
+        body: json.encode(event),
+        headers: BaseApiService.headers
+      ),
+      (response) {},
+    );
   }
 
   /// Delete an event.
   static Future<void> deleteEvent(String eventId) async {
-
+    return BaseApiService.handleRequest(
+      () => http.delete(
+        Uri.parse("$baseUrl/$eventId"), 
+        headers: BaseApiService.headers
+      ),
+      (response) {},
+    );
   }
 }

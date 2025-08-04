@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:namer_app/utils/datetime_converter.dart';
 
 part 'recurring_event.g.dart';
 
@@ -7,20 +8,22 @@ part 'recurring_event.g.dart';
 class RecurringEvent {
   final String id;
   final String? groupId;
-  final String userId;
   final bool isActive;
   final String title;
   final String? description;
   final String? location;
   final int eventDurationSeconds;
+  
+  @DatetimeConverter()
   final DateTime recurrenceStart;
+
+  @DatetimeConverter()
   final DateTime? recurrenceEnd;
   final String rrule;
 
   RecurringEvent({
     required this.id,
     this.groupId,
-    required this.userId,
     required this.isActive,
     required this.title,
     this.description,

@@ -32,11 +32,28 @@ RecurrenceRule convertToRRule(RecurrenceData data) {
       );
     case Frequency.monthly:
       if (data.monthlyRecurrence.useMode1) {
-        // Mode 1: By day of month (1-31)
+        List<int> monthDays;
+        if (data.monthlyRecurrence.mode1DayOfMonth > 31) {
+          data.monthlyRecurrence.mode1DayOfMonth = 31;
+        }
+        // if day > 28, we make sure to fallback for earlier end-of-months
+        if (data.monthlyRecurrence.mode1DayOfMonth > 28) {
+          monthDays = [
+            data.monthlyRecurrence.mode1DayOfMonth,
+            -1,
+          ];
+          if (data.monthlyRecurrence.mode1DayOfMonth == 30) {
+            monthDays.add(-2); 
+          } else if (data.monthlyRecurrence.mode1DayOfMonth == 29) {
+            monthDays.addAll([-2, -3]);
+          }
+        } else {
+          monthDays = [data.monthlyRecurrence.mode1DayOfMonth];
+        }
         rrule = RecurrenceRule(
           frequency: Frequency.monthly,
           interval: data.monthlyRecurrence.monthPeriodicity,
-          byMonthDays: [data.monthlyRecurrence.mode1DayOfMonth],
+          byMonthDays: monthDays,
           until: data.endDate?.toUtc(),
         );
       } else {

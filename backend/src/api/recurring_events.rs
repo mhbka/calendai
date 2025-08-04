@@ -49,17 +49,25 @@ async fn create_events(
         rrules.push(event.rrule.to_string());
     }
 
-    let authorized_groups = sqlx::query!(
-    r#"
-        select id from recurring_event_groups 
-        where id = any($1) and user_id = $2
-    "#,
-    &group_ids[..] as &[Option<Uuid>],
-    user.id
-    )
-        .fetch_all(&app_state.db)
-        .await?;
-    if (authorized_groups.len()) != group_ids.len() {
+    let all_groups_authorized = {
+        let requested_group_ids: Vec<_> = group_ids
+            .iter()
+            .filter(|&g| g.is_some())
+            .map(|g| g.clone())
+            .collect();
+        let authorized_groups = sqlx::query!(
+            r#"
+                select id from recurring_event_groups 
+                where id = any($1) and user_id = $2
+            "#,
+            &requested_group_ids[..] as &[Option<Uuid>],
+            user.id
+        )
+            .fetch_all(&app_state.db)
+            .await?;
+        authorized_groups.len() == requested_group_ids.len()
+    };
+    if !all_groups_authorized {
         return Err(ApiError::Forbidden);
     }
     

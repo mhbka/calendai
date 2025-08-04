@@ -1,13 +1,13 @@
 use std::str::FromStr;
 use chrono::{DateTime, TimeZone, Utc};
-use rrule::{RRuleError, RRuleResult, RRuleSet, Tz};
-use serde::{Deserialize, Serialize};
+use rrule::{RRule, RRuleError, RRuleResult, RRuleSet, Tz, Unvalidated};
+use serde::{Deserialize, Serialize, Serializer};
 use sqlx::{postgres::PgHasArrayType, Database, Decode, Encode, Type};
 
 static INSTANCE_LIMIT: u16 = 100;
 
 /// A wrapper around a `RRuleSet`, with serde + deserialization-time validation + sqlx support.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct ValidatedRRule {
     rrule: RRuleSet
 }
@@ -66,7 +66,7 @@ where
 // allows to insert arrays of it
 impl PgHasArrayType for ValidatedRRule {
     fn array_type_info() -> sqlx::postgres::PgTypeInfo {
-        <&str as PgHasArrayType>::array_type_info()
+        <String as PgHasArrayType>::array_type_info()
     }
 }
 
@@ -75,12 +75,29 @@ impl<'de> Deserialize<'de> for ValidatedRRule {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> 
-    {
+    {   
+        // HACK: need a start date set, but frontend doesn't support one (bastard fucker).
+        // thus we use this placeholder and pray nothing goes wrong
+        let placeholder_start = DateTime::parse_from_rfc3339("1970-01-01T00:00:00Z")
+            .expect("This string should be valid")
+            .with_timezone(&Tz::UTC);
         let s = String::deserialize(deserializer)?;
-        let rrule: RRuleSet = s
+        let rrule: RRule<Unvalidated> = s
             .parse()
-            .map_err(|e| serde::de::Error::custom(format!("Failed to parse into RRuleSet: {}", e)))?;
-        Ok(Self { rrule })
+            .map_err(|e| serde::de::Error::custom(format!("Failed to parse into RRule: {}", e)))?;
+        let rrule = rrule
+            .validate(placeholder_start)
+            .map_err(|e| serde::de::Error::custom(format!("Failed to validate RRule: {}", e)))?;
+        let set = RRuleSet::new(placeholder_start).set_rrules(vec![rrule]);
+        Ok(Self { rrule: set })
+    }
+}
+
+impl Serialize for ValidatedRRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+            serializer.serialize_str(&self.rrule.to_string())
     }
 }
 

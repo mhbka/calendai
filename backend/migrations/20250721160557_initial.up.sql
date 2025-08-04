@@ -44,7 +44,7 @@ CREATE TABLE recurring_events (
     event_duration_seconds INT NOT NULL,
     recurrence_start TIMESTAMPTZ NOT NULL,
     recurrence_end TIMESTAMPTZ,
-    rrule VARCHAR NOT NULL,
+    rrule TEXT NOT NULL,
 
     -- Ensure valid time values
     CONSTRAINT check_duration CHECK (event_duration_seconds >= 0),
