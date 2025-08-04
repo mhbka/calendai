@@ -262,12 +262,7 @@ async fn update_event(
     Json(updated_event): Json<UpdatedRecurringEvent>
 ) -> ApiResult<()> {
     let event_record = sqlx::query!(
-        r#"
-            SELECT recurring_event_groups.user_id
-            FROM recurring_events 
-            INNER JOIN recurring_event_groups ON recurring_events.group_id = recurring_event_groups.id
-            WHERE recurring_events.id = $1
-        "#,
+        "SELECT user_id FROM recurring_events WHERE id = $1",
         updated_event.id
     )
         .fetch_one(&app_state.db)

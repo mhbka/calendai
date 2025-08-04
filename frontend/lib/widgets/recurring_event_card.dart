@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/recurring_event_dialog.dart';
 
 class RecurringEventCard extends StatelessWidget {
   final RecurringEvent event;
+  final RecurringEventsController _controller = RecurringEventsController.instance;
 
   RecurringEventCard({Key? key, required this.event}) : super(key: key);
 
@@ -137,7 +140,42 @@ class RecurringEventCard extends StatelessWidget {
 
   Widget _buildDeleteButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Delete group"),
+            content: Text("Are you sure you want to delete this group and all its events? This action is irreversible."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Back"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _controller.deleteEvent(event.id)
+                    .then((value) => {if (context.mounted) Navigator.pop(context)})
+                    .catchError((err) {
+                      if (context.mounted) {
+                        Alerts.showErrorDialog(
+                          context, 
+                          "Error", 
+                          "Failed to delete event: $err. Please try again later."
+                        );
+                      }
+                      return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
+                    });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text("Delete"),
+              ),
+            ],
+          ),
+        );
+      },
       icon: Icon(Icons.delete),
       label: Text("Delete"),
       style: ElevatedButton.styleFrom(

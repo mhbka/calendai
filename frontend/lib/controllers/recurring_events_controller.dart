@@ -95,7 +95,7 @@ class RecurringEventsController extends ChangeNotifier {
   }
 
   /// Delete a event.
-  Future<void> deleteGroup(String eventId) async {
+  Future<void> deleteEvent(String eventId) async {
     _setLoading(true);
     try {
       await RecurringEventsApiService.deleteEvent(eventId);

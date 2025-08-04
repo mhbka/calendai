@@ -169,7 +169,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
                         Alerts.showErrorDialog(
                           context, 
                           "Error", 
-                          "Failed to delete event: $err. Please try again later."
+                          "Failed to delete group: $err. Please try again later."
                         );
                       }
                       return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
