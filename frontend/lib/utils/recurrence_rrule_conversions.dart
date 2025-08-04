@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/widgets/recurrence_input.dart';
 import 'package:rrule/rrule.dart';
 
@@ -81,6 +82,16 @@ RecurrenceRule convertToRRule(RecurrenceData data) {
       throw ArgumentError('Unsupported frequency type: ${data.type}');
   }
   return rrule;
+}
+
+/// Get the `RecurrenceData` described in a `RecurringEvent`.
+RecurrenceData getEventRecurrence(RecurringEvent event) {
+  return convertToRecurrenceData(
+    RecurrenceRule.fromString(event.rrule), 
+    event.recurrenceStart, 
+    TimeOfDay.fromDateTime(event.recurrenceStart), 
+    TimeOfDay.fromDateTime(event.recurrenceStart.add(Duration(seconds: event.eventDurationSeconds)))
+  );
 }
 
 /// Converts a `RecurrenceRule` to `RecurrenceData`.

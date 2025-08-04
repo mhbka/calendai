@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
+import 'package:namer_app/widgets/recurrence_input.dart';
 import 'package:namer_app/widgets/recurring_event_dialog.dart';
+import 'package:rrule/rrule.dart';
 
 class RecurringEventCard extends StatelessWidget {
   final RecurringEvent event;
@@ -38,8 +41,9 @@ class RecurringEventCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (event.description != null) _buildDescription(context),
+                          _buildDescription(context),
                           _buildDateRange(context),
+                          _buildRecurrenceDescription(context)
                         ],
                       ),
                     ),
@@ -89,11 +93,7 @@ class RecurringEventCard extends StatelessWidget {
   Widget _buildStatusBadge() {
     Color color; 
     String text;
-    if (event.isActive == null) {
-      color = Colors.grey;
-      text = 'Not set';
-    }
-    else if (event.isActive!) {
+    if (event.isActive) {
       color = Colors.green;
       text = 'Active';
     }
@@ -189,7 +189,7 @@ class RecurringEventCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Text(
-        event.description!,
+        event.description ?? "-",
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: Colors.grey[600],
         ),
@@ -219,6 +219,26 @@ class RecurringEventCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRecurrenceDescription(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          Icons.event_repeat,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 4),
+        Text(
+          getEventRecurrence(event).describeRecurrence(),
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 

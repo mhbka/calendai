@@ -71,6 +71,67 @@ class RecurrenceData {
     var rrule = convertToRRule(this);
     return rrule.getInstances(start: _startDate).take(num).toList();
   }
+
+  String describeRecurrence() {
+    switch (type) {
+      case Frequency.daily:
+        if (dailyRecurrence.dayPeriodicity == 1) {
+          return "Daily";
+        }
+        return "Every ${dailyRecurrence.dayPeriodicity} days";
+      
+      case Frequency.weekly:
+        final weekdays = weeklyRecurrence.weekdays;
+        final periodicity = weeklyRecurrence.weekPeriodicity;
+        
+        if (weekdays.isEmpty) {
+          return periodicity == 1 ? "Weekly" : "Every $periodicity weeks";
+        }
+        
+        final dayNames = weekdays.map((day) => _getDayName(day)).join(", ");
+        if (periodicity == 1) {
+          return "Weekly on $dayNames";
+        }
+        return "Every $periodicity weeks on $dayNames";
+      
+      case Frequency.monthly:
+        final periodicity = monthlyRecurrence.monthPeriodicity;
+        final prefix = periodicity == 1 ? "Monthly" : "Every $periodicity months";
+        
+        if (monthlyRecurrence.useMode1) {
+          final day = monthlyRecurrence.mode1DayOfMonth;
+          return "$prefix on day $day";
+        } else {
+          final week = _getWeekName(monthlyRecurrence.mode2WeekOfMonth);
+          final dayName = _getDayName(monthlyRecurrence.mode2Weekday);
+          return "$prefix on $week $dayName";
+        }
+      
+      case Frequency.yearly:
+        final date = yearlyRecurrence.dayOfYear;
+        final month = _getMonthName(date.month);
+        return "Yearly on $month ${date.day}";
+
+      default:
+        return "Unsupported recurrence frequency";
+    }
+  }
+
+  String _getDayName(int weekday) {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return days[weekday % 7];
+  }
+
+  String _getWeekName(int week) {
+    const weeks = ["first", "second", "third", "fourth", "last"];
+    return weeks[(week - 1).clamp(0, 4)];
+  }
+
+  String _getMonthName(int month) {
+    const months = ["", "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+    return months[month];
+  }
 }
 
 /// Controller for RecurrenceInput.
@@ -103,12 +164,10 @@ class RecurrenceInputController extends ChangeNotifier {
 /// Widget for configuring recurrence patterns.
 class RecurrenceInput extends StatefulWidget {
   final RecurrenceInputController controller;
-  final RecurrenceData? initialData;
 
   const RecurrenceInput({
     super.key,
     required this.controller,
-    this.initialData,
   });
 
   @override
@@ -122,11 +181,7 @@ class _RecurrenceInputState extends State<RecurrenceInput> {
   @override
   void initState() {
     super.initState();
-    _data = widget.initialData ?? RecurrenceData(
-      startTime: TimeOfDay.now(),
-      endTime: TimeOfDay.now(),
-      startDate: DateTime.now()
-    );
+    _data = widget.controller._data;
   }
 
   void _update() {
