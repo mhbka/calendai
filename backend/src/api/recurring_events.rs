@@ -3,7 +3,7 @@ use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Jso
 use chrono::{DateTime, Duration, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::models::recurring_event_group::RecurringEventGroup;
+use crate::models::{recurring_event::UpdatedRecurringEvent, recurring_event_group::RecurringEventGroup};
 use crate::models::time::Second;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
 use crate::models::rrule::ValidatedRRule;
@@ -259,7 +259,7 @@ async fn get_events(
 async fn update_event(
     State(app_state): State<AppState>,
     user: AuthUser,
-    Json(updated_event): Json<RecurringEvent>
+    Json(updated_event): Json<UpdatedRecurringEvent>
 ) -> ApiResult<()> {
     let event_record = sqlx::query!(
         r#"

@@ -97,7 +97,9 @@ impl Serialize for ValidatedRRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer {
-            serializer.serialize_str(&self.rrule.to_string())
+            // HACK: we fuckin hacking over here. assume only 1 RRule per RRuleSet; also we need to append this prefix for frontend compatibility
+            let rrule_string = format!("RRULE:{}", self.rrule.get_rrule()[0].to_string());
+            serializer.serialize_str(&rrule_string)
     }
 }
 

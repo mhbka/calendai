@@ -5,7 +5,6 @@ import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/recurring_event_card.dart';
 import 'package:namer_app/widgets/recurring_event_dialog.dart';
-import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
 
 class RecurringEventsPage extends StatefulWidget {
   final String? groupId;
@@ -97,7 +96,7 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
   @override
   Widget build(BuildContext context) {
     return BasePage(
-      title: "Recurring events - ${_controller.currentGroup?.name ?? "Ungrouped"}",
+      title: "Recurring events - ${_controller.isLoading ? "" : _controller.currentGroup?.name ?? "Ungrouped"}",
       body: _controller.isLoading ? _buildLoading() : _buildMainArea(),
       floatingActions: _controller.events.isEmpty ? null : _buildAddEventButton(),
     );

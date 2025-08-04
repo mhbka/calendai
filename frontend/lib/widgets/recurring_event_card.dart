@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/widgets/recurring_event_dialog.dart';
 
 class RecurringEventCard extends StatelessWidget {
   final RecurringEvent event;
-  final RecurringEventGroupsController _controller = RecurringEventGroupsController.instance;
 
   RecurringEventCard({Key? key, required this.event}) : super(key: key);
 
@@ -13,13 +12,7 @@ class RecurringEventCard extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () {
-          // TODO: go to individual events page
-        },
-        borderRadius: BorderRadius.circular(4),
-        child: _buildCardBody(context)
-      )
+      child: _buildCardBody(context)
     );
   }
 
@@ -127,7 +120,12 @@ class RecurringEventCard extends StatelessWidget {
 
   Widget _buildEditButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () async {
+        await showDialog(
+          context: context, 
+          builder: (dialogContext) => RecurringEventDialog(currentEvent: event)
+        );
+      },
       label: Text("Edit"),
       icon: Icon(Icons.edit),
       style: ElevatedButton.styleFrom(

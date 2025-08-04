@@ -44,10 +44,10 @@ class RecurringEventsController extends ChangeNotifier {
     }).toList();
   }
 
-  /// Resets the current group
+  /// Resets the current group and events.
   /// 
   /// This is just to ensure the previous group's name isn't shown when a new group is loaded.
-  void resetGroup() {
+  void resetData() {
     _currentGroup = null;
     _events = [];
   }
@@ -55,7 +55,8 @@ class RecurringEventsController extends ChangeNotifier {
   /// Sets the current group and loads its events.
   Future<void> setGroupLoadEvents(String? groupId) async {
     _setLoading(true);
-    resetGroup();
+    resetData();
+    _currentGroupId = groupId;
     if (groupId != null && groupId != Namespace.nil.value) {
       _currentGroup = await RecurringEventGroupsApiService.fetchGroup(groupId);
     } else {
