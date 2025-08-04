@@ -7,12 +7,34 @@ use sqlx::{postgres::PgHasArrayType, Database, Decode, Encode, Type};
 static INSTANCE_LIMIT: u16 = 100;
 
 /// A wrapper around a `RRuleSet`, with serde + deserialization-time validation + sqlx support.
+/// 
+/// **NOTE**: We assume that the only thing set for the `RRuleSet` are a singular `RRULE`, `DTSTART`, and `UNTIL`. 
 #[derive(Debug, Clone)]
 pub struct ValidatedRRule {
     rrule: RRuleSet
 }
 
 impl ValidatedRRule {
+    /// Set a new start datetime.
+    pub fn set_start(&mut self, start: DateTime<Utc>) {
+        let rrule = self.rrule.get_rrule().clone();
+        self.rrule = RRuleSet::new(start.with_timezone(&Tz::UTC)).set_rrules(rrule);
+    }
+
+    /// Set a new end datetime.
+    pub fn set_end(&mut self, end: Option<DateTime<Utc>>) {
+        let start = *self.rrule.get_dt_start();
+        let old_rrule = self.rrule.get_rrule()[0].to_string();
+        let mut rrule = <RRule<Unvalidated>>::from_str(&old_rrule)
+            .expect("We parse directly from a validated RRule, so it should be valid");
+        if let Some(end) = end {
+            rrule = rrule.until(end.with_timezone(&Tz::UTC));
+        }
+        let rrule = rrule.validate(start)
+            .expect("Setting a new UNTIL should not make the RRule invalid");
+        self.rrule = RRuleSet::new(start).rrule(rrule);
+    }
+
     /// Returns all instances of the reccurence rule within the start/end dates.
     /// 
     /// **Note**: The maximum number of instances is set to 100 (for now).

@@ -6,7 +6,7 @@ import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/pages/calendar_page/calendar_action_widgets.dart';
-import 'package:namer_app/pages/calendar_page/calendar_events.dart';
+import 'package:namer_app/pages/calendar_page/calendar_events_list.dart';
 import 'package:namer_app/pages/calendar_page/calendar_dialogs.dart';
 import 'package:namer_app/pages/calendar_page/calendar.dart';
 import 'package:namer_app/utils/alerts.dart';

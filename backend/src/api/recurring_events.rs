@@ -27,8 +27,14 @@ pub(super) fn router() -> Router<AppState> {
 async fn create_events(
     State(app_state): State<AppState>,
     user: AuthUser,
-    Json(events): Json<Vec<NewRecurringEvent>>
+    Json(mut events): Json<Vec<NewRecurringEvent>>
 ) -> ApiResult<()> {
+    // HACK: frontend is unable to set start/end datetimes, so we must ensure they're set here
+    for event in &mut events {
+        event.rrule.set_start(event.recurrence_start);
+        event.rrule.set_end(event.recurrence_end);
+    }
+
     let mut group_ids = Vec::with_capacity(events.len());
     let user_ids = vec![user.id; events.len()];
     let mut titles = Vec::with_capacity(events.len());
@@ -115,8 +121,11 @@ async fn get_events(
                 re.event_duration_seconds as "event_duration_seconds: _", 
                 re.rrule as "rrule: _"
             FROM recurring_events re
-            INNER JOIN recurring_event_groups reg ON reg.id = re.group_id
-            WHERE reg.user_id = $1 AND re.recurrence_start > $2 AND re.recurrence_end < $3 AND re.is_active = true
+            LEFT JOIN recurring_event_groups reg ON reg.id = re.group_id
+            WHERE re.user_id = $1 
+            AND re.is_active = true
+            AND re.recurrence_start < $3 
+            AND (re.recurrence_end IS NULL OR re.recurrence_end > $2)
         "#,
         user.id,
         params.start,
@@ -124,12 +133,17 @@ async fn get_events(
     )
         .fetch_all(&app_state.db)
         .await?;
+    tracing::trace!("Obtained {} active recurring events", recurring_events.len());
 
     // get actual event instances
     let mut events_and_instances: Vec<_> = recurring_events
         .into_iter()
         .map(|event| {
             let instances = event.rrule.all_within_period(params.start, params.end);
+            tracing::trace!(
+                "Generated {} instances for event {} for {} - {}",
+                instances.dates.len(), event.id, params.start, params.end
+            );
             (event, instances)
         })
         .collect();
@@ -158,6 +172,7 @@ async fn get_events(
             .fetch_all(&app_state.db)
             .await?      
     };
+    tracing::trace!("Found {} event exceptions", event_exceptions.len());
 
     // resolve events' instances and exceptions
     let mut instances_with_group_ids = Vec::new();
@@ -175,7 +190,7 @@ async fn get_events(
             .collect();
 
         // delete all "cancelled" instances
-        instances.dates.retain(|date| relevant_exceptions
+        instances.dates.retain(|date| !relevant_exceptions
                 .iter()
                 .any(|e| e.exception_type == ExceptionType::Cancelled && e.exception_date == date.to_utc())
             );
@@ -217,6 +232,7 @@ async fn get_events(
 
     // don't query for groups whose events have 0 instances
     instances_with_group_ids.retain(|(g, i)| i.len() > 0);
+    tracing::trace!("After resolving exceptions and removing 0-instance events, retained {} events", instances_with_group_ids.len());
 
     // get group data for remaining instances
     let group_ids: Vec<_> = instances_with_group_ids
@@ -252,6 +268,7 @@ async fn get_events(
         .map(|(_, events)| events)
         .flatten()
         .collect();
+    tracing::trace!("Returning {} recurring event instances", events.len());
 
     Ok(Json(events))
 }

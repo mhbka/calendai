@@ -22,7 +22,7 @@ class RecurringEventGroup {
   @DatetimeConverter()
   final DateTime? endDate;
   
-  final num recurringEvents;
+  final num? recurringEvents;
 
   RecurringEventGroup({
     required this.name,

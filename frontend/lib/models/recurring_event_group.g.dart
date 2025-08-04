@@ -21,7 +21,7 @@ RecurringEventGroup _$RecurringEventGroupFromJson(Map<String, dynamic> json) =>
         json['endDate'],
         const DatetimeConverter().fromJson,
       ),
-      recurringEvents: json['recurringEvents'] as num,
+      recurringEvents: json['recurringEvents'] as num?,
     );
 
 Map<String, dynamic> _$RecurringEventGroupToJson(
