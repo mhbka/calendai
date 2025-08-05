@@ -29,7 +29,7 @@ class _CalendarState extends State<Calendar> {
       lastDay: DateTime.utc(CalendarConstants.lastYear, 12, 31),
       focusedDay: widget.controller.focusedDay,
       calendarFormat: widget.calendarFormat,
-      eventLoader: widget.controller.getEventsForDay,
+      eventLoader: widget.controller.getAllEventsForDay,
       startingDayOfWeek: CalendarConstants.startingDayOfWeek,
       calendarStyle: CalendarTheme.calendarStyle,
       onDaySelected: widget.controller.setSelectedDay,

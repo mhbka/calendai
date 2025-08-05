@@ -2,19 +2,24 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/widgets/event_list.dart';
 
 class CalendarEventsList extends StatelessWidget {
   final List<CalendarEvent> events;
+  final List<RecurringCalendarEvent> recurringEvents;
   final bool isLoading;
   final Function(CalendarEvent) onEventTap;
+  final Function(RecurringCalendarEvent) onRecurringEventTap;
 
   const CalendarEventsList({
-    Key? key,
+    super.key,
     required this.events,
+    required this.recurringEvents,
     required this.isLoading,
     required this.onEventTap,
-  }) : super(key: key);
+    required this.onRecurringEventTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +39,10 @@ class CalendarEventsList extends StatelessWidget {
         Expanded(
           child: EventList(
             events: events,
+            recurringEvents: recurringEvents,
             isLoading: isLoading,
             onEventTap: onEventTap,
+            onRecurringEventTap: onRecurringEventTap,
           ),
         ),
       ],

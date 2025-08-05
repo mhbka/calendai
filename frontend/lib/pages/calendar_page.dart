@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
+import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/pages/calendar_page/calendar_action_widgets.dart';
 import 'package:namer_app/pages/calendar_page/calendar_events_list.dart';
@@ -79,6 +80,10 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
+  Future<void> _showRecurringEventOptions(RecurringCalendarEvent event) async {
+
+  }
+
   void _onFormatChanged(CalendarFormat format) {
     setState(() {
       _calendarFormat = format;
@@ -108,6 +113,9 @@ class _CalendarPageState extends State<CalendarPage> {
     final selectedEvents = _controller.selectedDay != null
         ? _controller.getEventsForDay(_controller.selectedDay!)
         : <CalendarEvent>[];
+    final selectedRecurringEvents = _controller.selectedDay != null
+        ? _controller.getRecurringEventsForDay(_controller.selectedDay!)
+        : <RecurringCalendarEvent>[];
 
     return BasePage(
       title: 'Calendai', 
@@ -121,8 +129,10 @@ class _CalendarPageState extends State<CalendarPage> {
           Expanded(
             child: CalendarEventsList(
               events: selectedEvents,
+              recurringEvents: selectedRecurringEvents,
               isLoading: _controller.isLoading,
               onEventTap: _showEventOptions,
+              onRecurringEventTap: _showRecurringEventOptions,
             ),
           ),
         ],

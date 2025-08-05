@@ -37,16 +37,30 @@ class CalendarController extends ChangeNotifier {
 
   // methods
 
-  /// Gets all events for the selected day.
+  /// Gets events for the selected day.
   List<CalendarEvent> getEventsForDay(DateTime day) {
-    var normalEvents = _events
+    return _events
+      .where((event) => isSameDay(event.startTime, day))
+      .toList();
+  }
+
+  /// Gets recurring events for the current day.
+  List<RecurringCalendarEvent> getRecurringEventsForDay(DateTime day) {
+    return _recurringEvents
+      .where((event) => isSameDay(event.startTime, day))
+      .toList();
+  }
+
+  /// Get all events for the day (recurring events are mapped to `CalendarEvent`).
+  List<CalendarEvent> getAllEventsForDay(DateTime day) {
+    var events = _events
       .where((event) => isSameDay(event.startTime, day))
       .toList();
     var recurringEvents = _recurringEvents
       .where((event) => isSameDay(event.startTime, day))
       .map((e) => e.recurringToCalendarEvent())
       .toList();
-    return [...normalEvents, ...recurringEvents];
+    return [...events, ...recurringEvents];
   }
 
   /// Sets the selected day.
