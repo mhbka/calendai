@@ -9,16 +9,12 @@ class CalendarEventsList extends StatelessWidget {
   final List<CalendarEvent> events;
   final List<RecurringCalendarEvent> recurringEvents;
   final bool isLoading;
-  final Function(CalendarEvent) onEventTap;
-  final Function(RecurringCalendarEvent) onRecurringEventTap;
 
   const CalendarEventsList({
     super.key,
     required this.events,
     required this.recurringEvents,
     required this.isLoading,
-    required this.onEventTap,
-    required this.onRecurringEventTap,
   });
 
   @override
@@ -40,9 +36,7 @@ class CalendarEventsList extends StatelessWidget {
           child: EventList(
             events: events,
             recurringEvents: recurringEvents,
-            isLoading: isLoading,
-            onEventTap: onEventTap,
-            onRecurringEventTap: onRecurringEventTap,
+            isLoading: isLoading
           ),
         ),
       ],

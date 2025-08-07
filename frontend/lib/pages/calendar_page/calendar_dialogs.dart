@@ -3,51 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
+import 'package:namer_app/models/recurring_calendar_event.dart';
+import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/widgets/event_dialog.dart';
 
 class CalendarDialogs {
-  final CalendarController controller;
-
-  CalendarDialogs({required this.controller});
-
-  /// Save an event.
-  Future<void> saveEvent(
-    BuildContext context, {
-    CalendarEvent? existingEvent,
-    required String title,
-    required String description,
-    String? location,
-    required DateTime startTime,
-    required DateTime endTime,
-  }) async {
-    try {
-      await controller.saveEvent(
-        existingEvent: existingEvent,
-        title: title,
-        description: description,
-        location: location,
-        startTime: startTime,
-        endTime: endTime,
-      );
-      _showSuccessMessage(
-        context,
-        existingEvent != null
-            ? CalendarConstants.eventUpdatedMessage
-            : CalendarConstants.eventAddedMessage,
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      _showErrorMessage(context, '${CalendarConstants.failedToSaveMessage}: $e');
-    }
-  }
+  static CalendarController _controller = CalendarController.instance;
 
   /// Delete an event.
-  Future<void> deleteEvent(BuildContext context, CalendarEvent event) async {
+  static Future<void> deleteEvent(BuildContext context, CalendarEvent event) async {
     try {
-      await controller.deleteEvent(event);
-      if (context.mounted) _showSuccessMessage(context, CalendarConstants.eventDeletedMessage);
+      await _controller.deleteEvent(event);
+      if (context.mounted) Alerts.showInfoDialog(context, "Success", "The event was successfully deleted.");
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage(context, '${CalendarConstants.failedToDeleteMessage}: $e');
+        Alerts.showErrorDialog(context, "Error", "Failed to delete the event: $e. Please try again later.");
       }
       else {
         print("context was not mounted");
@@ -56,7 +26,7 @@ class CalendarDialogs {
   }
 
   /// Show the dialog for confirming an event delete.
-  Future<bool> showDeleteConfirmation(
+  static Future<bool> showDeleteConfirmation(
     BuildContext context,
     CalendarEvent event,
   ) async {
@@ -84,12 +54,10 @@ class CalendarDialogs {
     return confirmed ?? false;
   }
 
-  /// Show the options for an event.
-  Future<void> showEventOptions(
+  /// Show the dialog options for an event.
+  static Future<void> showEventOptions(
     BuildContext context,
-    CalendarEvent event, {
-    required VoidCallback onEdit,
-  }) async {
+    CalendarEvent event) async {
     await showModalBottomSheet(
       context: context,
       builder: (context) => Column(
@@ -97,16 +65,22 @@ class CalendarDialogs {
         children: [
           ListTile(
             leading: Icon(Icons.edit),
-            title: Text(CalendarConstants.editEventLabel),
-            onTap: () {
+            title: Text('Edit'),
+            onTap: () async {
               Navigator.pop(context);
-              onEdit();
+              await showDialog(
+                context: context,
+                builder: (context) => EventDialog(
+                  event: event,
+                  selectedDay: _controller.selectedDay
+                ),
+              );
             },
           ),
           ListTile(
             leading: Icon(Icons.delete, color: CalendarConstants.errorColor),
             title: Text(
-              CalendarConstants.deleteEventLabel,
+              'Delete',
               style: CalendarConstants.errorTextStyle,
             ),
             onTap: () async {
@@ -126,22 +100,42 @@ class CalendarDialogs {
       ),
     );
   }
-  
-  void showSnackBar(BuildContext context, Widget content) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: content),
-    );
-  }
 
-  void _showSuccessMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  void _showErrorMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+  /// Show the dialog options for a recurring event.
+  static Future<void> showRecurringEventOptions(
+    BuildContext context,
+    RecurringCalendarEvent event) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: Text('Edit'),
+            onTap: () {
+              Navigator.pop(context);
+              // TODO: modify RecurringEventDialog to handle 'modify exceptions'
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.delete, color: CalendarConstants.errorColor),
+            title: Text(
+              'Delete',
+              style: CalendarConstants.errorTextStyle,
+            ),
+            onTap: () async {
+              Navigator.pop(context);
+              // TODO: create a delete exception dialog
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.cancel),
+            title: Text(CalendarConstants.cancelLabel),
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
+      ),
     );
   }
 }

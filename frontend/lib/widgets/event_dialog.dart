@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/utils/alerts.dart';
 
 /// Dialog for creating a new event/updating a selected event.
 class EventDialog extends StatefulWidget {
   final CalendarEvent? event;
   final DateTime? selectedDay;
-  final Function(CalendarEvent?, String, String, String?, DateTime, DateTime) onSave;
 
-  const EventDialog({
-    Key? key,
+  EventDialog({
+    super.key,
     this.event,
     this.selectedDay,
-    required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _EventDialogState createState() => _EventDialogState();
 }
 
 class _EventDialogState extends State<EventDialog> {
+  final CalendarController _controller = CalendarController.instance;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _locationController;
@@ -54,13 +55,11 @@ class _EventDialogState extends State<EventDialog> {
       firstDate: DateTime.now().subtract(Duration(days: 365)),
       lastDate: DateTime.now().add(Duration(days: 365)),
     );
-    
     if (date != null) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_startTime),
       );
-      
       if (time != null) {
         setState(() {
           _startTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
@@ -79,7 +78,6 @@ class _EventDialogState extends State<EventDialog> {
       firstDate: _startTime,
       lastDate: DateTime.now().add(Duration(days: 365)),
     );
-    
     if (date != null) {
       final time = await showTimePicker(
         context: context,
@@ -96,15 +94,40 @@ class _EventDialogState extends State<EventDialog> {
 
   void _save() {
     if (_titleController.text.isEmpty) return;
-    
-    widget.onSave(
-      widget.event,
-      _titleController.text,
-      _descriptionController.text,
-      _locationController.text.isEmpty ? null : _locationController.text,
-      _startTime,
-      _endTime,
-    );
+
+    CalendarEvent event;
+    if (widget.event != null) {
+      event = CalendarEvent(
+        id: widget.event!.id, 
+        title: _titleController.text, 
+        description: _descriptionController.text,
+        location: _locationController.text,
+        startTime: _startTime, 
+        endTime: _endTime
+      );
+    }
+    else {
+      event = CalendarEvent(
+        id: '-1', 
+        title: _titleController.text, 
+        description: _descriptionController.text,
+        location: _locationController.text,
+        startTime: _startTime, 
+        endTime: _endTime
+      );
+    }
+    _controller.saveEvent(event, widget.event == null)
+      .then((v) => {if (mounted) Navigator.pop(context)})
+      .catchError((err) async {
+        if (mounted)  {
+          await Alerts.showErrorDialog(
+            context, 
+            "Error", 
+            "Failed to save the event: $err. Please try again later."
+          );
+        }
+        return <dynamic>{};
+      });
   }
 
   @override

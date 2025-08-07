@@ -81,7 +81,11 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> _showRecurringEventOptions(RecurringCalendarEvent event) async {
-
+    await _calendarDialogs.showRecurringEventOptions(
+      context,
+      event,
+      onEdit: () => {}
+    );
   }
 
   void _onFormatChanged(CalendarFormat format) {
@@ -95,9 +99,10 @@ class _CalendarPageState extends State<CalendarPage> {
       await _controller.loadEvents();
     } catch (e) {
       if (mounted) {
-        _calendarDialogs.showSnackBar(
+        Alerts.showErrorDialog(
           context, 
-          Text('${CalendarConstants.failedToLoadMessage}: $e')
+          "Error",
+          "Unable to load calendar events: $e. Please try again later."
         );
       }
     }

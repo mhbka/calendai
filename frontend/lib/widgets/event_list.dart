@@ -2,20 +2,18 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/models/recurring_calendar_event.dart';
+import 'package:namer_app/pages/calendar_page/calendar_dialogs.dart';
+import 'package:namer_app/utils/alerts.dart';
 
 class EventList extends StatelessWidget {
   final List<CalendarEvent> events;
   final List<RecurringCalendarEvent> recurringEvents;
-  final Function(CalendarEvent) onEventTap;
-  final Function(RecurringCalendarEvent) onRecurringEventTap;
   final bool isLoading;
 
   const EventList({
     super.key,
     required this.events,
     required this.recurringEvents,
-    required this.onEventTap,
-    required this.onRecurringEventTap,
     this.isLoading = false,
   });
 
@@ -46,15 +44,13 @@ class EventList extends StatelessWidget {
         if (index < events.length) {
           final event = events[index];
           return EventListItem(
-            event: event,
-            onTap: () => onEventTap(event),
+            event: event
           );
         }
         else {
           final recurringEvent = recurringEvents[index - events.length];
           return EventListItem(
-            recurringEvent: recurringEvent,
-            onTap: () => onRecurringEventTap(recurringEvent),
+            recurringEvent: recurringEvent
           );
         }
       },
@@ -76,13 +72,11 @@ class EventList extends StatelessWidget {
 class EventListItem extends StatelessWidget {
   final CalendarEvent? event;
   final RecurringCalendarEvent? recurringEvent;
-  final VoidCallback onTap;
 
   const EventListItem({
     super.key, 
     this.event, 
     this.recurringEvent,
-    required this.onTap
   });
 
   @override
@@ -93,6 +87,7 @@ class EventListItem extends StatelessWidget {
     String location;
     Color? color;
     String? groupName;
+    bool isException = false;
     if (event != null) {
       time = _buildTimeString(event!.startTime, event!.endTime);
       title = event!.title;
@@ -106,6 +101,7 @@ class EventListItem extends StatelessWidget {
       location = recurringEvent!.location ?? "-";
       color = recurringEvent!.group?.color;
       groupName = recurringEvent!.group?.name;
+      isException = recurringEvent!.exceptionId != null;
     }
     else {
       return SizedBox.shrink();
@@ -121,8 +117,22 @@ class EventListItem extends StatelessWidget {
               Container(width: 4, color: color),
             Expanded(
               child: ListTile(
-                onTap: onTap,
-                title: _buildTitleComponent(title),
+                onTap: () {
+                  if (event != null) {
+                    _openEventDialog(context, event!);
+                  }
+                  else if (recurringEvent != null) {
+                    _openRecurringEventDialog(context, recurringEvent!);
+                  }
+                  else {
+                    Alerts.showErrorDialog(
+                      context, 
+                      "An internal error occurred", 
+                      "No event exists for this list. Apologies for the issue!"
+                    );
+                  }
+                },
+                title: _buildTitleComponent(title, recurringEvent != null, isException),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -149,9 +159,9 @@ class EventListItem extends StatelessWidget {
                           children: [
                             Expanded(child: _buildMetadataComponent(groupName ?? "Ungrouped", Icons.category, "Group this recurring event belongs to")),
                             SizedBox(width: 8),
-                            Spacer(flex: 1), // Can put more group metadata here...
+                            Spacer(flex: 1), // extra spot for new metadata
                             SizedBox(width: 8),
-                            Spacer(flex: 1), // and here!
+                            Spacer(flex: 1), // here too
                           ],
                         ),
                       )
@@ -166,10 +176,21 @@ class EventListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildTitleComponent(String title) {
-    return Tooltip(
-      message: "The name/title for this event",
-      child: Text(title, style: TextStyle(fontWeight: FontWeight.w600))
+  Widget _buildTitleComponent(String title, bool isRecurring, bool isException) {
+    return Row(
+      mainAxisSize: MainAxisSize.min, 
+      crossAxisAlignment: CrossAxisAlignment.start, 
+      children: [
+        Tooltip(
+          message: "The name/title for this event",
+          child: Text(title, style: TextStyle(fontWeight: FontWeight.w600))
+        ),
+        SizedBox(width: 3),
+        if (isRecurring) Tooltip(
+          message: "This is a ${isException ? "modified " : ""}recurring event",
+          child: Icon(Icons.star, size: 13, color: Colors.grey[600]),
+        )
+      ]
     );
   }
 
@@ -214,15 +235,19 @@ class EventListItem extends StatelessWidget {
 }
 
   String _buildTimeString(DateTime startTime, DateTime endTime) {
-    String amOrPm(int hour) {
-      return hour < 12 ? 'am' : 'pm';
-    }
-    int to12HourFormat(int hour) {
-      return hour % 12;
-    }
+    String amOrPm(int hour) => hour < 12 ? 'am' : 'pm';
+    int to12HourFormat(int hour) => hour % 12;
 
     String start = '${to12HourFormat(startTime.hour)}:${startTime.minute.toString().padLeft(2, '0')}${amOrPm(startTime.hour)}';
     String end = '${to12HourFormat(endTime.hour)}:${endTime.minute.toString().padLeft(2, '0')}${amOrPm(endTime.hour)}';
     return '$start - $end';
+  }
+
+  Future<void> _openEventDialog(BuildContext context, CalendarEvent event) async {
+    await CalendarDialogs.showEventOptions(context, event);
+  }
+
+  Future<void> _openRecurringEventDialog(BuildContext context, RecurringCalendarEvent event) async {
+    await CalendarDialogs.showRecurringEventOptions(context, event);
   }
 }

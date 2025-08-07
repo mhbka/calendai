@@ -40,12 +40,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
     _descriptionController = TextEditingController(text: widget.currentEvent?.description ?? '');
     if (widget.currentEvent != null) {
       _isActive = widget.currentEvent!.isActive;
-      RecurrenceData currentEventRRule = convertToRecurrenceData(
-        RecurrenceRule.fromString(widget.currentEvent!.rrule),
-        widget.currentEvent!.recurrenceStart,
-        TimeOfDay.fromDateTime(widget.currentEvent!.recurrenceStart),
-        TimeOfDay.fromDateTime(widget.currentEvent!.recurrenceStart.add(Duration(seconds: widget.currentEvent!.eventDurationSeconds)))
-      );
+      RecurrenceData currentEventRRule = getEventRecurrence(widget.currentEvent!);
       _recurrenceInputController = RecurrenceInputController(initialData: currentEventRRule);
     }
     else {

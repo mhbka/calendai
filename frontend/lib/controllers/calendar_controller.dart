@@ -105,44 +105,19 @@ class CalendarController extends ChangeNotifier {
   }
 
   /// Saves a new event/updates the current event.
-  Future<void> saveEvent({
-    CalendarEvent? existingEvent,
-    required String title,
-    required String description,
-    String? location,
-    required DateTime startTime,
-    required DateTime endTime,
-  }) async {
+  Future<void> saveEvent(CalendarEvent event,  bool isNewEvent) async {
     _setLoading(true);
     try {
-      CalendarEvent savedEvent;
-      
-      if (existingEvent != null) {
-        savedEvent = existingEvent.copyWith(
-          title: title,
-          description: description,
-          location: location,
-          startTime: startTime,
-          endTime: endTime,
-        );
-        await CalendarApiService.updateEvent(savedEvent);
-        await loadEvents();
+      if (isNewEvent) {
+        await CalendarApiService.createEvents([event]);
       } 
       else {
-        final newEvent = CalendarEvent(
-          id: "-1", // new events don't have IDs
-          title: title,
-          description: description,
-          location: location,
-          startTime: startTime,
-          endTime: endTime,
-        );
-        await CalendarApiService.createEvents([newEvent]);
-        await loadEvents();
+        await CalendarApiService.updateEvent(event);
       }
     } catch (e) {
       rethrow;
     } finally {
+      await loadEvents();
       _setLoading(false);
     }
   }
@@ -153,7 +128,6 @@ class CalendarController extends ChangeNotifier {
     try {
       await CalendarApiService.deleteEvent(event.id);
       NotificationService.cancelEventReminder(event.id);
-      
       _events.removeWhere((e) => e.id == event.id);
       notifyListeners();
     } catch (e) {

@@ -74,41 +74,8 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
       builder: (context) => EventDialog(
         event: event,
         selectedDay: event.startTime,
-        onSave: _saveGeneratedEvent,
       ),
     );
-  }
-
-  Future<void> _saveGeneratedEvent(
-    CalendarEvent? existingEvent,
-    String title,
-    String description,
-    String? location,
-    DateTime startTime,
-    DateTime endTime,
-  ) async {
-    Navigator.pop(context);
-    
-    try {
-      await _controller.saveGeneratedEvent(
-        existingEvent: existingEvent,
-        title: title,
-        description: description,
-        location: location,
-        startTime: startTime,
-        endTime: endTime,
-      );
-
-      if (_controller.hasCalendarController) {
-        _showSnackBar('Event created successfully!');
-        Navigator.pop(context);
-      } else {
-        _showSnackBar('Event preview completed');
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      _showErrorDialog('Save Error', 'Failed to save event: $e');
-    }
   }
 
   void _showErrorDialog(String title, String message) {
