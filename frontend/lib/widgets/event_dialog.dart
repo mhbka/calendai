@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/widgets/datetime_picker.dart';
 
 /// Dialog for creating a new event/updating a selected event.
 class EventDialog extends StatefulWidget {
@@ -47,50 +48,6 @@ class _EventDialogState extends State<EventDialog> {
   }
 
   bool get _isEditing => widget.event != null;
-
-  Future<void> _selectStartTime() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _startTime,
-      firstDate: DateTime.now().subtract(Duration(days: 365)),
-      lastDate: DateTime.now().add(Duration(days: 365)),
-    );
-    if (date != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(_startTime),
-      );
-      if (time != null) {
-        setState(() {
-          _startTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-          if (_endTime.isBefore(_startTime)) {
-            _endTime = _startTime.add(Duration(hours: 1));
-          }
-        });
-      }
-    }
-  }
-
-  Future<void> _selectEndTime() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _endTime,
-      firstDate: _startTime,
-      lastDate: DateTime.now().add(Duration(days: 365)),
-    );
-    if (date != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(_endTime),
-      );
-      
-      if (time != null) {
-        setState(() {
-          _endTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-        });
-      }
-    }
-  }
 
   void _save() {
     if (_titleController.text.isEmpty) return;
@@ -154,18 +111,14 @@ class _EventDialogState extends State<EventDialog> {
               decoration: InputDecoration(labelText: 'Location (optional)'),
             ),
             SizedBox(height: 16),
-            ListTile(
-              title: Text('Start'),
-              subtitle: Text('${_startTime.day}/${_startTime.month}/${_startTime.year} ${_startTime.hour}:${_startTime.minute.toString().padLeft(2, '0')}'),
-              trailing: Icon(Icons.edit),
-              onTap: _selectStartTime,
-            ),
-            ListTile(
-              title: Text('End'),
-              subtitle: Text('${_endTime.day}/${_endTime.month}/${_endTime.year} ${_endTime.hour}:${_endTime.minute.toString().padLeft(2, '0')}'),
-              trailing: Icon(Icons.edit),
-              onTap: _selectEndTime,
-            ),
+            DateTimePicker(
+              onDateTimesChanged: (start, end) {
+                setState(() {
+                  _startTime = start;
+                  _endTime = end;
+                });
+              }
+            )
           ],
         ),
       ),

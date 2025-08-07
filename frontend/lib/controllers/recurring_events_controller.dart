@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/models/recurring_event_exception.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/services/recurring_event_groups_api_service.dart';
 import 'package:namer_app/services/recurring_events_api_service.dart';
@@ -108,6 +109,28 @@ class RecurringEventsController extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  /// Save a recurring event exception.
+  Future<void> saveEventException(RecurringEventException exception, bool isNewException) async {
+    _setLoading(true);
+    try {
+      if (isNewException) { 
+        await RecurringEventsApiService.createEventException(exception);
+      }
+      else {
+        await RecurringEventsApiService.updateEventException(exception);
+      }
+    }
+    catch (e) {
+      rethrow;
+    }
+    finally {
+      await loadEvents();
+      _setLoading(false);
+    }
+  }
+
+  /// Deletes an event instance (could be )
 
   /// Toggle whether to only display events with active status.
   void toggleFilterActiveEvents() => _filterActiveEvents = !_filterActiveEvents;

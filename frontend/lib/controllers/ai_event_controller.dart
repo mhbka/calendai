@@ -79,6 +79,8 @@ class AddAIEventController extends ChangeNotifier {
     required DateTime endTime,
   }) async {
     if (_calendarController != null) {
+      // TODO: think this API will be changed/deleted
+      /*
       await _calendarController!.saveEvent(
         existingEvent: existingEvent,
         title: title,
@@ -87,6 +89,7 @@ class AddAIEventController extends ChangeNotifier {
         startTime: startTime,
         endTime: endTime,
       );
+      */
     }
   }
 

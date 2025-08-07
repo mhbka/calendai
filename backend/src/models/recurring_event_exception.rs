@@ -39,6 +39,7 @@ pub struct NewRecurringEventException {
 #[serde(rename_all = "lowercase")]
 #[derive(sqlx::Type)]
 #[sqlx(type_name = "varchar", rename_all = "lowercase")]
+/// The type of recurring event exception.
 pub enum ExceptionType {
     Cancelled,
     Modified,

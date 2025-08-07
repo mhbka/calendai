@@ -1,52 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/controllers/recurring_events_controller.dart';
-import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/models/recurring_calendar_event.dart';
+import 'package:namer_app/models/recurring_event_exception.dart';
 import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
-import 'package:namer_app/widgets/recurrence_input.dart';
+import 'package:namer_app/widgets/date_picker.dart';
+import 'package:namer_app/widgets/datetime_picker.dart';
 
-/// Dialog for creating a new recurring event/updating a selected event.
-class RecurringEventDialog extends StatefulWidget {
-  final RecurringEvent? currentEvent;
+/// Dialog for creating/updating a 'modify' recurring event exception.
+class RecurringEventExceptionDialog extends StatefulWidget {
+  final RecurringCalendarEvent event;
 
-  const RecurringEventDialog({
-    Key? key,
-    this.currentEvent,
-  }) : super(key: key);
+  const RecurringEventExceptionDialog({
+    super.key,
+    required this.event
+  });
 
   @override
-  _RecurringEventDialogState createState() => _RecurringEventDialogState();
+  _RecurringEventExceptionDialogState createState() => _RecurringEventExceptionDialogState();
 }
 
-class _RecurringEventDialogState extends State<RecurringEventDialog> {
+class _RecurringEventExceptionDialogState extends State<RecurringEventExceptionDialog> {
   final RecurringEventsController _controller = RecurringEventsController.instance;
-  late RecurrenceInputController _recurrenceInputController;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _locationController;
   
-  bool _isActive = true;
-  DateTime _startDate = DateTime.now();
-  DateTime? _endDate;
+  late DateTime _startTime;
+  late DateTime _endTime;
   
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-
-    _titleController = TextEditingController(text: widget.currentEvent?.title ?? '');
-    _descriptionController = TextEditingController(text: widget.currentEvent?.description ?? '');
-    _locationController = TextEditingController(text: widget.currentEvent?.location ?? '');
-
-    if (widget.currentEvent != null) {
-      _isActive = widget.currentEvent!.isActive;
-      RecurrenceData currentEventRRule = getEventRecurrence(widget.currentEvent!);
-      _recurrenceInputController = RecurrenceInputController(initialData: currentEventRRule);
-    }
-    else {
-      _recurrenceInputController = RecurrenceInputController();
-    }
+    _titleController = TextEditingController(text: widget.event.title);
+    _descriptionController = TextEditingController(text: widget.event.description);
+    _locationController = TextEditingController(text: widget.event.location);
+    _startTime = widget.event.startTime;
+    _endTime = widget.event.endTime;
   }
 
   @override
@@ -56,13 +47,11 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
     super.dispose();
   }
 
-  bool get _isEditing => widget.currentEvent != null;
-
   void _save() {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    if (_endDate != null && _startDate.isAfter(_endDate!)) {
+    if (_startTime.isAfter(_endTime)) {
       Alerts.showErrorDialog(
         context, 
         "Error",
@@ -70,48 +59,61 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
       );
       return;
     }
+    _saveException();
+  }
 
-    String id;
-    if (_isEditing) {
-      if (widget.currentEvent != null) {
-        id = widget.currentEvent!.id;
-      }
-      else {
-        Alerts.showErrorDialog(
-          context, 
-          "Unexpected error occurred", 
-          "No current event found despite being in edit mode. Apologies for this bug! Please try again."
-        );
-        return;
+  /// Saves this dialog as an exception.
+  void _saveException() {
+    String? modifiedTitle;
+    String? modifiedDescription;
+    String? modifiedLocation;
+    DateTime? modifiedStartTime;
+    DateTime? modifiedEndTime;
+    if (_titleController.text.trim() != widget.event.title) {
+      modifiedTitle = _titleController.text.trim();
+    }
+    {
+      String? description = _descriptionController.text.trim().isEmpty 
+        ? null 
+        : _descriptionController.text.trim();
+      if (description != widget.event.description) {
+        modifiedDescription = description;
       }
     }
-    else {
-      id = '-1';
+    {
+      String? location = _locationController.text.trim().isEmpty 
+        ? null 
+        : _locationController.text.trim();
+      if (location != widget.event.location) {
+        modifiedLocation = location;
+      }
     }
-    RecurringEvent event = RecurringEvent(
-      id: id, 
-      groupId: _controller.currentGroup?.id,
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim().isEmpty 
-          ? null 
-          : _descriptionController.text.trim(),
-      location: _locationController.text.trim().isEmpty 
-          ? null 
-          : _locationController.text.trim(),
-      isActive: _isActive,
-      recurrenceStart: _startDate,
-      recurrenceEnd: _endDate,
-      rrule: _recurrenceInputController.getRRule().toString(),
-      eventDurationSeconds: _recurrenceInputController.getEventDurationSeconds()
+    if (_startTime != widget.event.startTime) {
+      modifiedStartTime = _startTime;
+    }
+    if (_endTime != widget.event.endTime) {
+      modifiedEndTime = _endTime;
+    }
+
+    RecurringEventException exception = RecurringEventException(
+      id: widget.event.exceptionId ?? '-1', 
+      recurringEventId: widget.event.recurringEventId, 
+      exceptionDate: widget.event.startTime, 
+      exceptionType: RecurringEventExceptionType.modified,
+      modifiedTitle: modifiedTitle,
+      modifiedDescription: modifiedDescription,
+      modifiedLocation: modifiedLocation,
+      modifiedStartTime: modifiedStartTime,
+      modifiedEndTime: modifiedEndTime
     );
-    _controller.saveEvent(event, !_isEditing)
+    _controller.saveEventException(exception, widget.event.exceptionId == null)
       .then((v) => {if (mounted) Navigator.pop(context)})
       .catchError((err) async {
         if (mounted)  {
           await Alerts.showErrorDialog(
             context, 
             "Error", 
-            "Failed to save the event: $err. Please try again later."
+            "Failed to save this recurring event's exception: $err. Please try again later."
           );
         }
         return <dynamic>{}; // quirk of flutter/dart i guess
@@ -186,28 +188,12 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
     );
   }
 
-  Widget _buildRecurrenceInput() {
-    return RecurrenceInput(controller: _recurrenceInputController);
-  }
-
-  Widget _buildActiveSwitch() {
-    return Row(
-      spacing: 8,
-      children: [
-        const Text('Active: '),
-        Switch(
-          value: _isActive,
-          onChanged: (value) {
-            setState(() {
-              _isActive = value;
-            });
-          },
-        ),
-        Tooltip(
-          message: 'When inactive, events in this group will be disabled by default',
-          child: Icon(Icons.help_outline, size: 16, color: Colors.grey),
-        ),
-      ],
+  Widget _buildDatePicker() {
+    return DateTimePicker(
+      onDateTimesChanged: (start, end) {
+        _startTime = start;
+        _endTime = end;
+      }
     );
   }
 
@@ -219,7 +205,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
       ),
       ElevatedButton(
         onPressed: _save,
-        child: Text(_isEditing ? 'Update' : 'Add'),
+        child: Text('Save'),
       ),
     ];
   }
@@ -227,7 +213,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit event' : 'Create a new event'),
+      title: Text(widget.event.exceptionId != null ? 'Edit an exception' : 'Create an exception'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -241,9 +227,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
               const SizedBox(height: 16),
               _buildLocationField(),
               const SizedBox(height: 16),
-              _buildActiveSwitch(),
-              const SizedBox(height: 16),
-              _buildRecurrenceInput()
+              _buildDatePicker()
             ],
           ),
         ),

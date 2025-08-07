@@ -3,7 +3,7 @@ use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Jso
 use chrono::{DateTime, Duration, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::models::{recurring_event::UpdatedRecurringEvent, recurring_event_group::RecurringEventGroup};
+use crate::models::{recurring_event::UpdatedRecurringEvent, recurring_event_exception::NewRecurringEventException, recurring_event_group::RecurringEventGroup};
 use crate::models::time::Second;
 use crate::{api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, models::{recurring_event::{NewRecurringEvent, RecurringCalendarEvent, RecurringEvent}, recurring_event_exception::ExceptionType}};
 use crate::models::rrule::ValidatedRRule;
@@ -22,6 +22,8 @@ pub(super) fn router() -> Router<AppState> {
         .route("/", get(get_events))
         .route("/", put(update_event))
         .route("/{event_id}", delete(delete_event))
+        .route("/exception", post(create_event_exception))
+        .route("/exception", put(update_event_exception))
 }
 
 async fn create_events(
@@ -346,4 +348,20 @@ async fn delete_event(
             .await?;
         Ok(())
     }
+}
+
+async fn create_event_exception(
+    State(app_state): State<AppState>,
+    user: AuthUser,
+    Json(mut event): Json<NewRecurringEventException>
+) -> ApiResult<()> {
+    Ok(())
+}
+
+async fn update_event_exception(
+    State(app_state): State<AppState>,
+    user: AuthUser,
+    Json(mut event): Json<NewRecurringEventException>
+) -> ApiResult<()> {
+    Ok(())
 }

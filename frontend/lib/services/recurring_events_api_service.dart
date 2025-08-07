@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:namer_app/main.dart';
 import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/models/recurring_event_exception.dart';
 import 'package:namer_app/services/base_api_service.dart';
 import 'package:namer_app/services/recurring_event_groups_api_service.dart';
 
@@ -58,6 +59,30 @@ class RecurringEventsApiService extends BaseApiService {
     return BaseApiService.handleRequest(
       () => http.delete(
         Uri.parse("$baseUrl/$eventId"), 
+        headers: BaseApiService.headers
+      ),
+      (response) {},
+    );
+  }
+
+  /// Create an event exception (modifies/deletes a single instance of a recurring event).
+  static Future<void> createEventException(RecurringEventException exception) async {
+    return BaseApiService.handleRequest(
+      () => http.post(
+        Uri.parse("$baseUrl/exception"), 
+        body: json.encode(exception),
+        headers: BaseApiService.headers
+      ),
+      (response) {},
+    );
+  }
+
+  /// Update an event exception.
+  static Future<void> updateEventException(RecurringEventException exception) async {
+    return BaseApiService.handleRequest(
+      () => http.put(
+        Uri.parse("$baseUrl/exception"), 
+        body: json.encode(exception),
         headers: BaseApiService.headers
       ),
       (response) {},

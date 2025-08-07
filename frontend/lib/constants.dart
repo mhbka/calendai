@@ -23,14 +23,6 @@ class CalendarConstants {
   static const TextStyle whiteTextStyle = TextStyle(color: Colors.white);
   static const TextStyle errorTextStyle = TextStyle(color: Colors.red);
   
-  // Messages
-  static const String failedToSaveMessage = 'Failed to save event';
-  static const String failedToDeleteMessage = 'Failed to delete event';
-  static const String failedToLoadMessage = 'Failed to load events';
-  static const String deleteConfirmationTitle = 'Delete Event';
-  static const String deleteConfirmationMessage = 'Are you sure you want to delete';
-  static const String todaysEventsTitle = "Today's events";
-  
   // Button Labels
   static const String addWithAILabel = 'Add with AI';
   static const String addEventLabel = 'Add Event';

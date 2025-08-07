@@ -27,7 +27,7 @@ class CalendarEventsList extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              CalendarConstants.todaysEventsTitle,
+              "Today's events",
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),

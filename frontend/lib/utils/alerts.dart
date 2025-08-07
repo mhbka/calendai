@@ -172,7 +172,7 @@ class Alerts {
     String? confirmText,
     String? cancelText,
     bool barrierDismissible = true,
-    bool useRootNavigator = false,
+    bool useRootNavigator = true,
   }) {
     final color = _getAlertColor(type);
     final icon = _getAlertIcon(type);
