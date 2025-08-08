@@ -22,15 +22,6 @@ class CalendarConstants {
   // Text Styles
   static const TextStyle whiteTextStyle = TextStyle(color: Colors.white);
   static const TextStyle errorTextStyle = TextStyle(color: Colors.red);
-  
-  // Button Labels
-  static const String addWithAILabel = 'Add with AI';
-  static const String addEventLabel = 'Add Event';
-  static const String cancelLabel = 'Cancel';
-  static const String deleteLabel = 'Delete';
-  static const String logoutLabel = 'Log out';
-  static const String refreshLabel = 'Refresh';
-  static const String viewRecurringEventsLabel = 'View recurring events';
 }
 
 class CalendarTheme {

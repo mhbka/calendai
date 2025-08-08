@@ -26,12 +26,12 @@ class CalendarDialogs {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(CalendarConstants.cancelLabel),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: CalendarTheme.errorButtonStyle,
-            child: Text(CalendarConstants.deleteLabel),
+            child: Text('Delete'),
           ),
         ],
       ),
@@ -89,7 +89,7 @@ class CalendarDialogs {
           ),
           ListTile(
             leading: Icon(Icons.cancel),
-            title: Text(CalendarConstants.cancelLabel),
+            title: Text('Cancel'),
             onTap: () => Navigator.pop(context),
           ),
         ],
@@ -152,7 +152,7 @@ class CalendarDialogs {
           ),
           ListTile(
             leading: Icon(Icons.cancel),
-            title: Text(CalendarConstants.cancelLabel),
+            title: Text('Cancel'),
             onTap: () => Navigator.pop(context),
           ),
         ],

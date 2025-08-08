@@ -17,13 +17,13 @@ List<Widget> buildCalendarAppbarActions(
         onPressed: () => context.push('/recurring_event_groups'),
         style: CalendarTheme.primaryButtonStyle,
         child: Text(
-          CalendarConstants.viewRecurringEventsLabel,
+          "View recurring events",
           style: CalendarConstants.whiteTextStyle,
         ),
       ),
       TextButton(
         onPressed: handleLogout,
-        child: Text(CalendarConstants.logoutLabel),
+        child: Text("Log out"),
       ),
     ];
 }
@@ -45,7 +45,7 @@ Widget buildFloatingActions(
           backgroundColor: CalendarConstants.primaryColor,
           icon: Icon(Icons.auto_awesome, color: Colors.white),
           label: Text(
-            CalendarConstants.addWithAILabel,
+            "Add with AI",
             style: CalendarConstants.whiteTextStyle,
           ),
         ),
@@ -53,7 +53,7 @@ Widget buildFloatingActions(
           onPressed: showEventDialog,
           heroTag: "normal_add",
           icon: Icon(Icons.add),
-          label: Text(CalendarConstants.addEventLabel),
+          label: Text("Add an event"),
         ),
       ],
     ),

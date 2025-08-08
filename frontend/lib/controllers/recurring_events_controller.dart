@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/models/recurring_event_exception.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
@@ -27,6 +28,7 @@ class RecurringEventsController extends ChangeNotifier {
   List<RecurringEvent> _events = [];
   bool _filterActiveEvents = false;
   bool _isLoading = false;
+  CalendarController _calendarController = CalendarController.instance;
   
   RecurringEventGroup? get currentGroup => _currentGroup; 
   bool get filterActiveEvents => _filterActiveEvents;
@@ -114,13 +116,10 @@ class RecurringEventsController extends ChangeNotifier {
   Future<void> saveEventException(RecurringEventException exception, bool isNewException) async {
     _setLoading(true);
     try {
-      print("now saving exception");
       if (isNewException) { 
-        print("opt 1");
         await RecurringEventsApiService.createEventException(exception);
       }
       else {
-        print("opt 2");
         await RecurringEventsApiService.updateEventException(exception);
       }
     }
@@ -128,9 +127,7 @@ class RecurringEventsController extends ChangeNotifier {
       rethrow;
     }
     finally {
-      print("now loading events");
-      await loadEvents();
-      print("done loading");
+      await _calendarController.loadEvents();
       _setLoading(false);
     }
   }

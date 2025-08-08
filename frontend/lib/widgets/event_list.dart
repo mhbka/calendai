@@ -209,9 +209,10 @@ class EventListItem extends StatelessWidget {
 
   Widget _buildMetadataComponent(String text, IconData? icon, String? tooltipMessage) {
   String? originalText;
-  if (text.length > 20) {
+  if (text.length > 18) {
+    // around the length where it overflows onto the next line
     originalText = text;
-    text = '${text.substring(0, 20)}...';
+    text = '${text.substring(0, 18)}...';
   }
 
   return Row(

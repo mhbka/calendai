@@ -227,6 +227,7 @@ async fn get_events(
                     if let Some(modified_description) = exception.modified_description { event.description = modified_description; }
                     if let Some(modified_start) = exception.modified_start_time { event.start_time = modified_start; }
                     if let Some(modified_end) = exception.modified_end_time { event.end_time = modified_end; }
+                    event.exception_id = Some(exception.id);
                 }
             }
         };

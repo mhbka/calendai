@@ -8,7 +8,6 @@ import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/pages/calendar_page/calendar_action_widgets.dart';
 import 'package:namer_app/pages/calendar_page/calendar_events_list.dart';
-import 'package:namer_app/pages/calendar_page/calendar_dialogs.dart';
 import 'package:namer_app/pages/calendar_page/calendar.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
@@ -22,7 +21,6 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   final CalendarController _controller = CalendarController.instance;
-  late final CalendarDialogs _calendarDialogs;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
   @override
