@@ -9,39 +9,40 @@ part of 'recurring_event.dart';
 RecurringEvent _$RecurringEventFromJson(Map<String, dynamic> json) =>
     RecurringEvent(
       id: json['id'] as String,
-      groupId: json['groupId'] as String?,
-      isActive: json['isActive'] as bool,
+      groupId: json['group_id'] as String?,
+      isActive: json['is_active'] as bool,
       title: json['title'] as String,
       description: json['description'] as String?,
       location: json['location'] as String?,
-      eventDurationSeconds: (json['eventDurationSeconds'] as num).toInt(),
+      eventDurationSeconds: (json['event_duration_seconds'] as num).toInt(),
       recurrenceStart: const DatetimeConverter().fromJson(
-        json['recurrenceStart'] as String,
+        json['recurrence_start'] as String,
       ),
       recurrenceEnd: _$JsonConverterFromJson<String, DateTime>(
-        json['recurrenceEnd'],
+        json['recurrence_end'],
         const DatetimeConverter().fromJson,
       ),
       rrule: json['rrule'] as String,
     );
 
-Map<String, dynamic> _$RecurringEventToJson(
-  RecurringEvent instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'groupId': instance.groupId,
-  'isActive': instance.isActive,
-  'title': instance.title,
-  'description': instance.description,
-  'location': instance.location,
-  'eventDurationSeconds': instance.eventDurationSeconds,
-  'recurrenceStart': const DatetimeConverter().toJson(instance.recurrenceStart),
-  'recurrenceEnd': _$JsonConverterToJson<String, DateTime>(
-    instance.recurrenceEnd,
-    const DatetimeConverter().toJson,
-  ),
-  'rrule': instance.rrule,
-};
+Map<String, dynamic> _$RecurringEventToJson(RecurringEvent instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'group_id': instance.groupId,
+      'is_active': instance.isActive,
+      'title': instance.title,
+      'description': instance.description,
+      'location': instance.location,
+      'event_duration_seconds': instance.eventDurationSeconds,
+      'recurrence_start': const DatetimeConverter().toJson(
+        instance.recurrenceStart,
+      ),
+      'recurrence_end': _$JsonConverterToJson<String, DateTime>(
+        instance.recurrenceEnd,
+        const DatetimeConverter().toJson,
+      ),
+      'rrule': instance.rrule,
+    };
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

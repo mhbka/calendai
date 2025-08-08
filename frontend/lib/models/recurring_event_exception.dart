@@ -4,7 +4,7 @@ import 'package:namer_app/utils/datetime_converter.dart';
 part 'recurring_event_exception.g.dart';
 
 /// An exception to a recurring event.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RecurringEventException {
   final String id;
   final String recurringEventId;
@@ -33,7 +33,7 @@ class RecurringEventException {
     this.modifiedStartTime,
     this.modifiedEndTime,
   });
-  
+
   factory RecurringEventException.fromJson(Map<String, dynamic> json) => 
       _$RecurringEventExceptionFromJson(json);
   

@@ -44,3 +44,12 @@ pub enum ExceptionType {
     Cancelled,
     Modified,
 }
+
+impl ToString for ExceptionType {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Cancelled => "cancelled".into(),
+            Self::Modified => "modified".into()
+        }
+    }
+}

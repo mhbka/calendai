@@ -6,7 +6,7 @@ import 'package:namer_app/utils/datetime_converter.dart';
 part 'recurring_event_group.g.dart';
 
 /// Describes a recurring event group.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RecurringEventGroup {
   final String name;
   final String id;
@@ -21,7 +21,7 @@ class RecurringEventGroup {
   final DateTime? startDate;
   @DatetimeConverter()
   final DateTime? endDate;
-  
+
   final num? recurringEvents;
 
   RecurringEventGroup({

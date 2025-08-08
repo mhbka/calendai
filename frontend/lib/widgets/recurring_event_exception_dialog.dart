@@ -3,7 +3,6 @@ import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/models/recurring_event_exception.dart';
 import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/date_picker.dart';
 import 'package:namer_app/widgets/datetime_picker.dart';
 
 /// Dialog for creating/updating a 'modify' recurring event exception.
@@ -107,7 +106,10 @@ class _RecurringEventExceptionDialogState extends State<RecurringEventExceptionD
       modifiedEndTime: modifiedEndTime
     );
     _controller.saveEventException(exception, widget.event.exceptionId == null)
-      .then((v) => {if (mounted) Navigator.pop(context)})
+      .then((v) {
+        if (mounted) {Navigator.pop(context);}
+        print("this is after the save");
+      })
       .catchError((err) async {
         if (mounted)  {
           await Alerts.showErrorDialog(
@@ -116,7 +118,6 @@ class _RecurringEventExceptionDialogState extends State<RecurringEventExceptionD
             "Failed to save this recurring event's exception: $err. Please try again later."
           );
         }
-        return <dynamic>{}; // quirk of flutter/dart i guess
       });
   }
 

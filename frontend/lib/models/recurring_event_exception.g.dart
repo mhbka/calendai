@@ -10,23 +10,23 @@ RecurringEventException _$RecurringEventExceptionFromJson(
   Map<String, dynamic> json,
 ) => RecurringEventException(
   id: json['id'] as String,
-  recurringEventId: json['recurringEventId'] as String,
+  recurringEventId: json['recurring_event_id'] as String,
   exceptionDate: const DatetimeConverter().fromJson(
-    json['exceptionDate'] as String,
+    json['exception_date'] as String,
   ),
   exceptionType: $enumDecode(
     _$RecurringEventExceptionTypeEnumMap,
-    json['exceptionType'],
+    json['exception_type'],
   ),
-  modifiedTitle: json['modifiedTitle'] as String?,
-  modifiedDescription: json['modifiedDescription'] as String?,
-  modifiedLocation: json['modifiedLocation'] as String?,
+  modifiedTitle: json['modified_title'] as String?,
+  modifiedDescription: json['modified_description'] as String?,
+  modifiedLocation: json['modified_location'] as String?,
   modifiedStartTime: _$JsonConverterFromJson<String, DateTime>(
-    json['modifiedStartTime'],
+    json['modified_start_time'],
     const DatetimeConverter().fromJson,
   ),
   modifiedEndTime: _$JsonConverterFromJson<String, DateTime>(
-    json['modifiedEndTime'],
+    json['modified_end_time'],
     const DatetimeConverter().fromJson,
   ),
 );
@@ -35,18 +35,18 @@ Map<String, dynamic> _$RecurringEventExceptionToJson(
   RecurringEventException instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  'recurringEventId': instance.recurringEventId,
-  'exceptionDate': const DatetimeConverter().toJson(instance.exceptionDate),
-  'exceptionType':
+  'recurring_event_id': instance.recurringEventId,
+  'exception_date': const DatetimeConverter().toJson(instance.exceptionDate),
+  'exception_type':
       _$RecurringEventExceptionTypeEnumMap[instance.exceptionType]!,
-  'modifiedTitle': instance.modifiedTitle,
-  'modifiedDescription': instance.modifiedDescription,
-  'modifiedLocation': instance.modifiedLocation,
-  'modifiedStartTime': _$JsonConverterToJson<String, DateTime>(
+  'modified_title': instance.modifiedTitle,
+  'modified_description': instance.modifiedDescription,
+  'modified_location': instance.modifiedLocation,
+  'modified_start_time': _$JsonConverterToJson<String, DateTime>(
     instance.modifiedStartTime,
     const DatetimeConverter().toJson,
   ),
-  'modifiedEndTime': _$JsonConverterToJson<String, DateTime>(
+  'modified_end_time': _$JsonConverterToJson<String, DateTime>(
     instance.modifiedEndTime,
     const DatetimeConverter().toJson,
   ),

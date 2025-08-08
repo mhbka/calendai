@@ -8,7 +8,6 @@ use crate::models::{recurring_event_group::RecurringEventGroup, rrule::Validated
 /// 
 /// *NOTE*: This isn't represented in the database but is constructed in the backend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct RecurringCalendarEvent {
     // event metadata
     pub title: String,
@@ -30,7 +29,6 @@ pub struct RecurringCalendarEvent {
 /// 
 /// Thus, it is critical that they both contain the same datetime. 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct RecurringEvent {
     pub id: Uuid,
     pub group_id: Option<Uuid>,
@@ -46,7 +44,6 @@ pub struct RecurringEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct NewRecurringEvent {
     pub group_id: Option<Uuid>,
     pub is_active: bool,
@@ -60,7 +57,6 @@ pub struct NewRecurringEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct UpdatedRecurringEvent {
     pub id: Uuid,
     pub group_id: Option<Uuid>,

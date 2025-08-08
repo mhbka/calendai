@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use axum::{extract::{Path, Query, State}, routing::{delete, get, post, put}, Json, Router};
 use chrono::{DateTime, Duration, Utc};
 use serde::Deserialize;
@@ -152,7 +152,10 @@ async fn get_events(
 
     // get exceptions within start/end dates
     let mut event_exceptions: Vec<RecurringEventException> = {
-        let event_ids: Vec<_> = events_and_instances.iter().map(|(e, _)| e.id).collect();
+        let event_ids: Vec<_> = events_and_instances
+            .iter()
+            .map(|(e, _)| e.id)
+            .collect();
         sqlx::query_as!(
             RecurringEventException,
             r#"
@@ -353,15 +356,106 @@ async fn delete_event(
 async fn create_event_exception(
     State(app_state): State<AppState>,
     user: AuthUser,
-    Json(mut event): Json<NewRecurringEventException>
+    Json(exception): Json<NewRecurringEventException>
 ) -> ApiResult<()> {
-    Ok(())
+    let user_authorized = {
+        let event = sqlx::query!(
+            r#"
+                SELECT COUNT(*)
+                FROM recurring_event_exceptions ree
+                LEFT JOIN recurring_events re ON ree.recurring_event_id = re.id
+                WHERE re.user_id = $1 AND re.id = $2
+            "#,
+            user.id,
+            exception.recurring_event_id
+        )
+            .fetch_optional(&app_state.db)
+            .await?;
+        event.is_some()
+    };
+    if !user_authorized {
+        return Err(ApiError::Forbidden);
+    }
+    match sqlx::query!(
+        r#"
+            INSERT INTO recurring_event_exceptions (
+                recurring_event_id,
+                exception_date,
+                exception_type,
+                modified_title,
+                modified_description,
+                modified_location,
+                modified_start_time,
+                modified_end_time
+            )
+            VALUES ($1, $2, 'modified', $3, $4, $5, $6, $7)
+        "#,
+        exception.recurring_event_id,
+        exception.exception_date,
+        exception.modified_title,
+        exception.modified_description,
+        exception.modified_location as Option<Option<String>>,
+        exception.modified_start_time,
+        exception.modified_end_time
+    )
+        .execute(&app_state.db)
+        .await
+    {
+        Ok(_) => Ok(()),
+        Err(sqlx::Error::Database(db_err)) if db_err.constraint() == Some("unique_exception_per_instance") => {
+            // just to make things clearer
+            return Err(ApiError::unprocessable_entity(vec![("exception_date", "There's already an exception on this exception date")]));
+        },
+        Err(err) => return Err(err.into())
+    }
 }
 
 async fn update_event_exception(
     State(app_state): State<AppState>,
     user: AuthUser,
-    Json(mut event): Json<NewRecurringEventException>
+    Json(exception): Json<RecurringEventException>
 ) -> ApiResult<()> {
-    Ok(())
+    let user_authorized = {
+        let event = sqlx::query!(
+            r#"
+                SELECT COUNT(*)
+                FROM recurring_event_exceptions ree
+                LEFT JOIN recurring_events re ON ree.recurring_event_id = re.id
+                WHERE re.user_id = $1 AND re.id = $2
+            "#,
+            user.id,
+            exception.recurring_event_id
+        )
+            .fetch_optional(&app_state.db)
+            .await?;
+        event.is_some()
+    };
+    if !user_authorized {
+        return Err(ApiError::Forbidden);
+    }
+    sqlx::query!(
+        r#"
+            UPDATE recurring_event_exceptions 
+            SET 
+                exception_date = $2,
+                exception_type = $3,
+                modified_title = $4,
+                modified_description = $5,
+                modified_location = $6,
+                modified_start_time = $7,
+                modified_end_time = $8
+            WHERE id = $1
+        "#,
+        exception.id,
+        exception.exception_date,
+        &exception.exception_type.to_string(),
+        exception.modified_title,
+        exception.modified_description as Option<Option<String>>,
+        exception.modified_location as Option<Option<String>>,
+        exception.modified_start_time,
+        exception.modified_end_time
+    )
+        .execute(&app_state.db)
+        .await?;
+    Ok(())    
 }

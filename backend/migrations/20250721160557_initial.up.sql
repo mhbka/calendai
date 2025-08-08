@@ -75,5 +75,9 @@ CREATE TABLE recurring_event_exceptions (
         CHECK (
             exception_type != 'modified' OR 
             modified_start_time < modified_end_time
-        )
+        ),
+        
+    -- Ensure only one exception per instance
+    CONSTRAINT unique_exception_per_instance 
+        UNIQUE (recurring_event_id, exception_date)
 );

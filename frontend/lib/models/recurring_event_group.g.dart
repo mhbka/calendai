@@ -12,16 +12,16 @@ RecurringEventGroup _$RecurringEventGroupFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       description: json['description'] as String?,
       color: const ColorConverter().fromJson((json['color'] as num).toInt()),
-      isActive: json['isActive'] as bool?,
+      isActive: json['is_active'] as bool?,
       startDate: _$JsonConverterFromJson<String, DateTime>(
-        json['startDate'],
+        json['start_date'],
         const DatetimeConverter().fromJson,
       ),
       endDate: _$JsonConverterFromJson<String, DateTime>(
-        json['endDate'],
+        json['end_date'],
         const DatetimeConverter().fromJson,
       ),
-      recurringEvents: json['recurringEvents'] as num?,
+      recurringEvents: json['recurring_events'] as num?,
     );
 
 Map<String, dynamic> _$RecurringEventGroupToJson(
@@ -31,16 +31,16 @@ Map<String, dynamic> _$RecurringEventGroupToJson(
   'id': instance.id,
   'description': instance.description,
   'color': const ColorConverter().toJson(instance.color),
-  'isActive': instance.isActive,
-  'startDate': _$JsonConverterToJson<String, DateTime>(
+  'is_active': instance.isActive,
+  'start_date': _$JsonConverterToJson<String, DateTime>(
     instance.startDate,
     const DatetimeConverter().toJson,
   ),
-  'endDate': _$JsonConverterToJson<String, DateTime>(
+  'end_date': _$JsonConverterToJson<String, DateTime>(
     instance.endDate,
     const DatetimeConverter().toJson,
   ),
-  'recurringEvents': instance.recurringEvents,
+  'recurring_events': instance.recurringEvents,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

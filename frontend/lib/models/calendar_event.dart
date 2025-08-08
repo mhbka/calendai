@@ -4,7 +4,7 @@ import 'package:namer_app/utils/datetime_converter.dart';
 part 'calendar_event.g.dart';
 
 /// Describes a singular calendar event.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CalendarEvent {
   final String id;
   final String title;
@@ -12,10 +12,8 @@ class CalendarEvent {
   final String? location;
 
   @DatetimeConverter()
-  @JsonKey(name: 'start_time')
   final DateTime startTime;
   @DatetimeConverter()
-  @JsonKey(name: 'end_time')
   final DateTime endTime;
 
   CalendarEvent({

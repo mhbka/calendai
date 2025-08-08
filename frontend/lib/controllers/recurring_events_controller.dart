@@ -114,10 +114,13 @@ class RecurringEventsController extends ChangeNotifier {
   Future<void> saveEventException(RecurringEventException exception, bool isNewException) async {
     _setLoading(true);
     try {
+      print("now saving exception");
       if (isNewException) { 
+        print("opt 1");
         await RecurringEventsApiService.createEventException(exception);
       }
       else {
+        print("opt 2");
         await RecurringEventsApiService.updateEventException(exception);
       }
     }
@@ -125,7 +128,9 @@ class RecurringEventsController extends ChangeNotifier {
       rethrow;
     }
     finally {
+      print("now loading events");
       await loadEvents();
+      print("done loading");
       _setLoading(false);
     }
   }

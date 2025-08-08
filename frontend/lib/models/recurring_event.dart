@@ -4,7 +4,7 @@ import 'package:namer_app/utils/datetime_converter.dart';
 part 'recurring_event.g.dart';
 
 /// Describes a calendar event which can recur.
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RecurringEvent {
   final String id;
   final String? groupId;
