@@ -1,4 +1,4 @@
-use crate::{repositories::Repositories, services::calendar_events_service::CalendarEventsService};
+use crate::{repositories::Repositories, services::{calendar_events_service::CalendarEventsService, recurring_event_groups_service::RecurringEventGroupsService}};
 
 pub mod ai_add_events_service;
 pub mod calendar_events_service;
@@ -8,13 +8,15 @@ pub mod recurring_events_service;
 /// An abstraction over the business logic.
 #[derive(Clone, Debug)]
 pub struct Services {
-    pub calendar_events: CalendarEventsService
+    pub calendar_events: CalendarEventsService,
+    pub recurring_event_groups: RecurringEventGroupsService
 }
 
 impl Services {
     pub fn new(repositories: Repositories) -> Self {
         Self {
-            calendar_events: CalendarEventsService::new(repositories)
+            calendar_events: CalendarEventsService::new(repositories.clone()),
+            recurring_event_groups: RecurringEventGroupsService::new(repositories.clone())
         }
     }
 }
