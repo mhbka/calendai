@@ -1,30 +1,31 @@
 use std::sync::Arc;
 
 use axum::Router;
-use sqlx::{Pool, Postgres};
+use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower_http::trace::TraceLayer;
-use crate::config::Config;
+use crate::{config::Config, services::Services};
 
-pub(super) mod auth;
 pub(super) mod error;
 mod calendar_events;
 mod recurring_event_groups;
 mod recurring_events;
-mod ai_add_event;
+mod ai_add_events;
 
 /// State for the app.
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Config>,
-    pub db: Pool<Postgres>
+    pub db: PgPool, // TODO: delete this after I've fully migrated architecture
+    pub services: Services
 }
 
 /// Run the API.
-pub async fn run(config: Config, db: Pool<Postgres>) {
+pub async fn run(config: Config, services: Services, db: PgPool) {
     let app_state = AppState { 
         config: Arc::new(config), 
-        db 
+        db,
+        services 
     };
     let router = build_app_router(app_state);
     let listener = TcpListener::bind("0.0.0.0:80")
@@ -42,7 +43,7 @@ fn build_app_router(state: AppState) -> Router {
         .nest("/recurring_event_groups", recurring_event_groups::router())
         .nest("/recurring_events", recurring_events::router())
         .nest("/calendar_events", calendar_events::router())
-        .nest("/ai_add_event", ai_add_event::router())
+        .nest("/ai_add_event", ai_add_events::router())
         .with_state(state)
         .layer(TraceLayer::new_for_http())
 }

@@ -4,15 +4,21 @@ use axum::{
     routing::{delete, get, post, put}, 
     Json, Router,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::{
-    api::{auth::types::AuthUser, error::{ApiError, ApiResult}, AppState}, 
-    models::{
+    api::{error::{ApiError, ApiResult}, AppState}, auth::types::AuthUser, models::{
         recurring_event::RecurringEvent, 
         recurring_event_group::{NewRecurringEventGroup, RecurringEventGroup, UpdatedRecurringEventGroup}
     }
 };
+
+/// Used for bulk creating events, optionally under a group.
+#[derive(Deserialize)]
+struct GroupWithEvents {
+    recurring_events: Vec<RecurringEvent>,
+    recurring_event_group: Option<NewRecurringEventGroup>
+}
 
 /// The response for a group (includes the number of events under the group).
 #[derive(Serialize)]
@@ -29,6 +35,7 @@ pub(super) fn router() -> Router<AppState> {
         .route("/", get(fetch_all_groups))
         .route("/", post(add_group))
         .route("/", put(update_group))
+        .route("/with_events", post(add_with_events))
         .route("/{group_id}", delete(delete_group))
         .route("/{group_id}", get(fetch_group))
         .route("/{group_id}/events", get(fetch_events_for_group))
@@ -264,6 +271,40 @@ async fn delete_group(
             .await?;
         Ok(())
     }
+}
+
+async fn add_with_events(
+    State(app_state): State<AppState>,
+    user: AuthUser,
+    Json(events): Json<GroupWithEvents>
+) -> ApiResult<()> {
+    let group_id = match events.recurring_event_group {
+        Some(new_group) => {
+            let id = sqlx::query!(
+                r#"
+                    INSERT INTO recurring_event_groups 
+                    (user_id, name, description, color, group_is_active, group_recurrence_start, group_recurrence_end)
+                    VALUES 
+                    ($1, $2, $3, $4, $5, $6, $7)
+                    RETURNING id
+                "#,
+                user.id,
+                new_group.name,
+                new_group.description,
+                new_group.color as i64,
+                new_group.group_is_active,
+                new_group.group_recurrence_start,
+                new_group.group_recurrence_end
+            )
+                .fetch_one(&app_state.db)
+                .await?;
+            Some(id)
+        },
+        None => None
+    };
+
+    // TODO: finish this
+    Ok(())
 }
 
 async fn fetch_events_for_group(

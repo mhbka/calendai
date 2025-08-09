@@ -1,12 +1,16 @@
 use clap::Parser;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
-use crate::config::StartupConfig;
+use crate::{config::StartupConfig, repositories::Repositories, services::Services};
 
 mod telemetry;
 mod config;
 mod api;
 mod models;
+mod llm;
+mod services;
+mod repositories;
+mod auth;
 
 #[tokio::main]
 async fn main() {
@@ -31,6 +35,8 @@ async fn main() {
         .expect("Failed to run migration on database");
     tracing::info!("Successfully ran migrations");
 
-    api::run(config, db)
+    let repos = Repositories::new(db.clone());
+    let services = Services::new(repos);
+    api::run(config, services, db)
         .await;
 }
