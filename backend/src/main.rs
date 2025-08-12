@@ -1,7 +1,7 @@
 use clap::Parser;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
-use crate::{config::StartupConfig, repositories::Repositories, services::Services};
+use crate::{config::StartupConfig, llm::LLM, repositories::Repositories, services::Services};
 
 mod telemetry;
 mod config;
@@ -36,7 +36,8 @@ async fn main() {
     tracing::info!("Successfully ran migrations");
 
     let repos = Repositories::new(db.clone());
-    let services = Services::new(repos);
-    api::run(config, services, db)
+    let llm = LLM::new(&config);
+    let services = Services::new(repos, llm);
+    api::run(config, services)
         .await;
 }

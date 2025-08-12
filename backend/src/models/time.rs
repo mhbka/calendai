@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Deserializer, Serialize};
 use sqlx::{postgres::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueRef}, Decode, Encode, Postgres};
 
@@ -38,7 +39,7 @@ impl Minute {
 }
 
 /// A u32 wrapper.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct Second(pub u32);
 
 //

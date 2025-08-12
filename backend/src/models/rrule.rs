@@ -1,6 +1,7 @@
 use std::str::FromStr;
 use chrono::{DateTime, TimeZone, Utc};
 use rrule::{RRule, RRuleError, RRuleResult, RRuleSet, Tz, Unvalidated};
+use schemars::{JsonSchema, Schema, SchemaGenerator};
 use serde::{Deserialize, Serialize, Serializer};
 use sqlx::{postgres::PgHasArrayType, Database, Decode, Encode, Type};
 
@@ -137,5 +138,15 @@ impl FromStr for ValidatedRRule {
 impl ToString for ValidatedRRule {
     fn to_string(&self) -> String {
         self.rrule.to_string()
+    }
+}
+
+impl JsonSchema for ValidatedRRule {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        "string".into()
+    }
+
+    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+        generator.subschema_for::<String>()
     }
 }

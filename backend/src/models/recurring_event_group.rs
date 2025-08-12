@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -15,26 +16,20 @@ pub struct RecurringEventGroup {
     /// The color to represent the group by (should be `u32`, but we require `i64` for storing in Postgres).
     pub color: i64,
     /// A default `is_active` for all the group's events.
-    #[serde(rename(serialize = "isActive", deserialize = "isActive"))]
     pub group_is_active: Option<bool>,
     /// A default start date for the group's events.
-    #[serde(rename(serialize = "startDate", deserialize = "startDate"))]
     pub group_recurrence_start: Option<DateTime<Utc>>,
     /// A default end date for the group's events.
-    #[serde(rename(serialize = "endDate", deserialize = "endDate"))]
     pub group_recurrence_end: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct NewRecurringEventGroup {
     pub name: String,
     pub description: Option<String>,
     pub color: i64,
-    #[serde(rename(serialize = "isActive", deserialize = "isActive"))]
     pub group_is_active: Option<bool>,
-    #[serde(rename(serialize = "startDate", deserialize = "startDate"))]
     pub group_recurrence_start: Option<DateTime<Utc>>,
-    #[serde(rename(serialize = "endDate", deserialize = "endDate"))]
     pub group_recurrence_end: Option<DateTime<Utc>>,
 }
 
@@ -44,10 +39,7 @@ pub struct UpdatedRecurringEventGroup {
     pub name: String,
     pub description: Option<String>,
     pub color: i64,
-    #[serde(rename(serialize = "isActive", deserialize = "isActive"))]
     pub group_is_active: Option<bool>,
-    #[serde(rename(serialize = "startDate", deserialize = "startDate"))]
     pub group_recurrence_start: Option<DateTime<Utc>>,
-    #[serde(rename(serialize = "endDate", deserialize = "endDate"))]
     pub group_recurrence_end: Option<DateTime<Utc>>,
 }

@@ -1,5 +1,6 @@
 
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::models::{recurring_event_group::RecurringEventGroup, rrule::ValidatedRRule, time::Second};
@@ -28,7 +29,7 @@ pub struct RecurringCalendarEvent {
 /// `recurrence_start`/`recurrence_end` is used for querying for recurring events between a given start/end datetime in the database.
 /// 
 /// Thus, it is critical that they both contain the same datetime. 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RecurringEvent {
     pub id: Uuid,
     pub group_id: Option<Uuid>,

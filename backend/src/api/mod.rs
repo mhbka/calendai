@@ -4,7 +4,7 @@ use axum::Router;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower_http::trace::TraceLayer;
-use crate::{config::Config, services::Services};
+use crate::{config::Config, llm::LLM, services::Services};
 
 pub(super) mod error;
 mod calendar_events;
@@ -16,16 +16,14 @@ mod ai_add_events;
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Config>,
-    pub db: PgPool, // TODO: delete this after I've fully migrated architecture
-    pub services: Services
+    pub services: Services,
 }
 
 /// Run the API.
-pub async fn run(config: Config, services: Services, db: PgPool) {
+pub async fn run(config: Config, services: Services) {
     let app_state = AppState { 
         config: Arc::new(config), 
-        db,
-        services 
+        services
     };
     let router = build_app_router(app_state);
     let listener = TcpListener::bind("0.0.0.0:80")

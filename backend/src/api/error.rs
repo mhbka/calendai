@@ -1,5 +1,6 @@
 // NOTE: copied with modifications from realworld-axum-sqlx
 
+use axum::extract::multipart::MultipartError;
 use axum::http::header::WWW_AUTHENTICATE;
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
@@ -50,9 +51,17 @@ pub enum ApiError {
     #[error("an error occurred with the database")]
     Sqlx(#[from] sqlx::Error),
 
+    /// An error from parsing a multipart form.
+    #[error("An error occurred processing the multipart request: {0}")]
+    Multipart(#[from] MultipartError),
+
     /// Returns a `500 Internal Server Error`; useful for logical errors etc.
     #[error("An unexpected internal error occurred: {0}")]
-    Other(String)
+    Internal(String),
+
+    /// Returns a `400 Bad Request`; useful for internal errors that can be exposed to the user.
+    #[error("{0}")]
+    BadRequest(String)
 
     /* 
     /// Return `500 Internal Server Error` on a `anyhow::Error`.
@@ -98,7 +107,9 @@ impl ApiError {
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            Self::Other(_) => StatusCode::INTERNAL_SERVER_ERROR
+            Self::Multipart(_) => StatusCode::BAD_REQUEST,
+            Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::BadRequest(_) =>  StatusCode::BAD_REQUEST
         }
     }
 }
@@ -123,17 +134,6 @@ impl IntoResponse for ApiError {
                 )
                     .into_response();
             }
-            Self::Sqlx(ref e) => {
-                tracing::error!("SQLx error: {:?}", e);
-            }
-            Self::Other(ref msg) => {
-                tracing::error!("An unexpected error occurred: {msg}");
-            }
-            /* 
-            Self::Anyhow(ref e) => {
-                tracing::error!("Generic error: {:?}", e);
-            }
-            */
             _ => (),
         }
 
