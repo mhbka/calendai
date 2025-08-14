@@ -10,7 +10,8 @@ static INSTANCE_LIMIT: u16 = 100;
 /// A wrapper around a `RRuleSet`, with serde + deserialization-time validation + sqlx support.
 /// 
 /// **NOTE**: We assume that the only thing set for the `RRuleSet` are a singular `RRULE`, `DTSTART`, and `UNTIL`. 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, JsonSchema)]
+#[schemars(with = "String", inline)]
 pub struct ValidatedRRule {
     rrule: RRuleSet
 }
@@ -141,7 +142,12 @@ impl ToString for ValidatedRRule {
     }
 }
 
+/* 
 impl JsonSchema for ValidatedRRule {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> std::borrow::Cow<'static, str> {
         "string".into()
     }
@@ -150,3 +156,4 @@ impl JsonSchema for ValidatedRRule {
         generator.subschema_for::<String>()
     }
 }
+*/

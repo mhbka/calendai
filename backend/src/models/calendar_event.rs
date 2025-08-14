@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 /// Represents an event on the calendar.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CalendarEvent {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -15,7 +15,7 @@ pub struct CalendarEvent {
     pub end_time: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct NewCalendarEvent {
     pub title: String,
     pub description: Option<String>,

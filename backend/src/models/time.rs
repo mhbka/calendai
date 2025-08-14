@@ -1,4 +1,4 @@
-use schemars::JsonSchema;
+use schemars::{JsonSchema, Schema, SchemaGenerator};
 use serde::{Deserialize, Deserializer, Serialize};
 use sqlx::{postgres::{PgArgumentBuffer, PgHasArrayType, PgTypeInfo, PgValueRef}, Decode, Encode, Postgres};
 
@@ -40,6 +40,7 @@ impl Minute {
 
 /// A u32 wrapper.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema)]
+#[schemars(transparent, inline)]
 pub struct Second(pub u32);
 
 //
@@ -142,4 +143,3 @@ impl PgHasArrayType for Second {
         <i32 as sqlx::Type<Postgres>>::type_info()
     }
 }
-

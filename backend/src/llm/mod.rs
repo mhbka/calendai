@@ -1,23 +1,21 @@
-use axum::body::Bytes;
-use image::DynamicImage;
+use chrono::Utc;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use crate::config::Config;
 use crate::llm::error::LLMError;
 use crate::llm::gemini::GeminiLLM;
-use crate::models::calendar_event::CalendarEvent;
-use crate::models::recurring_event::RecurringEvent;
+use crate::models::calendar_event::NewCalendarEvent;
+use crate::models::recurring_event::NewRecurringEvent;
 use crate::models::recurring_event_group::NewRecurringEventGroup;
 
 mod gemini;
 pub mod error;
 
-static GOOGLE_ENDPOINT: &str = "https://generativelanguage.googleapis.com/v1beta/";
-
+/// Events generated from the LLM.
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct GeneratedEvents {
-    pub events: Vec<CalendarEvent>,
-    pub recurring_events: Vec<RecurringEvent>,
+    pub events: Vec<NewCalendarEvent>,
+    pub recurring_events: Vec<NewRecurringEvent>,
     pub recurring_event_group: Option<NewRecurringEventGroup>
 }
 
@@ -28,6 +26,7 @@ pub struct LLM {
 }
 
 impl LLM {
+    /// Instantiate the struct.
     pub fn new(config: &Config) -> Self {
         let gemini = GeminiLLM::new(&config.gemini_key, &config.gemini_model);
         Self {
@@ -35,12 +34,14 @@ impl LLM {
         }
     }
     
+    /// Generate events from text.
     pub async fn events_from_text(&self, text: String) -> Result<GeneratedEvents, LLMError> {
         self.gemini
             .request_text(text, Some(self.system_instruction().into()))
             .await
     }
 
+    /// Generate events from an mp3 audio.
     pub async fn events_from_audio(&self, audio_bytes: &[u8]) -> Result<GeneratedEvents, LLMError> {
         self.gemini
             .request_audio(
@@ -51,6 +52,7 @@ impl LLM {
             .await
     }
 
+    /// Generate events from a JPG image.
     pub async fn events_from_image(&self, image_bytes: &[u8]) -> Result<GeneratedEvents, LLMError> {
         self.gemini
             .request_image(
@@ -61,8 +63,10 @@ impl LLM {
             .await
     }
 
-    fn system_instruction(&self) -> &'static str {
-        r#"
+    fn system_instruction(&self) -> String {
+        let now_string = Utc::now().format("%d/%m/%Y %H:%M");
+        format!(r#"
+            Today's date and time in UTC is {now_string}.
             You are a calendar event-generating AI. 
             You take an input of text/image/audio, and output events that are present within the input.
             There are 2 types of events:
@@ -84,6 +88,6 @@ impl LLM {
 
             Act conservatively yet precisely. If you are unsure if an event should be generated, do not generate it, allowing the user to add it themselves.
             Obtain all necessary details of each event within the input media.
-        "#
+        "#)
     }
 }

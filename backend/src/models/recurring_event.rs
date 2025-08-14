@@ -29,7 +29,7 @@ pub struct RecurringCalendarEvent {
 /// `recurrence_start`/`recurrence_end` is used for querying for recurring events between a given start/end datetime in the database.
 /// 
 /// Thus, it is critical that they both contain the same datetime. 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecurringEvent {
     pub id: Uuid,
     pub group_id: Option<Uuid>,
@@ -44,7 +44,7 @@ pub struct RecurringEvent {
     pub rrule: ValidatedRRule
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct NewRecurringEvent {
     pub group_id: Option<Uuid>,
     pub is_active: bool,

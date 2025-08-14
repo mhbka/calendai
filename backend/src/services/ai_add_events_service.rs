@@ -1,4 +1,7 @@
+use std::io::Cursor;
+
 use axum::body::Bytes;
+use image::{ImageFormat, ImageReader};
 
 use crate::{api::error::{ApiError, ApiResult}, llm::{GeneratedEvents, LLM}};
 
@@ -36,8 +39,28 @@ impl AIAddEventsService {
     }
 
     pub async fn generate_from_image(&self, image_bytes: Bytes) -> ApiResult<GeneratedEvents> {
+        // parse/validate the image and convert it to JPG
+        let img = ImageReader::new(Cursor::new(image_bytes.clone()))
+            .with_guessed_format()
+            .map_err(|err|{
+                tracing::warn!("Got an IO error guessing the image format: {err}");
+                ApiError::Internal("Failed to process the image".into())
+            })?
+            .decode()
+            .map_err(|err| {
+                tracing::debug!("Failed to decode image (unsupported format or invalid data): {err:?}");
+                ApiError::BadRequest("Invalid image format or data was requested".into())
+            })?;
+        let mut jpg_bytes = Vec::new();
+        img.write_to(&mut Cursor::new(&mut jpg_bytes), ImageFormat::Jpeg)
+            .map_err(|err| {
+                tracing::debug!("Failed to write JPG image: {err:?}");
+                ApiError::Internal("Failed to process the image".into())
+            })?;
+        
+        // then we request the LLM
         self.llm
-            .events_from_image(&image_bytes)
+            .events_from_image(&jpg_bytes)
             .await
             .map_err(|err| {
                 tracing::warn!("Failed to generate events from image: {err}");
