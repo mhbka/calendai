@@ -8,7 +8,7 @@ part of 'calendar_event.dart';
 
 CalendarEvent _$CalendarEventFromJson(Map<String, dynamic> json) =>
     CalendarEvent(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       title: json['title'] as String,
       description: json['description'] as String?,
       location: json['location'] as String?,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/pages/ai_event_page/ai_event_body.dart';
 import 'package:namer_app/pages/base_page.dart';
+import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
@@ -43,28 +44,38 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
       if (text != null) {
         await _processTextInput(text);
       } else {
-        _showSnackBar('No text found in clipboard');
+        Alerts.showErrorSnackBar(context, "There was no text/image in your clipboard. Please copy your intended media and try again.");
       }
     } catch (e) {
-      _showSnackBar(e.toString());
+      Alerts.showErrorSnackBar(context, "Failed to obtain your pasted text/image: $e. Please try again.");
     }
   }
 
   Future<void> _processTextInput(String text) async {
     try {
       final event = await _controller.processTextInput(text);
-      await _showEventPreview(event);
+      //await _showEventPreview(event);
+      Alerts.showInfoSnackBar(context, "all good OG");
     } catch (e) {
-      _showErrorDialog('Processing Error', e.toString());
+      Alerts.showErrorDialog(
+        context,
+        "Error",
+        "Failed to process the text input: $e. Please try again."
+      );
     }
   }
 
-  Future<void> _processAudioInput(Uint8List audioData) async {
+  Future<void> _processAudioInput(String wavFilePath) async {
     try {
-      final event = await _controller.processAudioInput(audioData);
-      await _showEventPreview(event);
+      final event = await _controller.processAudioInput(wavFilePath);
+      // await _showEventPreview(event);
+      Alerts.showInfoSnackBar(context, "all good OG");
     } catch (e) {
-      _showErrorDialog('Audio Processing Error', e.toString());
+      Alerts.showErrorDialog(
+        context,
+        "Error",
+        "Failed to process the audio: $e. Please try again."
+      );
     }
   }
 
@@ -75,29 +86,6 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
         event: event,
         selectedDay: event.startTime,
       ),
-    );
-  }
-
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        icon: Icon(Icons.error_outline, color: Colors.red, size: 48),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
     );
   }
 

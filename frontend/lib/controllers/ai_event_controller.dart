@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/models/generated_events.dart';
 import 'package:namer_app/services/ai_event_api_service.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 
@@ -43,28 +48,67 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<CalendarEvent> processTextInput(String text) async {
+  Future<GeneratedEvents> processTextInput(String text) async {
     _setProcessingState(true, 'text');
-    
     try {
-      final event = await AIEventService.processTextToEvent(text);
-      return event;
+      final events = await AIEventService.processTextToEvent(text);
+      return events;
     } catch (e) {
-      throw Exception('Processing Error: ${e.toString()}');
+      throw Exception('Failed to generate the events from the text: $e');
     } finally {
       _setProcessingState(false, '');
     }
   }
 
-  Future<CalendarEvent> processAudioInput(Uint8List audioData) async {
-    _setProcessingState(true, 'audio');
-
+  Future<GeneratedEvents> processImageInput(Uint8List imageData) async {
+    _setProcessingState(true, 'image');
     try {
-      final event = await AIEventService.processAudioToEvent(audioData);
-      return event;
+      final events = await AIEventService.processImageToEvent(imageData);
+      return events;
     } catch (e) {
-      throw Exception('Audio Processing Error: ${e.toString()}');
+      throw Exception('Failed to generate the events from the image: $e');
     } finally {
+      _setProcessingState(false, '');
+    }
+  }
+
+  Future<GeneratedEvents> processAudioInput(String wavFilePath) async {
+    _setProcessingState(true, 'audio');
+    try {
+      // convert wav file to mp3
+      final tempOutputPath = "temp.mp3";
+      var session = await FFmpegKit.execute('ffmpeg -i $wavFilePath -vn -ar 44100 -ac 2 -b:a 128k $tempOutputPath');
+      final returnCode = await session.getReturnCode();
+      if (ReturnCode.isSuccess(returnCode)) {
+        // read mp3 file into memory, and send to service for processing
+        Uri outputPathUri = Uri.parse(tempOutputPath);
+        File outputFile = File.fromUri(outputPathUri);
+        Uint8List audioData = await outputFile.readAsBytes();
+        final events = await AIEventService.processAudioToEvent(audioData);
+
+        // try to delete the temp files before we return
+        try {
+          outputFile.delete();
+        } catch (e) { /* ignore */ }
+        try {
+          Uri inputPath = Uri.parse(wavFilePath);
+          File inputFile = File.fromUri(inputPath);
+          inputFile.delete();
+        } catch (e) { /* ignore */ }
+
+        return events;
+      }
+      else if (ReturnCode.isCancel(returnCode)) {
+        throw ArgumentError("The audio processing was cancelled");
+      }
+      else {
+        throw ArgumentError("The audio processing failed (ffmpeg code $returnCode)");
+      }
+    } 
+    catch (e) {
+      rethrow;
+    } 
+    finally {
       _setProcessingState(false, '');
       setRecording(false);
     }

@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:namer_app/utils/alerts.dart';
 import 'package:record/record.dart';
 
 enum RecordingState { idle, recording, processing }
 
 /// Widget for recording audio data.
 class AudioRecordingInput extends StatefulWidget {
-  final Function(Uint8List audioData) onRecordingComplete;
+  final Function(String wavFilePath) onRecordingComplete;
   final VoidCallback? onRecordingStart;
   final VoidCallback? onRecordingStop;
 
@@ -85,9 +86,7 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
         await _recorder.startRecording();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed while starting recording: $e')),
-      );
+      Alerts.showErrorSnackBar(context, "Failed to start recording audio: $e. Please try again.");
     }
   }
 
@@ -101,9 +100,8 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
       _pulseController.stop();
       widget.onRecordingStop?.call();
 
-      Uint8List audioData = await _recorder.stopRecording();
-      widget.onRecordingComplete(audioData);
-      
+      String wavFilePath = await _recorder.stopRecording();
+      widget.onRecordingComplete(wavFilePath);
 
       setState(() {
         _state = RecordingState.idle;
@@ -127,77 +125,77 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
   }
 
   @override
-Widget build(BuildContext context) {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedBuilder(
-            animation: _pulseAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _state == RecordingState.recording ? _pulseAnimation.value : 1.0,
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _getButtonColor(),
-                    boxShadow: _state == RecordingState.recording
-                        ? [
-                            BoxShadow(
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    color: Colors.black,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(40),
-                      onTap: _state == RecordingState.processing ? null : _toggleRecording,
-                      child: Center(
-                        child: _getButtonIcon(),
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedBuilder(
+              animation: _pulseAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _state == RecordingState.recording ? _pulseAnimation.value : 1.0,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _getButtonColor(),
+                      boxShadow: _state == RecordingState.recording
+                          ? [
+                              BoxShadow(
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Material(
+                      type: MaterialType.transparency,
+                      color: Colors.black,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(40),
+                        onTap: _state == RecordingState.processing ? null : _toggleRecording,
+                        child: Center(
+                          child: _getButtonIcon(),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-          SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _getStatusText(),
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: _getTextColor(),
-                    ),
-              ),
-              if (_state == RecordingState.recording) ...[
-                SizedBox(height: 4),
+                );
+              },
+            ),
+            SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Text(
-                  _formatDuration(_recordingDuration),
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
+                  _getStatusText(),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: _getTextColor(),
                       ),
                 ),
+                if (_state == RecordingState.recording) ...[
+                  SizedBox(height: 4),
+                  Text(
+                    _formatDuration(_recordingDuration),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                  ),
+                ],
               ],
-            ],
-          ),
-        ],
-      ),
-    ],
-  );
-}
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   Color _getButtonColor() { 
     switch (_state) {
@@ -254,34 +252,23 @@ Widget build(BuildContext context) {
 /// Wrapper for recording and collecting audio data.
 class AudioRecorderWrapper {
   final AudioRecorder _recorder = AudioRecorder();
-  List<Uint8List> _audioData = [];
-  StreamSubscription? _audioSub;
+  final String tempFilePath = "temp.wav";
 
   AudioRecorderWrapper();
 
   void dispose() {
-    _audioSub?.cancel();
     _recorder.dispose();
   }
 
-  /// Start recording and collecting audio data.
+  /// Start recording and collecting WAV audio data.
   Future<void> startRecording() async {
-    _audioData.clear();
-    Stream<Uint8List> audioStream = await _recorder.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-    _audioSub = audioStream.listen((chunk) {
-      _audioData.add(chunk);
-    });
+    await _recorder.start(const RecordConfig(encoder: AudioEncoder.wav), path: tempFilePath);
   }
 
-  /// Stop recording and return the audio data.
-  Future<Uint8List> stopRecording() async {
+  /// Stop recording and save the audio data to the temp file.
+  Future<String> stopRecording() async {
     await _recorder.stop();
-    await _audioSub?.cancel();
-    final completeAudio = Uint8List.fromList(
-      _audioData.expand((chunk) => chunk).toList()
-    );
-    _audioData.clear();
-    return completeAudio;
+    return tempFilePath;
   }
   
   /// Passthrough for internal recorder `hasPermission`.

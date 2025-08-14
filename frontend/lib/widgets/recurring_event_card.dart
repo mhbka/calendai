@@ -151,7 +151,7 @@ class RecurringEventCard extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  _controller.deleteEvent(event.id)
+                  _controller.deleteEvent(event.id ?? '')
                     .then((value) => {if (context.mounted) Navigator.pop(context)})
                     .catchError((err) {
                       if (context.mounted) {

@@ -10,7 +10,7 @@ import 'package:namer_app/widgets/processing_indicator.dart';
 class AIEventBody extends StatelessWidget {
   final AddAIEventController controller;
   final VoidCallback handlePaste;
-  final Function(Uint8List audioData) onRecordingComplete;
+  final Function(String wavFilePath) onRecordingComplete;
 
   AIEventBody({
     super.key, 
@@ -28,7 +28,6 @@ class AIEventBody extends StatelessWidget {
 
     return EventInputWidget(
       onPaste: handlePaste,
-      onStartRecording: () => controller.setRecording(true),
       audioRecorder: AudioRecordingInput(
           onRecordingComplete: onRecordingComplete,
           onRecordingStart: () => controller.setRecording(true),

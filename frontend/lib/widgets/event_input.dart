@@ -4,16 +4,14 @@ import 'package:namer_app/widgets/audio_recording_input.dart';
 class EventInputWidget extends StatelessWidget {
   final AudioRecordingInput audioRecorder;
   final VoidCallback onPaste;
-  final VoidCallback onStartRecording;
   final double height;
 
   const EventInputWidget({
-    Key? key,
+    super.key,
     required this.audioRecorder,
     required this.onPaste,
-    required this.onStartRecording,
     this.height = 300,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

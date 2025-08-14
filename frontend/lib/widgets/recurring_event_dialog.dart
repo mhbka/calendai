@@ -74,7 +74,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
     String id;
     if (_isEditing) {
       if (widget.currentEvent != null) {
-        id = widget.currentEvent!.id;
+        id = widget.currentEvent!.id ?? '';
       }
       else {
         Alerts.showErrorDialog(

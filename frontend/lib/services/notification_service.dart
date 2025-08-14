@@ -34,6 +34,10 @@ class NotificationService {
 
   /// Schedules a reminder for an event, or updates it if it's already been scheduled.
   static void scheduleEventReminder(CalendarEvent event) {
+    if (event.id == null) {
+      throw ArgumentError("No event ID was found");
+    }
+    
     final reminderTime = event.startTime.subtract(Duration(minutes: 10));
     final now = DateTime.now();
     
@@ -45,7 +49,7 @@ class NotificationService {
       final duration = reminderTime.difference(now);
       
       // Schedule new reminder
-      _activeTimers[event.id] = Timer(duration, () {
+      _activeTimers[event.id!] = Timer(duration, () {
         _showNotification(event);
         _activeTimers.remove(event.id);
       });

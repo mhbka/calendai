@@ -8,7 +8,7 @@ part of 'recurring_event.dart';
 
 RecurringEvent _$RecurringEventFromJson(Map<String, dynamic> json) =>
     RecurringEvent(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       groupId: json['group_id'] as String?,
       isActive: json['is_active'] as bool,
       title: json['title'] as String,

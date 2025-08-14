@@ -6,7 +6,7 @@ part 'calendar_event.g.dart';
 /// Describes a singular calendar event.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class CalendarEvent {
-  final String id;
+  final String? id;
   final String title;
   final String? description;
   final String? location;

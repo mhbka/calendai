@@ -6,7 +6,7 @@ part 'recurring_event.g.dart';
 /// Describes a calendar event which can recur.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RecurringEvent {
-  final String id;
+  final String? id;
   final String? groupId;
   final bool isActive;
   final String title;

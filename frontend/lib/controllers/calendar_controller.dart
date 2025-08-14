@@ -126,10 +126,15 @@ class CalendarController extends ChangeNotifier {
   Future<void> deleteEvent(CalendarEvent event) async {
     _setLoading(true);
     try {
-      await CalendarApiService.deleteEvent(event.id);
-      NotificationService.cancelEventReminder(event.id);
-      _events.removeWhere((e) => e.id == event.id);
-      notifyListeners();
+      if (event.id != null) {
+        await CalendarApiService.deleteEvent(event.id!);
+        NotificationService.cancelEventReminder(event.id!);
+        _events.removeWhere((e) => e.id == event.id);
+        notifyListeners();
+      }
+      else {
+        throw ArgumentError("No ID was found for this event");
+      }
     } catch (e) {
       rethrow;
     } finally {
