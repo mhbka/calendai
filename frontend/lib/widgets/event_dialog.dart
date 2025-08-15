@@ -7,12 +7,14 @@ import 'package:namer_app/widgets/datetime_picker.dart';
 /// Dialog for creating a new event/updating a selected event.
 class EventDialog extends StatefulWidget {
   final CalendarEvent? event;
+  final Function(CalendarEvent) onSubmit;
   final DateTime? selectedDay;
 
   EventDialog({
     super.key,
     this.event,
     this.selectedDay,
+    required this.onSubmit
   });
 
   @override
@@ -73,6 +75,10 @@ class _EventDialogState extends State<EventDialog> {
         endTime: _endTime
       );
     }
+
+    widget.onSubmit(event);
+
+    /*
     _controller.saveEvent(event, widget.event == null)
       .then((v) => {if (mounted) Navigator.pop(context)})
       .catchError((err) async {
@@ -85,6 +91,7 @@ class _EventDialogState extends State<EventDialog> {
         }
         return <dynamic>{};
       });
+    */
   }
 
   @override

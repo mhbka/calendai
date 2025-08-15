@@ -40,9 +40,7 @@ class CalendarDialogs {
   }
 
   /// Show the dialog options for an event.
-  static Future<void> showEventOptions(
-    BuildContext context,
-    CalendarEvent event) async {
+  static Future<void> showEventOptions(BuildContext context, CalendarEvent event) async {
     await showModalBottomSheet(
       context: context,
       builder: (context) => Column(
@@ -57,7 +55,21 @@ class CalendarDialogs {
                 context: context,
                 builder: (context) => EventDialog(
                   event: event,
-                  selectedDay: _controller.selectedDay
+                  selectedDay: _controller.selectedDay,
+                  onSubmit: (editedEvent) {
+                    _controller.saveEvent(editedEvent, false)
+                      .then((v) => {if (context.mounted) Navigator.pop(context)})
+                      .catchError((err) async {
+                        if (context.mounted) {
+                          await Alerts.showErrorDialog(
+                            context, 
+                            "Error", 
+                            "Failed to save the event: $err. Please try again later."
+                          );
+                        }
+                        return <dynamic>{};
+                      });
+                    },
                 ),
               );
             },

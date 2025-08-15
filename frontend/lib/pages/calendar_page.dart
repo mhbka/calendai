@@ -45,6 +45,20 @@ class _CalendarPageState extends State<CalendarPage> {
       builder: (context) => EventDialog(
         event: event,
         selectedDay: _controller.selectedDay,
+        onSubmit: (editedEvent) {
+          _controller.saveEvent(editedEvent, event == null)
+            .then((v) => {if (context.mounted) Navigator.pop(context)})
+            .catchError((err) async {
+              if (context.mounted) {
+                await Alerts.showErrorDialog(
+                  context, 
+                  "Error", 
+                  "Failed to save the event: $err. Please try again later."
+                );
+              }
+              return <dynamic>{};
+            });
+          },
       ),
     );
   }
@@ -57,7 +71,9 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Future<void> _handleRefresh() async {
     try {
-      await _controller.loadEvents();
+      await _controller.loadEvents().catchError((err) {
+      if (mounted) Alerts.showErrorSnackBar(context, "Failed to load events: $err. Please try again later");
+    });;
     } catch (e) {
       if (mounted) {
         Alerts.showErrorDialog(

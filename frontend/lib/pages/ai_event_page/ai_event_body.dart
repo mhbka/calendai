@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
+import 'package:namer_app/pages/ai_event_page/generated_events_dialog.dart';
 import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_input.dart';
 import 'package:namer_app/widgets/example_tip.dart';
@@ -19,7 +20,7 @@ class AIEventBody extends StatelessWidget {
     required this.onRecordingComplete
   });
 
-  Widget _buildMainArea() {
+  Widget _buildMainArea(BuildContext context) {
     if (controller.isProcessing) {
       return ProcessingIndicatorWidget(
         processingType: controller.processingType,
@@ -31,7 +32,7 @@ class AIEventBody extends StatelessWidget {
       audioRecorder: AudioRecordingInput(
           onRecordingComplete: onRecordingComplete,
           onRecordingStart: () => controller.setRecording(true),
-          onRecordingStop: () => controller.setRecording(false),
+          onRecordingStop: () => controller.setRecording(false)
         ),
     );
   }
@@ -64,7 +65,7 @@ class AIEventBody extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 16),
-        _buildMainArea(),
+        _buildMainArea(context),
         SizedBox(height: 16),
         if (!controller.isProcessing && !controller.isRecording)
           ExampleTipWidget(),

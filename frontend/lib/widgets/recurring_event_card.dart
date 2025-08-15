@@ -7,9 +7,16 @@ import 'package:namer_app/widgets/recurring_event_dialog.dart';
 
 class RecurringEventCard extends StatelessWidget {
   final RecurringEvent event;
+  final Function(RecurringEvent) onSubmitEdit;
+  final VoidCallback onSubmitDelete;
   final RecurringEventsController _controller = RecurringEventsController.instance;
 
-  RecurringEventCard({Key? key, required this.event}) : super(key: key);
+  RecurringEventCard({
+    super.key, 
+    required this.onSubmitEdit,
+    required this.onSubmitDelete,
+    required this.event
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +131,10 @@ class RecurringEventCard extends StatelessWidget {
       onPressed: () async {
         await showDialog(
           context: context, 
-          builder: (dialogContext) => RecurringEventDialog(currentEvent: event)
+          builder: (dialogContext) => RecurringEventDialog(
+            currentEvent: event,
+            onSubmit: onSubmitEdit,
+          )
         );
       },
       label: Text("Edit"),
@@ -150,20 +160,7 @@ class RecurringEventCard extends StatelessWidget {
                 child: Text("Back"),
               ),
               ElevatedButton(
-                onPressed: () {
-                  _controller.deleteEvent(event.id ?? '')
-                    .then((value) => {if (context.mounted) Navigator.pop(context)})
-                    .catchError((err) {
-                      if (context.mounted) {
-                        Alerts.showErrorDialog(
-                          context, 
-                          "Error", 
-                          "Failed to delete event: $err. Please try again later."
-                        );
-                      }
-                      return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
-                    });
-                },
+                onPressed: onSubmitDelete,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,

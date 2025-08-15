@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/pages/ai_event_page/ai_event_body.dart';
+import 'package:namer_app/pages/ai_event_page/generated_events_dialog.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
 
@@ -53,9 +51,8 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
 
   Future<void> _processTextInput(String text) async {
     try {
-      final event = await _controller.processTextInput(text);
-      //await _showEventPreview(event);
-      Alerts.showInfoSnackBar(context, "all good OG");
+      await _controller.processTextInput(text);
+      await _showEventPreview();
     } catch (e) {
       Alerts.showErrorDialog(
         context,
@@ -67,9 +64,8 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
 
   Future<void> _processAudioInput(String wavFilePath) async {
     try {
-      final event = await _controller.processAudioInput(wavFilePath);
-      // await _showEventPreview(event);
-      Alerts.showInfoSnackBar(context, "all good OG");
+      await _controller.processAudioInput(wavFilePath);
+      await _showEventPreview();
     } catch (e) {
       Alerts.showErrorDialog(
         context,
@@ -79,13 +75,10 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
     }
   }
 
-  Future<void> _showEventPreview(CalendarEvent event) async {
+  Future<void> _showEventPreview() async {
     await showDialog(
-      context: context,
-      builder: (context) => EventDialog(
-        event: event,
-        selectedDay: event.startTime,
-      ),
+      context: context, 
+      builder: (context) => GeneratedEventsDialog()
     );
   }
 

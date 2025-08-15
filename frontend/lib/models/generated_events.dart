@@ -7,9 +7,9 @@ part 'generated_events.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class GeneratedEvents { 
-  final List<CalendarEvent> events;
-  final List<RecurringEvent> recurringEvents;
-  final RecurringEventGroup? recurringEventGroup;
+  List<CalendarEvent> events;
+  List<RecurringEvent> recurringEvents;
+  RecurringEventGroup? recurringEventGroup;
 
   GeneratedEvents({
     required this.events,

@@ -1,11 +1,13 @@
+import 'dart:core';
 import 'dart:io';
-
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/models/generated_events.dart';
+import 'package:namer_app/models/recurring_event.dart';
+import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/services/ai_event_api_service.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 
@@ -26,10 +28,12 @@ class AddAIEventController extends ChangeNotifier {
   late final CalendarController? _calendarController;
   
   // members
+  GeneratedEvents _generatedEvents = GeneratedEvents(events: [], recurringEvents: []);
   bool _isProcessing = false;
   bool _isRecording = false;
   String _processingType = '';
 
+  GeneratedEvents get generatedEvents => _generatedEvents;
   bool get isProcessing => _isProcessing;
   bool get isRecording => _isRecording;
   String get processingType => _processingType;
@@ -48,11 +52,10 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<GeneratedEvents> processTextInput(String text) async {
+  Future<void> processTextInput(String text) async {
     _setProcessingState(true, 'text');
     try {
-      final events = await AIEventService.processTextToEvent(text);
-      return events;
+      _generatedEvents = await AIEventService.processTextToEvent(text);
     } catch (e) {
       throw Exception('Failed to generate the events from the text: $e');
     } finally {
@@ -60,11 +63,10 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<GeneratedEvents> processImageInput(Uint8List imageData) async {
+  Future<void> processImageInput(Uint8List imageData) async {
     _setProcessingState(true, 'image');
     try {
-      final events = await AIEventService.processImageToEvent(imageData);
-      return events;
+      _generatedEvents = await AIEventService.processImageToEvent(imageData);
     } catch (e) {
       throw Exception('Failed to generate the events from the image: $e');
     } finally {
@@ -72,7 +74,7 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<GeneratedEvents> processAudioInput(String wavFilePath) async {
+  Future<void> processAudioInput(String wavFilePath) async {
     _setProcessingState(true, 'audio');
     try {
       // convert wav file to mp3
@@ -84,7 +86,7 @@ class AddAIEventController extends ChangeNotifier {
         Uri outputPathUri = Uri.parse(tempOutputPath);
         File outputFile = File.fromUri(outputPathUri);
         Uint8List audioData = await outputFile.readAsBytes();
-        final events = await AIEventService.processAudioToEvent(audioData);
+        _generatedEvents = await AIEventService.processAudioToEvent(audioData);
 
         // try to delete the temp files before we return
         try {
@@ -95,8 +97,6 @@ class AddAIEventController extends ChangeNotifier {
           File inputFile = File.fromUri(inputPath);
           inputFile.delete();
         } catch (e) { /* ignore */ }
-
-        return events;
       }
       else if (ReturnCode.isCancel(returnCode)) {
         throw ArgumentError("The audio processing was cancelled");
@@ -114,14 +114,8 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<void> saveGeneratedEvent({
-    CalendarEvent? existingEvent,
-    required String title,
-    required String description,
-    String? location,
-    required DateTime startTime,
-    required DateTime endTime,
-  }) async {
+  /// Submit the generated events.
+  Future<void> saveGeneratedEvents() async {
     if (_calendarController != null) {
       // TODO: think this API will be changed/deleted
       /*
@@ -137,6 +131,57 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
+  /// Edit the calendar event at the index.
+  void editEvent(int index, CalendarEvent updatedEvent) {
+    if (index < _generatedEvents.events.length) {
+      _generatedEvents.events[index] = updatedEvent;
+    }
+    notifyListeners();
+  }
+
+  /// Add the calendar event.
+  void addEvent(CalendarEvent newEvent) {
+    _generatedEvents.events.add(newEvent);
+    notifyListeners();
+  }
+
+  /// Delete the calendar event at the index.
+  void deleteEvent(int index) {
+    if (index < _generatedEvents.events.length) {
+      _generatedEvents.events.removeAt(index);
+    }
+    notifyListeners();
+  }
+
+  /// Edit the recurring event at the index.
+  void editRecurringEvent(int index, RecurringEvent updatedEvent) {
+    if (index < _generatedEvents.recurringEvents.length) {
+      _generatedEvents.recurringEvents[index] = updatedEvent;
+    }
+    notifyListeners();
+  }
+
+  /// Add the calendar event.
+  void addRecurringEvent(RecurringEvent newEvent) {
+    _generatedEvents.recurringEvents.add(newEvent);
+    notifyListeners();
+  }
+
+  /// Delete the recurring event at the index.
+  void deleteRecurringEvent(int index) {
+    if (index < _generatedEvents.recurringEvents.length) {
+      _generatedEvents.recurringEvents.removeAt(index);
+    }
+    notifyListeners();
+  }
+
+  /// Set the recurring event group to the given value.
+  void setRecurringEventGroup(RecurringEventGroup? group) {
+    _generatedEvents.recurringEventGroup = group;
+    notifyListeners();
+  }
+
+  /// Set the audio recording state.
   void setRecording(bool recording) {
     _isRecording = recording;
     notifyListeners();

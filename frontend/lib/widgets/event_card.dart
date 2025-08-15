@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
+import 'package:namer_app/models/calendar_event.dart';
+import 'package:namer_app/widgets/event_dialog.dart';
 
-class RecurringEventsGroupCard extends StatelessWidget {
-  final RecurringEventGroup group;
-  final RecurringEventGroupsController _controller = RecurringEventGroupsController.instance;
+/// A card for displaying, editing, and deleting a calendar event.
+class EventCard extends StatelessWidget {
+  final CalendarEvent event;
+  final Function(CalendarEvent) onSubmitEdit;
+  final VoidCallback onSubmitDelete;
 
-  RecurringEventsGroupCard({
+  EventCard({
     super.key, 
-    required this.group
+    required this.onSubmitEdit,
+    required this.onSubmitDelete,
+    required this.event
   });
 
   @override
@@ -19,13 +20,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () async {
-          await context.push('/recurring_events/${group.id}');
-        },
-        borderRadius: BorderRadius.circular(4),
-        child: _buildCardBody(context)
-      )
+      child: _buildCardBody(context)
     );
   }
 
@@ -48,9 +43,8 @@ class RecurringEventsGroupCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (group.description != null) _buildDescription(context),
+                          _buildDescription(context),
                           _buildDateRange(context),
-                          _buildRecurringEventsCount(context),
                         ],
                       ),
                     ),
@@ -67,7 +61,6 @@ class RecurringEventsGroupCard extends StatelessWidget {
     return Container(
       width: 6,
       decoration: BoxDecoration(
-        color: group.color,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(4),
           bottomLeft: Radius.circular(4),
@@ -82,15 +75,13 @@ class RecurringEventsGroupCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            group.name,
+            event.title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        _buildStatusBadge(),
-        SizedBox(width: 8),
         _buildEditButton(context),
         SizedBox(width: 8),
         _buildDeleteButton(context)
@@ -98,47 +89,12 @@ class RecurringEventsGroupCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge() {
-    Color color; 
-    String text;
-    if (group.isActive == null) {
-      color = Colors.grey;
-      text = 'Not set';
-    }
-    else if (group.isActive!) {
-      color = Colors.green;
-      text = 'Active';
-    }
-    else {
-      color = Colors.red;
-      text = 'Inactive';
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
   Widget _buildEditButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: group.name == "Ungrouped" ? null : () async {
+      onPressed: () async {
         await showDialog(
           context: context, 
-          builder: (dialogContext) => RecurringEventGroupDialog(currentGroup: group)
+          builder: (dialogContext) => EventDialog(event: event, onSubmit: onSubmitEdit)
         );
       },
       label: Text("Edit"),
@@ -152,32 +108,19 @@ class RecurringEventsGroupCard extends StatelessWidget {
 
   Widget _buildDeleteButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: group.name == "Ungrouped" ? null : () {
+      onPressed: () {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text("Delete group"),
-            content: Text("Are you sure you want to delete this group and all its events? This action is irreversible."),
+            title: Text("Delete"),
+            content: Text("Are you sure you want to delete this event?"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text("Back"),
               ),
               ElevatedButton(
-                onPressed: () {
-                  _controller.deleteGroup(group.id)
-                    .then((value) => {if (context.mounted) Navigator.pop(context)})
-                    .catchError((err) {
-                      if (context.mounted) {
-                        Alerts.showErrorDialog(
-                          context, 
-                          "Error", 
-                          "Failed to delete group: $err. Please try again later."
-                        );
-                      }
-                      return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
-                    });
-                },
+                onPressed: onSubmitDelete,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
@@ -201,7 +144,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Text(
-        group.description!,
+        event.description ?? "-",
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: Colors.grey[600],
         ),
@@ -224,35 +167,13 @@ class RecurringEventsGroupCard extends StatelessWidget {
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              (group.startDate != null || group.endDate != null) ? 
-                _formatDateRange(group.startDate, group.endDate) :
-                "No specified start/end date",
+              _formatDateRange(event.startTime, event.endTime),
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
       ),
-    );
-  }
-  
-  Widget _buildRecurringEventsCount(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          Icons.event_repeat,
-          size: 16,
-          color: Colors.grey[600],
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '${group.recurringEvents} recurring event${group.recurringEvents == 1 ? '' : 's'}',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
     );
   }
 

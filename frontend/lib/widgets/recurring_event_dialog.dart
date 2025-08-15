@@ -8,11 +8,13 @@ import 'package:namer_app/widgets/recurrence_input.dart';
 /// Dialog for creating a new recurring event/updating a selected event.
 class RecurringEventDialog extends StatefulWidget {
   final RecurringEvent? currentEvent;
+  final Function(RecurringEvent) onSubmit;
 
   const RecurringEventDialog({
-    Key? key,
+    super.key,
     this.currentEvent,
-  }) : super(key: key);
+    required this.onSubmit
+  });
 
   @override
   _RecurringEventDialogState createState() => _RecurringEventDialogState();
@@ -88,6 +90,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
     else {
       id = '-1';
     }
+
     RecurringEvent event = RecurringEvent(
       id: id, 
       groupId: _controller.currentGroup?.id,
@@ -104,18 +107,8 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
       rrule: _recurrenceInputController.getRRule().toString(),
       eventDurationSeconds: _recurrenceInputController.getEventDurationSeconds()
     );
-    _controller.saveEvent(event, !_isEditing)
-      .then((v) => {if (mounted) Navigator.pop(context)})
-      .catchError((err) async {
-        if (mounted)  {
-          await Alerts.showErrorDialog(
-            context, 
-            "Error", 
-            "Failed to save the event: $err. Please try again later."
-          );
-        }
-        return <dynamic>{}; // quirk of flutter/dart i guess
-      });
+    
+    widget.onSubmit(event);
   }
 
   Widget _buildNameField() {

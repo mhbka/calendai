@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/constants.dart';
 import 'package:namer_app/controllers/recurring_events_controller.dart';
+import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/recurring_event_card.dart';
@@ -26,6 +27,15 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
     _controller.addListener(() {
       if (mounted) setState(() {});
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BasePage(
+      title: "Recurring events - ${_controller.isLoading ? "" : _controller.currentGroup?.name ?? "Ungrouped"}",
+      body: _controller.isLoading ? _buildLoading() : _buildMainArea(),
+      floatingActions: _controller.events.isEmpty ? null : _buildAddEventButton(),
+    );
   }
 
   Widget _buildMainArea() {
@@ -66,7 +76,11 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
             final event = _controller.events[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
-              child: RecurringEventCard(event: event),
+              child: RecurringEventCard(
+                event: event,
+                onSubmitEdit: _editEvent,
+                onSubmitDelete: () => _deleteEvent(event.id ?? ''),
+              ),
             );
           },
         ),
@@ -83,7 +97,22 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
         onPressed: () async {
           await showDialog(
             context: context, 
-            builder: (dialogContext) => RecurringEventDialog()
+            builder: (dialogContext) => RecurringEventDialog(
+              onSubmit: (newEvent) {
+                _controller.saveEvent(newEvent, true)
+                  .then((v) => {if (mounted) Navigator.pop(context)})
+                  .catchError((err) async {
+                    if (mounted) {
+                      await Alerts.showErrorDialog(
+                        context, 
+                        "Error", 
+                        "Failed to save the event: $err. Please try again later."
+                      );
+                    }
+                    return <dynamic>{};
+                  });
+              },
+            )
           );
         },
         heroTag: "recurring_event_create",
@@ -93,12 +122,35 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
       );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BasePage(
-      title: "Recurring events - ${_controller.isLoading ? "" : _controller.currentGroup?.name ?? "Ungrouped"}",
-      body: _controller.isLoading ? _buildLoading() : _buildMainArea(),
-      floatingActions: _controller.events.isEmpty ? null : _buildAddEventButton(),
-    );
+  /// Callback for deleting a recurring event.
+  void _deleteEvent(String? eventId) {
+    _controller.deleteEvent(eventId ?? '')
+      .then((value) => {if (mounted) Navigator.pop(context)})
+      .catchError((err) {
+        if (mounted) {
+          Alerts.showErrorDialog(
+            context, 
+            "Error", 
+            "Failed to delete event: $err. Please try again later."
+          );
+        }
+        return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
+      });
+  }
+
+  /// Callback for submitting an edited recurring event.
+  void _editEvent(RecurringEvent updatedEvent) {
+    _controller.saveEvent(updatedEvent, false)
+      .then((value) => {if (mounted) Navigator.pop(context)})
+      .catchError((err) {
+        if (mounted) {
+          Alerts.showErrorDialog(
+            context, 
+            "Error", 
+            "Failed to submit event: $err. Please try again later."
+          );
+        }
+        return <dynamic>{}; // seems to be a quirk of Flutter; we need this to not crash
+      });
   }
 }
