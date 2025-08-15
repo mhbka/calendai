@@ -5,7 +5,10 @@ import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/models/recurring_event_group.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/event_card.dart';
+import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:namer_app/widgets/recurring_event_card.dart';
+import 'package:namer_app/widgets/recurring_event_dialog.dart';
+import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
 import 'package:namer_app/widgets/recurring_events_group_card.dart';
 
 /// A dialog for reviewing generated events produced by AI.
@@ -80,10 +83,11 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
     );
   }
 
+  /// Build the section for the recurring event group.
   Widget _buildRecurringEventGroupSection(RecurringEventGroup? group) {
     Widget groupCard;
     if (group == null) {
-      groupCard = const Text("No group was set.");
+      groupCard = _buildEmptySection("No group has been set. Click here to create one.");
     } else {
       groupCard = RecurringEventsGroupCard(group: group);
     }
@@ -92,7 +96,14 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Recurring Event Group', Icons.folder),
+          _buildSectionHeader(
+            'Recurring Event Group', 
+            Icons.folder,
+            () => showDialog(
+              builder: (context) => RecurringEventGroupDialog(), // TODO: add callback for this dialog to set the group instead
+              context: context
+            )
+          ),
           groupCard,
           const SizedBox(height: 16),
         ],
@@ -100,10 +111,11 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
     );
   }
   
+  /// Build the section for calendar events.
   Widget _buildEventsSection(List<CalendarEvent> events) {
     Widget eventList;
     if (events.isEmpty) {
-      eventList = const Text("No calendar events have been set.");
+      eventList = _buildEmptySection("There are no events. Click here to create one.");
     } 
     else {
       eventList = ListView.builder(
@@ -128,7 +140,19 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Events', Icons.event),
+          _buildSectionHeader(
+            'Events',
+            Icons.event,
+            () => showDialog(
+              context: context, 
+              builder: (context) => EventDialog(
+                onSubmit: (event) {
+                  _controller.addEvent(event);
+                  Navigator.pop(context);
+                },
+              )
+            )
+          ),
           eventList,
           const SizedBox(height: 16),
         ],
@@ -136,10 +160,11 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
     );
   }
   
+  /// Build the section for recurring events.
   Widget _buildRecurringEventsSection(List<RecurringEvent> events) {
     Widget eventList;
     if (events.isEmpty) {
-      eventList = const Text("No recurring events have been set.");
+      eventList = _buildEmptySection("There are no recurring events. Click here to create one.");
     } 
     else {
       eventList = ListView.builder(
@@ -158,7 +183,19 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Recurring Events', Icons.repeat),
+          _buildSectionHeader(
+            'Recurring Events', 
+            Icons.repeat,
+            () => showDialog(
+              context: context,
+              builder: (context) => RecurringEventDialog(
+                onSubmit: (event) {
+                  _controller.addRecurringEvent(event);
+                  Navigator.pop(context);
+                }
+              )
+            )
+          ),
           eventList,
           const SizedBox(height: 16),
         ],
@@ -166,13 +203,14 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
     );
   }
   
-  Widget _buildSectionHeader(String title, IconData icon) {
+  /// Build the header for a section, including the 'Add' button.
+  Widget _buildSectionHeader(String title, IconData icon, VoidCallback onAdd) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: [
           Icon(icon, size: 20),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text(
             title,
             style: const TextStyle(
@@ -180,8 +218,55 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
               fontWeight: FontWeight.w600,
             ),
           ),
+          SizedBox(width: 16),
+          FilledButton(
+            onPressed: onAdd,
+            child: Text('Add'),
+          )
         ],
       ),
     );
   }
+
+  /// Build the section placeholder for if it's empty.
+ Widget _buildEmptySection(String placeholderText) {
+  return Card(
+    elevation: 2,
+    margin: EdgeInsets.zero,
+    child: SizedBox(
+      height: 140,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            width: 6,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.cancel, size: 32, color: Colors.grey[400]),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    placeholderText,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/widgets/datetime_picker.dart';
 
 /// Dialog for creating a new event/updating a selected event.
@@ -22,7 +20,6 @@ class EventDialog extends StatefulWidget {
 }
 
 class _EventDialogState extends State<EventDialog> {
-  final CalendarController _controller = CalendarController.instance;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _locationController;
@@ -37,8 +34,12 @@ class _EventDialogState extends State<EventDialog> {
     _descriptionController = TextEditingController(text: event?.description ?? '');
     _locationController = TextEditingController(text: event?.location ?? '');
     
-    _startTime = event?.startTime ?? widget.selectedDay!.add(Duration(hours: 9));
-    _endTime = event?.endTime ?? widget.selectedDay!.add(Duration(hours: 10));
+    _startTime = event?.startTime ?? 
+      widget.selectedDay ?? 
+      DateTime.now();
+    _endTime = event?.endTime ?? 
+      widget.selectedDay?.add(Duration(hours: 1)) ?? 
+      DateTime.now();
   }
 
   @override
