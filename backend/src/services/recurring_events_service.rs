@@ -30,7 +30,7 @@ impl RecurringEventsService {
     }
 
     pub async fn create_events(&self, user_id: Uuid, mut events: Vec<NewRecurringEvent>) -> Result<(), ApiError> {
-        // HACK: frontend is unable to set start/end datetimes, so we must ensure they're set here
+        // HACK: frontend is unable to set start/end datetimes in the rrule, so we must ensure they're set here
         for event in &mut events {
             event.rrule.set_start(event.recurrence_start);
             event.rrule.set_end(event.recurrence_end);
@@ -69,7 +69,7 @@ impl RecurringEventsService {
 
         tracing::trace!("Obtained {} active recurring events", recurring_events.len());
 
-        // Get actual event instances
+        // Generate actual event instances
         let mut events_and_instances: Vec<_> = recurring_events
             .into_iter()
             .map(|event| {
@@ -289,6 +289,7 @@ impl RecurringEventsService {
                     // **NOTE**: if more modifiable metadata is added to recurring events, they should be replaced here as well
                     if let Some(modified_title) = exception.modified_title { event.title = modified_title; }
                     if let Some(modified_description) = exception.modified_description { event.description = modified_description; }
+                    if let Some(modified_location) = exception.modified_location { event.location = modified_location; }
                     if let Some(modified_start) = exception.modified_start_time { event.start_time = modified_start; }
                     if let Some(modified_end) = exception.modified_end_time { event.end_time = modified_end; }
                     event.exception_id = Some(exception.id);

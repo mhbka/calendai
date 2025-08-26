@@ -18,9 +18,9 @@ impl AIAddEventsService {
         }
     }
 
-    pub async fn generate_from_text(&self, text: String) -> ApiResult<GeneratedEvents> {
+    pub async fn generate_from_text(&self, text: String, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
         self.llm
-            .events_from_text(text)
+            .events_from_text(text, timezone_offset_minutes)
             .await
             .map_err(|err| {
                 tracing::warn!("Failed to generate events from text: {err}");
@@ -28,9 +28,9 @@ impl AIAddEventsService {
             })
     }
 
-    pub async fn generate_from_audio(&self, audio_bytes: Bytes) -> ApiResult<GeneratedEvents> {
+    pub async fn generate_from_audio(&self, audio_bytes: Bytes, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
         self.llm
-            .events_from_audio(&audio_bytes)
+            .events_from_audio(&audio_bytes, timezone_offset_minutes)
             .await
             .map_err(|err| {
                 tracing::warn!("Failed to generate events from audio: {err}");
@@ -38,7 +38,7 @@ impl AIAddEventsService {
             })
     }
 
-    pub async fn generate_from_image(&self, image_bytes: Bytes) -> ApiResult<GeneratedEvents> {
+    pub async fn generate_from_image(&self, image_bytes: Bytes, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
         // parse/validate the image and convert it to JPG
         let img = ImageReader::new(Cursor::new(image_bytes.clone()))
             .with_guessed_format()
@@ -60,7 +60,7 @@ impl AIAddEventsService {
         
         // then we request the LLM
         self.llm
-            .events_from_image(&jpg_bytes)
+            .events_from_image(&jpg_bytes, timezone_offset_minutes)
             .await
             .map_err(|err| {
                 tracing::warn!("Failed to generate events from image: {err}");

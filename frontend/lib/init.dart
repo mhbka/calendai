@@ -19,7 +19,11 @@ Future<void> initDeps() async {
     url: envVars['supabase_url']!,
     anonKey: envVars['supabase_anon_key']!
   );
-  await Supabase.instance.client.auth.refreshSession();
+  try {
+    await Supabase.instance.client.auth.refreshSession();
+  } catch (e) {
+    print("Auth not refreshed (likely not logged in)");
+  }
 }
 
 /// Validates and returns the env vars for the app.

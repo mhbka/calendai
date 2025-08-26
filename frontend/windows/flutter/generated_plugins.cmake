@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  pasteboard
   record_windows
   screen_retriever_windows
   tray_manager

@@ -19,7 +19,7 @@ class NotificationService {
     const initializationSettingsWindows = WindowsInitializationSettings(
       appName: 'Calendai', 
       appUserModelId: 'Calendai.Calendai.Desktop.1.0', 
-      guid: 'ab0ede05-7eca-4d77-b1b8-533688e2f52d' // TODO: is this ok?
+      guid: 'ab0ede05-7eca-4d77-b1b8-533688e2f52d' // NOTE: just a random UUID, should be fine
     );
     
     const initializationSettings = InitializationSettings(

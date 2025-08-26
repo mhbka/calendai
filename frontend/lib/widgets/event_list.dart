@@ -88,6 +88,7 @@ class EventListItem extends StatelessWidget {
     Color? color;
     String? groupName;
     bool isException = false;
+    
     if (event != null) {
       time = _buildTimeString(event!.startTime, event!.endTime);
       title = event!.title;

@@ -264,10 +264,11 @@ impl RecurringEventsRepository {
                     modified_start_time,
                     modified_end_time
                 )
-                VALUES ($1, $2, 'modified', $3, $4, $5, $6, $7)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             "#,
             exception.recurring_event_id,
             exception.exception_date,
+            &exception.exception_type.to_string(),
             exception.modified_title,
             exception.modified_description,
             exception.modified_location as Option<Option<String>>,

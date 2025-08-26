@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
-import 'package:namer_app/main.dart';
+import 'package:namer_app/utils/alerts.dart';
+import 'package:namer_app/utils/google_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,34 +11,32 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final supabase = Supabase.instance.client;
-  late GoogleSignIn _googleSignIn;
+  final GoogleSignIn _googleSignIn = googleSignInInstance;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _googleSignIn = GoogleSignIn(
-      params: GoogleSignInParams(
-        redirectPort: 3000,
-        clientId: envVars['google_client_id'],
-        clientSecret: envVars['google_client_secret'] 
-      ),
-    );
   }
   
 
   Future<void> _nativeGoogleSignIn() async {
+    await _googleSignIn.signOut();
     final credentials = await _googleSignIn.signIn();
-    if (credentials != null) {
+    if (credentials != null && credentials.idToken != null) {
+      print("ID TOKEN: ${credentials.idToken}");
       await supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
-        idToken: credentials.idToken!, // TODO: check if this is actually not null
+        idToken: credentials.idToken!, 
         accessToken: credentials.accessToken
       );
     }
     else {
-      // TODO: proper error handling or something
-      print('gg nerd');
+      await Alerts.showErrorDialog(
+        context, 
+        "Error logging in", 
+        "We were unable to log in as the credentials were null."
+      );
     }
   }
 

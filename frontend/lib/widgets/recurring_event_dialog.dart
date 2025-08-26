@@ -28,8 +28,6 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
   late TextEditingController _locationController;
   
   bool _isActive = true;
-  DateTime _startDate = DateTime.now();
-  DateTime? _endDate;
   
   final _formKey = GlobalKey<FormState>();
 
@@ -64,14 +62,6 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    if (_endDate != null && _startDate.isAfter(_endDate!)) {
-      Alerts.showErrorDialog(
-        context, 
-        "Error",
-        "Start date must be before end date"
-      );
-      return;
-    }
 
     String id;
     if (_isEditing) {
@@ -91,6 +81,17 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
       id = '-1';
     }
 
+    var startDate = _recurrenceInputController.data.startDate;
+    var endDate = _recurrenceInputController.data.endDate;
+    var startTime = _recurrenceInputController.data.startTime;
+    DateTime recurrenceStart = DateTime(
+      startDate.year,
+      startDate.month,
+      startDate.day,
+      startTime.hour,
+      startTime.minute,
+    );
+
     RecurringEvent event = RecurringEvent(
       id: id, 
       groupId: _controller.currentGroup?.id,
@@ -102,8 +103,8 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
           ? null 
           : _locationController.text.trim(),
       isActive: _isActive,
-      recurrenceStart: _startDate,
-      recurrenceEnd: _endDate,
+      recurrenceStart: recurrenceStart,
+      recurrenceEnd: endDate,
       rrule: _recurrenceInputController.getRRule().toString(),
       eventDurationSeconds: _recurrenceInputController.getEventDurationSeconds()
     );
@@ -220,7 +221,7 @@ class _RecurringEventDialogState extends State<RecurringEventDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit event' : 'Create a new event'),
+      title: Text(_isEditing ? 'Edit recurring event' : 'Create a recurring event'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,

@@ -39,7 +39,7 @@ class _EventDialogState extends State<EventDialog> {
       DateTime.now();
     _endTime = event?.endTime ?? 
       widget.selectedDay?.add(Duration(hours: 1)) ?? 
-      DateTime.now();
+      DateTime.now().add(Duration(hours: 1));
   }
 
   @override
@@ -98,7 +98,7 @@ class _EventDialogState extends State<EventDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit Event' : 'Add Event'),
+      title: Text(_isEditing ? 'Edit event' : 'Create an event'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -120,6 +120,8 @@ class _EventDialogState extends State<EventDialog> {
             ),
             SizedBox(height: 16),
             DateTimePicker(
+              startTime: _startTime,
+              endTime: _endTime,
               onDateTimesChanged: (start, end) {
                 setState(() {
                   _startTime = start;

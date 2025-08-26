@@ -41,7 +41,7 @@ class EventInputWidget extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Paste your text here',
+                      'Paste your text or image here',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -50,7 +50,7 @@ class EventInputWidget extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Describe your event and AI will create it for you',
+                      'Normal and recurring events will be generated for you',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[500],

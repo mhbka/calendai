@@ -165,7 +165,7 @@ class RecurringEventsGroupCard extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  _controller.deleteGroup(group.id)
+                  _controller.deleteGroup(group.id ?? '')
                     .then((value) => {if (context.mounted) Navigator.pop(context)})
                     .catchError((err) {
                       if (context.mounted) {

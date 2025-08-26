@@ -41,7 +41,6 @@ impl ValidatedRRule {
     /// 
     /// **Note**: The maximum number of instances is set to 100 (for now).
     pub fn all_within_period(&self, start: DateTime<Utc>, end: DateTime<Utc>) -> RRuleResult {
-        // 
         let start = Tz::from_utc_datetime(&Tz::UTC, &start.naive_utc());
         let end = Tz::from_utc_datetime(&Tz::UTC, &end.naive_utc());
         let restricted_rrule = self.rrule

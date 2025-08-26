@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:namer_app/pages/ai_event_page/ai_event_body.dart';
 import 'package:namer_app/pages/ai_event_page/generated_events_dialog.dart';
@@ -5,6 +7,7 @@ import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 class AddAIEventPage extends StatefulWidget {
   final CalendarController calendarController = CalendarController.instance;
@@ -41,11 +44,18 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
       final text = await _controller.handlePaste();
       if (text != null) {
         await _processTextInput(text);
-      } else {
-        Alerts.showErrorSnackBar(context, "There was no text/image in your clipboard. Please copy your intended media and try again.");
+      } 
+      else {
+        final imageBytes = await Pasteboard.image;
+        if (imageBytes != null) {
+          await processImageInput(imageBytes);
+        }
+        else {
+          if (mounted) Alerts.showErrorSnackBar(context, "There was no text/image in your clipboard. Please copy your intended media and try again.");
+        }
       }
     } catch (e) {
-      Alerts.showErrorSnackBar(context, "Failed to obtain your pasted text/image: $e. Please try again.");
+      if (mounted) Alerts.showErrorSnackBar(context, "Failed to obtain your pasted text/image: $e. Please try again.");
     }
   }
 
@@ -54,11 +64,28 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
       await _controller.processTextInput(text);
       await _showEventPreview();
     } catch (e) {
-      Alerts.showErrorDialog(
-        context,
-        "Error",
-        "Failed to process the text input: $e. Please try again."
-      );
+      if (mounted) {
+        Alerts.showErrorDialog(
+          context,
+          "Error",
+          "Failed to process the text input: $e. Please try again."
+        );
+      }
+    }
+  }
+
+  Future<void> processImageInput(Uint8List imageBytes) async {
+    try {
+      await _controller.processImageInput(imageBytes);
+      await _showEventPreview();
+    } catch (e) {
+      if (mounted) {
+        Alerts.showErrorDialog(
+          context,
+          "Error",
+          "Failed to process the text input: $e. Please try again."
+        );
+      }
     }
   }
 

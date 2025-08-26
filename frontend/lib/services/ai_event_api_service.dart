@@ -10,13 +10,19 @@ import 'package:namer_app/services/base_api_service.dart';
 class AIEventService extends BaseApiService {
   static String baseUrl = "${envVars['api_base_url']!}/ai_add_event";
 
+  /// We include our local timezone's offset, so the backend can offset generated events' datetimes from UTC for usability.
+  static int timezoneOffsetInMinutes = DateTime.now().timeZoneOffset.inMinutes;
+
   /// Generate events from text.
   static Future<GeneratedEvents> processTextToEvent(String text) async {
     return BaseApiService.handleRequest(
       () => http.post(
         Uri.parse('$baseUrl/text'),
         headers: BaseApiService.headers,
-        body: json.encode({'text': text}),
+        body: json.encode({
+          'text': text, 
+          'timezone_offset_minutes': timezoneOffsetInMinutes
+        }),
       ),
       (response) => GeneratedEvents.fromJson(json.decode(response.body)),
       validStatusCodes: [200, 201],
@@ -39,6 +45,8 @@ class AIEventService extends BaseApiService {
             contentType: MediaType('audio', 'mpeg'),
           ),
         );
+        request.headers.addAll(BaseApiService.headers);
+        request.fields.addAll({'timezone_offset_minutes': timezoneOffsetInMinutes.toString()});
         return await request
           .send()
           .then((streamedResponse) async {
@@ -58,60 +66,26 @@ class AIEventService extends BaseApiService {
           'POST',
           Uri.parse('$baseUrl/image'),
         );
-        // Determine image format and add to multipart form
-        String filename;
-        MediaType contentType;
-        if (_isPng(imageData)) {
-          filename = 'image.png';
-          contentType = MediaType('image', 'png');
-        } 
-        else if (_isJpeg(imageData)) {
-          filename = 'image.jpg';
-          contentType = MediaType('image', 'jpeg');
-        } 
-        else {
-          // Default to PNG if format cannot be determined
-          filename = 'image.png';
-          contentType = MediaType('image', 'png');
-        }
-
+        String filename = 'image.jpg';
+        MediaType contentType = MediaType('image', 'jpeg');
+        request.headers.addAll(BaseApiService.headers);
         request.files.add(
           http.MultipartFile.fromBytes(
-            'image', // field name
+            'image',
             imageData,
             filename: filename,
             contentType: contentType,
           ),
         );
-
-        return await request.send().then((streamedResponse) async {
-          return await http.Response.fromStream(streamedResponse);
-        });
+        request.fields.addAll({'timezone_offset_minutes': timezoneOffsetInMinutes.toString()});
+        return await request
+          .send()
+          .then((streamedResponse) async {
+            return await http.Response.fromStream(streamedResponse);
+          });
       },
       (response) => GeneratedEvents.fromJson(json.decode(response.body)),
       validStatusCodes: [200, 201],
     );
   }
-
-  /// Check if image data is PNG format.
-  static bool _isPng(Uint8List imageData) {
-    if (imageData.length < 8) return false;
-    return imageData[0] == 0x89 &&
-           imageData[1] == 0x50 &&
-           imageData[2] == 0x4E &&
-           imageData[3] == 0x47 &&
-           imageData[4] == 0x0D &&
-           imageData[5] == 0x0A &&
-           imageData[6] == 0x1A &&
-           imageData[7] == 0x0A;
-  }
-
-  /// Check if image data is JPEG format.
-  static bool _isJpeg(Uint8List imageData) {
-    if (imageData.length < 2) return false;
-    return imageData[0] == 0xFF && imageData[1] == 0xD8;
-  }
 }
-
-// You'll need to add this import at the top of your file:
-// import 'package:http_parser/http_parser.dart';

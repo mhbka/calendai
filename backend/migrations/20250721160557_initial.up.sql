@@ -35,7 +35,7 @@ CREATE TABLE recurring_event_groups (
 
 CREATE TABLE recurring_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    group_id UUID REFERENCES recurring_event_groups(id),
+    group_id UUID REFERENCES recurring_event_groups(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id),
     is_active BOOLEAN NOT NULL DEFAULT true,
     title VARCHAR NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE recurring_events (
 
 CREATE TABLE recurring_event_exceptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    recurring_event_id UUID NOT NULL REFERENCES recurring_events(id),
+    recurring_event_id UUID NOT NULL REFERENCES recurring_events(id) ON DELETE CASCADE,
     exception_date TIMESTAMPTZ NOT NULL,
     exception_type VARCHAR NOT NULL CHECK (exception_type IN ('cancelled', 'modified')),
     

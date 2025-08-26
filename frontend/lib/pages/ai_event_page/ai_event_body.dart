@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:namer_app/controllers/ai_event_controller.dart';
-import 'package:namer_app/pages/ai_event_page/generated_events_dialog.dart';
 import 'package:namer_app/widgets/audio_recording_input.dart';
 import 'package:namer_app/widgets/event_input.dart';
 import 'package:namer_app/widgets/example_tip.dart';
@@ -22,9 +19,7 @@ class AIEventBody extends StatelessWidget {
 
   Widget _buildMainArea(BuildContext context) {
     if (controller.isProcessing) {
-      return ProcessingIndicatorWidget(
-        processingType: controller.processingType,
-      );
+      return ProcessingIndicatorWidget();
     }
 
     return EventInputWidget(

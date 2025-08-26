@@ -9,7 +9,7 @@ part 'recurring_event_group.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RecurringEventGroup {
   final String name;
-  final String id;
+  final String? id;
   final String? description;
 
   @ColorConverter()

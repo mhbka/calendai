@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProcessingIndicatorWidget extends StatelessWidget {
-  final String processingType;
   final double height;
 
   const ProcessingIndicatorWidget({
     super.key,
-    required this.processingType,
     this.height = 300,
   });
 
@@ -26,9 +24,7 @@ class ProcessingIndicatorWidget extends StatelessWidget {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              processingType == 'audio' 
-                  ? 'Processing audio...' 
-                  : 'Processing text...',
+              'Processing... hold still!',
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 16,

@@ -16,8 +16,7 @@ pub trait GeminiSchema: Serialize + for<'a> Deserialize<'a> + JsonSchema {
         let generator = SchemaGenerator::new(settings);
         let schema = generator.into_root_schema_for::<Self>();
 
-        tracing::trace!("Generated the following Gemini schema: \n {}", serde_json::to_string_pretty(&schema).unwrap());
-
+        tracing::info!("Schema: {}", serde_json::to_string_pretty(&schema).unwrap());
         return schema;
     } 
 }

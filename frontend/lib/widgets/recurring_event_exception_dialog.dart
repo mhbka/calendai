@@ -68,6 +68,13 @@ class _RecurringEventExceptionDialogState extends State<RecurringEventExceptionD
     String? modifiedLocation;
     DateTime? modifiedStartTime;
     DateTime? modifiedEndTime;
+
+    /*
+    // TODO: using <Option<Option<_>> in the backend doesn't work because, if we use null here, the value is interpreted
+    // TODO: as `Some(_)` and not `None`, meaning a single change will override the other values with null. Thus,
+    // TODO: for now, an exception will store ALL METADATA VALUES of the event at the time. This means changes to the actual event's metadata
+    // TODO: will not be reflected at all in modified exceptions.
+    // TODO: Will think about how to solve this.
     if (_titleController.text.trim() != widget.event.title) {
       modifiedTitle = _titleController.text.trim();
     }
@@ -87,6 +94,11 @@ class _RecurringEventExceptionDialogState extends State<RecurringEventExceptionD
         modifiedLocation = location;
       }
     }
+    */
+    modifiedTitle = _titleController.text.trim();
+    modifiedDescription = _descriptionController.text.trim();
+    modifiedLocation = _locationController.text.trim();
+
     if (_startTime != widget.event.startTime) {
       modifiedStartTime = _startTime;
     }
@@ -191,9 +203,15 @@ class _RecurringEventExceptionDialogState extends State<RecurringEventExceptionD
 
   Widget _buildDatePicker() {
     return DateTimePicker(
+      startTime: _startTime,
+      endTime: _endTime,
       onDateTimesChanged: (start, end) {
-        _startTime = start;
-        _endTime = end;
+        setState(() {
+          print("$start, $end");
+          _startTime = start;
+          _endTime = end;
+          print("$_startTime, $_endTime");
+        }); 
       }
     );
   }

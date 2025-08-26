@@ -126,7 +126,6 @@ impl RecurringEventGroupsService {
             .group_exists(user_id, group_id)
             .await
             .map_err(ApiError::from)?;
-
         if !exists {
             return Err(ApiError::Forbidden);
         }

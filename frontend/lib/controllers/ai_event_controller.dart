@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'dart:io';
+import 'package:image/image.dart' as img;
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
@@ -63,12 +64,23 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<void> processImageInput(Uint8List imageData) async {
+  Future<void> processImageInput(Uint8List imageBytes) async {
     _setProcessingState(true, 'image');
     try {
-      _generatedEvents = await AIEventService.processImageToEvent(imageData);
+      // NOTE: We need the full image file's bytes here, not just the image data bytes,
+      // so it's necessary to write to file then read again.
+      final tempPath = 'temp.jpg';
+      final cmd = img.Command()
+        ..decodeImage(imageBytes)
+        ..encodeJpg()
+        ..writeToFile(tempPath);
+      await cmd.executeThread();
+      final tempFile = File(tempPath);
+      final jpgImageBytes = await tempFile.readAsBytes();
+      await tempFile.delete();
+      _generatedEvents = await AIEventService.processImageToEvent(jpgImageBytes);
     } catch (e) {
-      throw Exception('Failed to generate the events from the image: $e');
+      rethrow;
     } finally {
       _setProcessingState(false, '');
     }
@@ -95,7 +107,7 @@ class AddAIEventController extends ChangeNotifier {
         try {
           Uri inputPath = Uri.parse(wavFilePath);
           File inputFile = File.fromUri(inputPath);
-          inputFile.delete();
+          await inputFile.delete();
         } catch (e) { /* ignore */ }
       }
       else if (ReturnCode.isCancel(returnCode)) {
@@ -116,19 +128,7 @@ class AddAIEventController extends ChangeNotifier {
 
   /// Submit the generated events.
   Future<void> saveGeneratedEvents() async {
-    if (_calendarController != null) {
-      // TODO: think this API will be changed/deleted
-      /*
-      await _calendarController!.saveEvent(
-        existingEvent: existingEvent,
-        title: title,
-        description: description,
-        location: location,
-        startTime: startTime,
-        endTime: endTime,
-      );
-      */
-    }
+    // TODO: this
   }
 
   /// Edit the calendar event at the index.
