@@ -1,6 +1,6 @@
 // lib/services/event_actions_service.dart
 import 'package:flutter/material.dart';
-import 'package:namer_app/constants.dart';
+
 import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
@@ -30,7 +30,9 @@ class CalendarDialogs {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: CalendarTheme.errorButtonStyle,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
             child: Text('Delete'),
           ),
         ],
@@ -75,10 +77,10 @@ class CalendarDialogs {
             },
           ),
           ListTile(
-            leading: Icon(Icons.delete, color: CalendarConstants.errorColor),
+            leading: Icon(Icons.delete, color: Colors.red),
             title: Text(
               'Delete',
-              style: CalendarConstants.errorTextStyle,
+              style: TextStyle(color: Colors.white),
             ),
             onTap: () async {
               Navigator.pop(context);
@@ -130,10 +132,10 @@ class CalendarDialogs {
             },
           ),
           ListTile(
-            leading: Icon(Icons.delete, color: CalendarConstants.errorColor),
+            leading: Icon(Icons.delete, color: Colors.red),
             title: Text(
               'Delete',
-              style: CalendarConstants.errorTextStyle,
+              style: TextStyle(color: Colors.red),
             ),
             onTap: () async {
               Navigator.pop(context);

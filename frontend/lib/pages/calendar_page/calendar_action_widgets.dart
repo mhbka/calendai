@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:namer_app/constants.dart';
+
 
 /// Builds the list of AppBar actions for the calendar page.
 List<Widget> buildCalendarAppbarActions(
@@ -15,10 +15,12 @@ List<Widget> buildCalendarAppbarActions(
       ),
       TextButton(
         onPressed: () => context.push('/recurring_event_groups'),
-        style: CalendarTheme.primaryButtonStyle,
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.deepPurple,
+        ),
         child: Text(
           "View recurring events",
-          style: CalendarConstants.whiteTextStyle,
+          style: TextStyle(color: Colors.white),
         ),
       ),
       TextButton(
@@ -34,19 +36,19 @@ Widget buildFloatingActions(
   VoidCallback showEventDialog
 ) {
   return Padding(
-    padding: CalendarConstants.floatingButtonPadding,
+    padding: EdgeInsets.only(top: 0),
     child: Row(
       mainAxisSize: MainAxisSize.min,
-      spacing: CalendarConstants.buttonSpacing,
+      spacing: 16.0,
       children: [
         FloatingActionButton.extended(
           onPressed: () => context.push('/add_ai_event'),
           heroTag: "ai_add",
-          backgroundColor: CalendarConstants.primaryColor,
+          backgroundColor: Colors.deepPurple,
           icon: Icon(Icons.auto_awesome, color: Colors.white),
           label: Text(
             "Add with AI",
-            style: CalendarConstants.whiteTextStyle,
+            style: TextStyle(color: Colors.white),
           ),
         ),
         FloatingActionButton.extended(

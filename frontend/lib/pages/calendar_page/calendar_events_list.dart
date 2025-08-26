@@ -1,6 +1,4 @@
-// lib/widgets/events_section.dart
 import 'package:flutter/material.dart';
-import 'package:namer_app/constants.dart';
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/widgets/event_list.dart';
@@ -21,9 +19,9 @@ class CalendarEventsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: CalendarConstants.defaultSpacing),
+        const SizedBox(height: 18.0),
         Padding(
-          padding: CalendarConstants.defaultPadding,
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(

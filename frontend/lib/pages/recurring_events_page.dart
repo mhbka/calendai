@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/constants.dart';
+
 import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/models/recurring_event.dart';
 import 'package:namer_app/pages/base_page.dart';
@@ -117,8 +117,8 @@ class _RecurringEventsPageState extends State<RecurringEventsPage> {
         },
         heroTag: "recurring_event_create",
         icon: Icon(Icons.add, color: Colors.white),
-        backgroundColor: CalendarConstants.primaryColor,
-        label: Text("Create a new event", style: CalendarConstants.whiteTextStyle),
+        backgroundColor: Colors.deepPurple,
+        label: Text("Create a new event", style: TextStyle(color: Colors.white)),
       );
   }
 

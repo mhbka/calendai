@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/constants.dart';
+
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -25,13 +25,13 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return TableCalendar<CalendarEvent>(
-      firstDay: DateTime.utc(CalendarConstants.firstYear, 1, 1),
-      lastDay: DateTime.utc(CalendarConstants.lastYear, 12, 31),
+      firstDay: DateTime.utc(2020, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
       focusedDay: widget.controller.focusedDay,
       calendarFormat: widget.calendarFormat,
       eventLoader: widget.controller.getAllEventsForDay,
-      startingDayOfWeek: CalendarConstants.startingDayOfWeek,
-      calendarStyle: CalendarTheme.calendarStyle,
+      startingDayOfWeek: StartingDayOfWeek.monday,
+      calendarStyle: CalendarStyle(outsideDaysVisible: false),
       onDaySelected: widget.controller.setSelectedDay,
       onFormatChanged: (format) {
         if (widget.calendarFormat != format) {

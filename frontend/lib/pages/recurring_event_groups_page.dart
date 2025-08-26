@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/constants.dart';
+
 import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
 import 'package:namer_app/pages/base_page.dart';
 import 'package:namer_app/utils/alerts.dart';
@@ -60,8 +60,8 @@ class _RecurringEventGroupsPageState extends State<RecurringEventGroupsPage> {
           },
           heroTag: "recurring_event_group_create",
           icon: Icon(Icons.add, color: Colors.white),
-          backgroundColor: CalendarConstants.primaryColor,
-          label: Text("Create a new group", style: CalendarConstants.whiteTextStyle),
+          backgroundColor: Colors.deepPurple,
+          label: Text("Create a new group", style: TextStyle(color: Colors.white)),
         );
     } 
   }

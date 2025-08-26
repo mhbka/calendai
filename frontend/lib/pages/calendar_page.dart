@@ -1,7 +1,7 @@
 // lib/pages/calendar_page.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:namer_app/constants.dart';
+
 import 'package:namer_app/models/calendar_event.dart';
 import 'package:namer_app/controllers/calendar_controller.dart';
 import 'package:namer_app/models/recurring_calendar_event.dart';
