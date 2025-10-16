@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/utils/google_auth.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
@@ -71,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 8),
               
               Text(
-                'Sign in to Google',
+                'Sign in to Calendai',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -80,6 +81,15 @@ class _LoginPageState extends State<LoginPage> {
               ),
               
               const SizedBox(height: 48),
+
+              SupaSocialsAuth(
+                socialProviders: [
+                  OAuthProvider.azure,
+                  OAuthProvider.google
+                ],
+                colored: true,
+                onSuccess: (session) => {},
+              ),
               
               ElevatedButton.icon(
                 onPressed: _isLoading ? null : _nativeGoogleSignIn,
@@ -95,6 +105,39 @@ class _LoginPageState extends State<LoginPage> {
                   : Icon(Icons.login), // TODO: replace with Google icon
                 label: Text(
                   _isLoading ? 'Signing in...' : 'Sign in with Google',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  elevation: 2,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.grey[300]!),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              ElevatedButton.icon(
+                onPressed: _isLoading ? null : _nativeGoogleSignIn,
+                icon: _isLoading 
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Icon(Icons.login), // TODO: replace with Microsoft icon
+                label: Text(
+                  _isLoading ? 'Signing in...' : 'Sign in with Outlook',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
