@@ -8,7 +8,7 @@ import 'package:uuid/enums.dart';
 
 /// For interacting with the recurring event groups' API.
 class RecurringEventGroupsApiService extends BaseApiService {
-  static String baseUrl = "${envVars['API_BASE_URL']!}/recurring_event_groups";
+  static String baseUrl = "${envVars.apiBaseUrl}/recurring_event_groups";
 
   /// Fetch all recurring event groups for a user.
   static Future<List<RecurringEventGroup>> fetchAllGroups() async {

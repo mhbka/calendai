@@ -16,13 +16,13 @@ Future<void> initDeps() async {
   await NotificationService.initialize();
   await windowManager.ensureInitialized();
 
-  if (envVars['ENV_TYPE'] == 'DEV') {
+  if (envVars.envType == 'DEV') {
     await registerCustomUri();
   }
 
   await Supabase.initialize(
-    url: envVars['SUPABASE_URL']!,
-    anonKey: envVars['SUPABASE_ANON_KEY']!
+    url: envVars.supabaseUrl,
+    anonKey: envVars.supabaseAnonKey
   );
   try {
     await Supabase.instance.client.auth.refreshSession();
@@ -32,18 +32,14 @@ Future<void> initDeps() async {
 }
 
 /// Validates and returns the env vars for the app.
-DotEnv initEnvVars() {
+EnvVars initEnvVars() {
   var env = DotEnv(includePlatformEnvironment: true)..load();
-  if (!env.isEveryDefined([
-      'ENV_TYPE',
-      'SUPABASE_URL', 
-      'SUPABASE_ANON_KEY', 
-      'API_BASE_URL', 
-    ])
-  ) {
-    throw 'Not all required env vars were detected';
-  }
-  return env;
+  return EnvVars(
+    env['ENV_TYPE']!,
+    env['SUPABASE_URL']!,
+    env['SUPABASE_ANON_KEY']!,
+    env['API_BASE_URL']!
+  );
 }
 
 /// Initialize the window's settings.

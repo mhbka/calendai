@@ -1,4 +1,3 @@
-import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:namer_app/init.dart';
 import 'package:namer_app/mixins/system_tray.dart';
@@ -9,8 +8,17 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
 
+/// Defines the env variables required for the app.
+class EnvVars {
+  String envType;
+  String supabaseUrl;
+  String supabaseAnonKey;
+  String apiBaseUrl;
+  EnvVars(this.envType, this.supabaseUrl, this.supabaseAnonKey, this.apiBaseUrl);
+}
+
 /// The env variables for the app.
-late final DotEnv envVars;
+late final EnvVars envVars;
 
 /// The UUID generator for the app.
 final Uuid uuid = Uuid();

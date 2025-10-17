@@ -10,7 +10,7 @@ import 'package:namer_app/services/recurring_event_groups_api_service.dart';
 
 /// For interacting with the recurring events' API.
 class RecurringEventsApiService extends BaseApiService {
-  static String baseUrl = "${envVars['API_BASE_URL']!}/recurring_events";
+  static String baseUrl = "${envVars.apiBaseUrl}/recurring_events";
 
   /// Fetch recurring events under a group.
   /// 
