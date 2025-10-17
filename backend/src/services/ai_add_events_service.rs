@@ -19,23 +19,17 @@ impl AIAddEventsService {
     }
 
     pub async fn generate_from_text(&self, text: String, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
-        self.llm
+        let events = self.llm
             .events_from_text(text, timezone_offset_minutes)
-            .await
-            .map_err(|err| {
-                tracing::warn!("Failed to generate events from text: {err}");
-                ApiError::Internal("Had an issue generating our AI service".into())
-            })
+            .await?;
+        Ok(events)
     }
 
     pub async fn generate_from_audio(&self, audio_bytes: Bytes, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
-        self.llm
+        let events = self.llm
             .events_from_audio(&audio_bytes, timezone_offset_minutes)
-            .await
-            .map_err(|err| {
-                tracing::warn!("Failed to generate events from audio: {err}");
-                ApiError::Internal("Had an issue generating our AI service".into())
-            })
+            .await?;
+        Ok(events)
     }
 
     pub async fn generate_from_image(&self, image_bytes: Bytes, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
@@ -58,13 +52,10 @@ impl AIAddEventsService {
                 ApiError::Internal("Failed to process the image".into())
             })?;
         
-        // then we request the LLM
-        self.llm
+        // then request the LLM
+        let events = self.llm
             .events_from_image(&jpg_bytes, timezone_offset_minutes)
-            .await
-            .map_err(|err| {
-                tracing::warn!("Failed to generate events from image: {err}");
-                ApiError::Internal("Had an issue generating our AI service".into())
-            })
+            .await?;
+        Ok(events)
     }
 }

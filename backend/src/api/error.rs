@@ -5,9 +5,12 @@ use axum::http::header::WWW_AUTHENTICATE;
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use graph_rs_sdk::GraphFailure;
 use sqlx::error::DatabaseError;
 use std::borrow::Cow;
 use std::collections::HashMap;
+
+use crate::llm::error::LLMError;
 
 /// An alias for `Result` which returns `ApiError`.
 pub type ApiResult<T> = Result<T, ApiError>;
@@ -48,33 +51,32 @@ pub enum ApiError {
     /// Note that this could also contain database constraint errors, which should usually
     /// be transformed into client errors (e.g. `422 Unprocessable Entity` or `409 Conflict`).
     /// See `ResultExt` below for a convenient way to do this.
-    #[error("an error occurred with the database")]
+    #[error("An error occurred with the database: {0}")]
     Sqlx(#[from] sqlx::Error),
+
+    /// An error from `rust_graph_sdk`.
+    #[error("An error occurred interacting with Microsoft Graph API: {0}")]
+    Graph(#[from] GraphFailure),
+
+    /// An error from `reqwest`.
+    #[error("An error occurred making a reqwest: {0}")]
+    Reqwest(#[from] reqwest::Error),
+
+    /// An error from the LLM.
+    #[error("An error occurred interfacing with the LLM for event generation: {0}")]
+    LLM(#[from] LLMError),
 
     /// An error from parsing a multipart form.
     #[error("An error occurred processing the multipart request: {0}")]
     Multipart(#[from] MultipartError),
 
-    /// Returns a `500 Internal Server Error`; useful for logical errors etc.
+    /// Returns a generic `500 Internal Server Error`; useful for logical errors etc that don't fit elsewhere.
     #[error("An unexpected internal error occurred: {0}")]
     Internal(String),
 
     /// Returns a `400 Bad Request`; useful for internal errors that can be exposed to the user.
     #[error("{0}")]
     BadRequest(String)
-
-    /* 
-    /// Return `500 Internal Server Error` on a `anyhow::Error`.
-    ///
-    /// `anyhow::Error` is used in a few places to capture context and backtraces
-    /// on unrecoverable (but technically non-fatal) errors which could be highly useful for
-    /// debugging. We use it a lot in our code for background tasks or making API calls
-    /// to external services so we can use `.context()` to refine the logged error.
-    /// 
-    /// NOTE: commented out till I actually need it
-    #[error("an internal server error occurred")]
-    Anyhow(#[from] anyhow::Error),
-    */
 }
 
 impl ApiError {
@@ -107,6 +109,9 @@ impl ApiError {
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Reqwest(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::LLM(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Graph(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::Multipart(_) => StatusCode::BAD_REQUEST,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::BadRequest(_) =>  StatusCode::BAD_REQUEST

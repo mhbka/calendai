@@ -60,13 +60,16 @@ class _LoginPageState extends State<LoginPage> {
               SupaSocialsAuth(
                 socialProviders: [
                   OAuthProvider.azure,
-                  OAuthProvider.google
                 ],
                 colored: true,
+                authScreenLaunchMode: LaunchMode.inAppWebView,
+                showSuccessSnackBar: false,
                 scopes: {
                   OAuthProvider.azure: 'email Calendars.ReadWrite.Shared'
                 },
-                onSuccess: (session) => { /* router auto-refreshes upon auth session update, so we don't use this for now */ },
+                onSuccess: (session) => { 
+                  Alerts.showConfirmationDialog(context, "Successful login", "You've successfully logged in. Provider: ${session.providerToken}")
+                 },
                 onError: (error) => {
                   Alerts.showErrorSnackBar(context, "Failed to log in: $error.")
                 },

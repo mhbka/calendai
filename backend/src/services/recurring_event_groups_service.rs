@@ -25,6 +25,7 @@ pub struct RecurringEventGroupResponse {
     pub recurring_events: usize
 }
 
+/// Service for recurring event groups.
 #[derive(Clone, Debug)]
 pub struct RecurringEventGroupsService {
     repositories: Repositories,
