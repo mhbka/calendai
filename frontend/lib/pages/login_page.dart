@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/utils/google_auth.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,7 +9,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final supabase = Supabase.instance.client;
-  final GoogleSignIn _googleSignIn = googleSignInInstance;
   bool _isLoading = false;
 
   @override
@@ -20,27 +16,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
   }
   
-
-  Future<void> _nativeGoogleSignIn() async {
-    await _googleSignIn.signOut();
-    final credentials = await _googleSignIn.signIn();
-    if (credentials != null && credentials.idToken != null) {
-      print("ID TOKEN: ${credentials.idToken}");
-      await supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: credentials.idToken!, 
-        accessToken: credentials.accessToken
-      );
-    }
-    else {
-      await Alerts.showErrorDialog(
-        context, 
-        "Error logging in", 
-        "We were unable to log in as the credentials were null."
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,71 +63,13 @@ class _LoginPageState extends State<LoginPage> {
                   OAuthProvider.google
                 ],
                 colored: true,
-                onSuccess: (session) => {},
-              ),
-              
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : _nativeGoogleSignIn,
-                icon: _isLoading 
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Icon(Icons.login), // TODO: replace with Google icon
-                label: Text(
-                  _isLoading ? 'Signing in...' : 'Sign in with Google',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  elevation: 2,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.grey[300]!),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : _nativeGoogleSignIn,
-                icon: _isLoading 
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Icon(Icons.login), // TODO: replace with Microsoft icon
-                label: Text(
-                  _isLoading ? 'Signing in...' : 'Sign in with Outlook',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  elevation: 2,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.grey[300]!),
-                  ),
-                ),
+                scopes: {
+                  OAuthProvider.azure: 'email Calendars.ReadWrite.Shared'
+                },
+                onSuccess: (session) => { /* router auto-refreshes upon auth session update, so we don't use this for now */ },
+                onError: (error) => {
+                  Alerts.showErrorSnackBar(context, "Failed to log in: $error.")
+                },
               ),
               
               const SizedBox(height: 24),

@@ -10,8 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   supabase_flutter: ^2.9.0
-  google_sign_in_all_platforms: ^1.0.0
-  google_sign_in: ^6.1.5
   table_calendar: 3.2.0
   intl: 0.20.2
   http: ^1.4.0
@@ -31,6 +29,7 @@ dependencies:
   image: ^4.5.4
   supabase_auth_ui: ^0.5.5
   app_links: ^6.4.1
+  win32_registry: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -38,6 +37,15 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.3.3
   json_serializable: ^6.8.0
+  msix: ^3.16.12
 
 flutter:
   uses-material-design: true
+
+msix_config:
+  display_name: Calendai
+  identity_name: calendai.app
+  msix_version: 1.0.0.0
+  logo_path: C:\path\to\logo.png
+  protocol_activation: calendai
+  capabilities: internetClient, location, microphone, webcam

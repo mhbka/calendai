@@ -6,6 +6,7 @@ import 'package:namer_app/main.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
+import 'package:win32_registry/win32_registry.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// Initializes any plugins/dependencies.
@@ -15,9 +16,13 @@ Future<void> initDeps() async {
   await NotificationService.initialize();
   await windowManager.ensureInitialized();
 
+  if (envVars['ENV_TYPE'] == 'DEV') {
+    await registerCustomUri();
+  }
+
   await Supabase.initialize(
-    url: envVars['supabase_url']!,
-    anonKey: envVars['supabase_anon_key']!
+    url: envVars['SUPABASE_URL']!,
+    anonKey: envVars['SUPABASE_ANON_KEY']!
   );
   try {
     await Supabase.instance.client.auth.refreshSession();
@@ -30,11 +35,10 @@ Future<void> initDeps() async {
 DotEnv initEnvVars() {
   var env = DotEnv(includePlatformEnvironment: true)..load();
   if (!env.isEveryDefined([
-    'supabase_url', 
-    'supabase_anon_key', 
-    'api_base_url', 
-    'google_client_id', 
-    'google_client_secret'
+      'ENV_TYPE',
+      'SUPABASE_URL', 
+      'SUPABASE_ANON_KEY', 
+      'API_BASE_URL', 
     ])
   ) {
     throw 'Not all required env vars were detected';
@@ -77,3 +81,25 @@ Future<void> initSystemTray() async {
   );
   await trayManager.setContextMenu(menu);
 }
+
+/// Registers the custom URI scheme for Windows manually, for OAuth callbacks.
+/// 
+/// This should only be done for development purposes; in a normal app install, `msix` will handle this.
+Future<void> registerCustomUri() async {
+  String appPath = Platform.resolvedExecutable;
+
+  String protocolRegKey = 'Software\\Classes\\calendai';
+  RegistryValue protocolRegValue = const RegistryValue.string(
+    'URL Protocol',
+    '',
+  );
+  String protocolCmdRegKey = 'shell\\open\\command';
+  RegistryValue protocolCmdRegValue = RegistryValue.string(
+    '',
+    '"$appPath" "%1"',
+  );
+
+  final regKey = Registry.currentUser.createKey(protocolRegKey);
+  regKey.createValue(protocolRegValue);
+  regKey.createKey(protocolCmdRegKey).createValue(protocolCmdRegValue);
+} 

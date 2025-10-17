@@ -10,7 +10,6 @@ import 'package:namer_app/pages/calendar_page/calendar_action_widgets.dart';
 import 'package:namer_app/pages/calendar_page/calendar_events_list.dart';
 import 'package:namer_app/pages/calendar_page/calendar.dart';
 import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/utils/google_auth.dart';
 import 'package:namer_app/widgets/event_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -88,7 +87,6 @@ class _CalendarPageState extends State<CalendarPage> {
   
   Future<void> _handleLogout() async {
     await Supabase.instance.client.auth.signOut();
-    await googleSignInInstance.signOut();
     if (mounted) context.go('/login');
   }
 

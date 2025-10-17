@@ -9,7 +9,7 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// The env vars for the app.
+/// The env variables for the app.
 late final DotEnv envVars;
 
 /// The UUID generator for the app.
@@ -18,8 +18,8 @@ final Uuid uuid = Uuid();
 void main() async {
   envVars = initEnvVars();  
   await initDeps();
-  await initSystemTray();
   await initWindowSettings();
+  // await initSystemTray();
 
   runApp(App());
 }
@@ -51,11 +51,6 @@ class _AppState extends State<App> with
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
-    double width = screenSize.width;
-    double height = screenSize.height;
-    print("$width x $height");
-
     return MaterialApp.router(
       title: 'Calendai',
       theme: ThemeData(

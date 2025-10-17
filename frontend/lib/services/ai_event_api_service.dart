@@ -8,7 +8,7 @@ import 'package:namer_app/services/base_api_service.dart';
 
 // For interacting with the AI Event API.
 class AIEventService extends BaseApiService {
-  static String baseUrl = "${envVars['api_base_url']!}/ai_add_event";
+  static String baseUrl = "${envVars['API_BASE_URL']!}/ai_add_event";
 
   /// We include our local timezone's offset, so the backend can offset generated events' datetimes from UTC for usability.
   static int timezoneOffsetInMinutes = DateTime.now().timeZoneOffset.inMinutes;

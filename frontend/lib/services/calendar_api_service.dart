@@ -6,7 +6,7 @@ import 'package:namer_app/services/base_api_service.dart';
 
 /// For interacting with the calendar (event) API.
 class CalendarApiService extends BaseApiService {
-  static String baseUrl = "${envVars['api_base_url']!}/calendar_events";
+  static String baseUrl = "${envVars['API_BASE_URL']!}/calendar_events";
 
   /// Fetch events for a date range.
   static Future<List<CalendarEvent>> fetchEvents(DateTime start, DateTime end) async {
