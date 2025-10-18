@@ -4,7 +4,7 @@ use crate::{api::error::ApiResult, llm::{GeneratedEvents, LLM}, models::outlook:
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OutlookListEmailsResponse {
-    value: Vec<OutlookMailMessage>
+    pub value: Vec<OutlookMailMessage>
 }
 
 /// Service for interacting with Outlook (or generally Microsoft Graph API).

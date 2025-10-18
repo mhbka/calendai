@@ -52,6 +52,16 @@ Widget buildFloatingActions(
           ),
         ),
         FloatingActionButton.extended(
+          onPressed: () => context.push('/outlook_emails'),
+          heroTag: "outlook_add",
+          backgroundColor: Colors.deepPurple,
+          icon: Icon(Icons.mail, color: Colors.white),
+          label: Text(
+            "Add from Outlook",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        FloatingActionButton.extended(
           onPressed: showEventDialog,
           heroTag: "normal_add",
           icon: Icon(Icons.add),

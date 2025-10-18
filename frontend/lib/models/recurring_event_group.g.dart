@@ -9,7 +9,7 @@ part of 'recurring_event_group.dart';
 RecurringEventGroup _$RecurringEventGroupFromJson(Map<String, dynamic> json) =>
     RecurringEventGroup(
       name: json['name'] as String,
-      id: json['id'] as String,
+      id: json['id'] as String?,
       description: json['description'] as String?,
       color: const ColorConverter().fromJson((json['color'] as num).toInt()),
       isActive: json['is_active'] as bool?,

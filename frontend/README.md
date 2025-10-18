@@ -1,16 +1,15 @@
 # frontend
+## Info
+The Flutter frontend for calendai. For running it, check the outer README.
 
-A new Flutter project.
+## General design
+The "architecture" is pretty simple:
+- Pages (screens) are found in `/pages`; each extends a `StatefulWidget` and is built upon the `BasePage` which just provides some consistent styling and design.
+- Each page has a corresponding controller in `/controllers`. These maintain the page's state and hold handler functions for the page's functionality.
+- Controllers usually call into their service(s) in `/services`. A service is basically the app's API layer (though the notification service instead handles device notifications)
+- The router in `router` handles mapping pages to routes.
+- Most data is defined inside `/models`, and is made `JsonSerializable` since they're usually passed to/from the API layer.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Dev notes
+Some useful dev notes:
+- After creating a new data model in `/models`, you can generate the serialization code by running `dart run build_runner build`

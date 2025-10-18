@@ -81,6 +81,7 @@ class CalendarController extends ChangeNotifier {
   /// Loads all calendar events and recurring calendar events between the start and end datetimes.
   Future<void> loadEvents() async {
     _setLoading(true);
+    
     try {
       final startOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
       final endOfMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
