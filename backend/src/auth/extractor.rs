@@ -1,5 +1,3 @@
-
-
 use crate::api::AppState;
 use super::error::AuthError;
 use super::types::{AuthClaims, AuthUser};

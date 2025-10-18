@@ -112,6 +112,8 @@ impl LLM {
             recurring_events, 
             recurring_event_group 
         };
+
+        // TODO: verify which approach is better
         /*
         let mut generated_events: GeneratedEvents = self.gemini
             .request_image(
@@ -121,6 +123,7 @@ impl LLM {
             )
             .await?;
          */
+        
         generated_events.offset_timezones(timezone_offset_minutes);
         return Ok(generated_events)
     }

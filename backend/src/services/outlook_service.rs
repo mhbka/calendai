@@ -20,7 +20,7 @@ impl OutlookService {
         }
     }
 
-    pub async fn list_user_emails(&self, access_token: &str) -> ApiResult<OutlookListEmailsResponse> {
+    pub async fn fetch_user_emails(&self, access_token: &str) -> ApiResult<OutlookListEmailsResponse> {
         let client = Graph::new(access_token);
 
         let messages = client.me()
@@ -34,7 +34,7 @@ impl OutlookService {
         Ok(messages)
     }
 
-    pub async fn generate_events_from_user_email(&self, access_token: &str, mail_id: String, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
+    pub async fn generate_events_from_user_email(&self, access_token: &str, mail_id: &str, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
         let client = Graph::new(access_token);
 
         let chosen_email = client.me()
