@@ -22,7 +22,7 @@ impl FromRequestParts<AppState> for AuthUser
                 tracing::debug!("failed to extract Bearer token; headers: {:?}", parts.headers);
                 AuthError::Auth
             })?;
-        tracing::trace!("Successfully extracted bearer token: {bearer:?}");
+        tracing::trace!("Successfully extracted bearer token");
 
         // HACK: set aud validation to false for now
         let mut validation = Validation::default();
@@ -41,12 +41,23 @@ impl FromRequestParts<AppState> for AuthUser
 
         // Extract user data from claims
         let claims = token_data.claims;
+
+        // Obtain user's Azure refresh token
+        let azure_refresh_token = parts.headers
+            .get("Azure-Refresh-Token")
+            .filter(|h| !h.is_empty())
+            .ok_or(AuthError::MissingOrInvalidAzureAccessToken)?
+            .to_str()
+            .map_err(|_| AuthError::MissingOrInvalidAzureAccessToken)?
+            .to_owned();
+        tracing::trace!("Successfully extracted Azure refresh token");
         
         Ok(AuthUser {
             id: claims.sub,
             email: claims.email,
             name: claims.name,
             picture: claims.picture,
+            azure_refresh_token
         })
     }
 }

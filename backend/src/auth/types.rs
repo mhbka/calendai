@@ -8,6 +8,7 @@ pub struct AuthUser {
     pub email: String,
     pub name: Option<String>,
     pub picture: Option<String>,
+    pub azure_refresh_token: String
 }
 
 #[derive(Debug, Serialize, Deserialize)]

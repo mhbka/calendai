@@ -30,6 +30,7 @@ dependencies:
   supabase_auth_ui: ^0.5.5
   app_links: ^6.4.1
   win32_registry: ^2.1.0
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:

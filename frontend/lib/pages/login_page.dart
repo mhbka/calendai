@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/services/azure_token_api_service.dart';
 import 'package:namer_app/utils/alerts.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
@@ -62,23 +63,21 @@ class _LoginPageState extends State<LoginPage> {
                   OAuthProvider.azure,
                 ],
                 colored: true,
-                authScreenLaunchMode: LaunchMode.inAppWebView,
+                authScreenLaunchMode: LaunchMode.externalApplication,
                 showSuccessSnackBar: false,
                 scopes: {
-                  OAuthProvider.azure: 'email Calendars.ReadWrite.Shared'
+                  OAuthProvider.azure: 'openid offline_access email Calendars.ReadWrite.Shared'
                 },
-                onSuccess: (session) => { 
-                  Alerts.showConfirmationDialog(context, "Successful login", "You've successfully logged in. Provider: ${session.providerToken}")
+                onSuccess: (session) async {
+                  await AzureTokenApiService.sendAzureToken();
+                  if (context.mounted) await Alerts.showConfirmationDialog(context, "Successful login", "You've successfully logged in. Provider: ${session.providerToken}");
                  },
-                onError: (error) => {
-                  Alerts.showErrorSnackBar(context, "Failed to log in: $error.")
-                },
               ),
               
               const SizedBox(height: 24),
               
               Text(
-                'By signing in, you agree to our Terms of Service and Privacy Policy',
+                'An AI-integrated calendar',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],

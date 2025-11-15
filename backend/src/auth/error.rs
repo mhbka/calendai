@@ -10,6 +10,8 @@ pub enum AuthError {
     Auth,
     #[error("Token decoding failed")]
     InvalidToken,
+    #[error("Missing Azure access token, or it wasn't a valid string")]
+    MissingOrInvalidAzureAccessToken
 }
 
 /// For immediately returning upon a failed auth
@@ -18,6 +20,7 @@ impl IntoResponse for AuthError {
         let status = match self {
             Self::Auth => StatusCode::UNAUTHORIZED,
             Self::InvalidToken => StatusCode::UNAUTHORIZED,
+            Self::MissingOrInvalidAzureAccessToken => StatusCode::BAD_REQUEST
         };
         let body = json!({
             "error": self.to_string(),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:namer_app/init.dart';
 import 'package:namer_app/mixins/system_tray.dart';
@@ -27,9 +29,13 @@ void main() async {
   envVars = initEnvVars();  
   await initDeps();
   await initWindowSettings();
-  // await initSystemTray();
-
-  runApp(App());
+  
+  runZonedGuarded(() {
+    runApp(App());
+  }, 
+  (error, stackTrace) {
+    print("Caught an uncaught exception! $error");
+  });
 }
 
 class App extends StatefulWidget {
@@ -54,7 +60,9 @@ class _AppState extends State<App> with
       if (mounted) {
         AppRouter.router.refresh();
       }
-    });
+    },
+      onError: (error) => print("Error from auth: $error")
+    );
   }
 
   @override

@@ -11,6 +11,7 @@ mod llm;
 mod services;
 mod repositories;
 mod auth;
+mod utils;
 
 #[tokio::main]
 async fn main() {

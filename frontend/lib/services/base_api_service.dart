@@ -9,6 +9,7 @@ abstract class BaseApiService {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken}',
+    'Azure-Refresh-Token': Supabase.instance.client.auth.currentSession?.providerRefreshToken ?? ''
   };
 
   /// Generic method to handle HTTP requests with consistent error handling

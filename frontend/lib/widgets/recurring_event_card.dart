@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/controllers/recurring_events_controller.dart';
 import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/utils/alerts.dart';
 import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
 import 'package:namer_app/widgets/recurring_event_dialog.dart';
 
@@ -9,7 +7,6 @@ class RecurringEventCard extends StatelessWidget {
   final RecurringEvent event;
   final Function(RecurringEvent) onSubmitEdit;
   final VoidCallback onSubmitDelete;
-  final RecurringEventsController _controller = RecurringEventsController.instance;
 
   RecurringEventCard({
     super.key, 
@@ -29,7 +26,7 @@ class RecurringEventCard extends StatelessWidget {
 
   Widget _buildCardBody(BuildContext context) {
     return SizedBox(
-        height: 140, // Fixed height for equal heights
+        height: 140,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

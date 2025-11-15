@@ -6,7 +6,6 @@ class OutlookEmailsController extends ChangeNotifier {
   // singleton stuff
 
   OutlookEmailsController._internal() {
-    loadEmails();
   }
 
   static final OutlookEmailsController _instance = OutlookEmailsController._internal();
@@ -26,16 +25,20 @@ class OutlookEmailsController extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadEmails() async {
-    _isLoading = true;
-    
     try { 
+      _setLoading(true);
       _emails = await OutlookEmailApiService.fetchUserEmails();
     } 
     catch (e) {
       rethrow;
     } 
     finally {
-      _isLoading = false;
+      _setLoading(false);
     }
+  }
+
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
   }
 }

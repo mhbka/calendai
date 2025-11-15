@@ -1,16 +1,18 @@
 use sqlx::PgPool;
-use crate::repositories::{calendar_events_repo::CalendarEventsRepository, recurring_event_groups_repo::RecurringEventGroupsRepository, recurring_events_repo::RecurringEventsRepository};
+use crate::repositories::{azure_token_repo::AzureTokensRepository, calendar_events_repo::CalendarEventsRepository, recurring_event_groups_repo::RecurringEventGroupsRepository, recurring_events_repo::RecurringEventsRepository};
 
 pub mod calendar_events_repo;
 pub mod recurring_event_groups_repo;
 pub mod recurring_events_repo;
+pub mod azure_token_repo;
 
 /// Repositories, or abstractions over the database.
 #[derive(Clone, Debug)]
 pub struct Repositories {
     pub calendar_events: CalendarEventsRepository,
     pub recurring_event_groups: RecurringEventGroupsRepository,
-    pub recurring_events: RecurringEventsRepository
+    pub recurring_events: RecurringEventsRepository,
+    pub azure_tokens: AzureTokensRepository,
 }
 
 impl Repositories {
@@ -18,7 +20,8 @@ impl Repositories {
         Self {
             calendar_events: CalendarEventsRepository::new(db.clone()),
             recurring_event_groups: RecurringEventGroupsRepository::new(db.clone()),
-            recurring_events: RecurringEventsRepository::new(db.clone())
+            recurring_events: RecurringEventsRepository::new(db.clone()),
+            azure_tokens: AzureTokensRepository::new(db.clone())
         }
     }
 }

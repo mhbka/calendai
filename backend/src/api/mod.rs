@@ -10,7 +10,7 @@ mod calendar_events;
 mod recurring_event_groups;
 mod recurring_events;
 mod ai_add_events;
-mod outlook;
+mod azure;
 
 /// State for the app.
 #[derive(Clone)]
@@ -42,7 +42,7 @@ fn build_app_router(state: AppState) -> Router {
         .nest("/recurring_events", recurring_events::router())
         .nest("/calendar_events", calendar_events::router())
         .nest("/ai_add_event", ai_add_events::router())
-        .nest("/outlook", outlook::router())
+        .nest("/azure", azure::router())
         .with_state(state)
         .layer(TraceLayer::new_for_http())
 }

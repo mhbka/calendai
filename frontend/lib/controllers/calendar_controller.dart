@@ -4,6 +4,9 @@ import 'package:namer_app/models/recurring_calendar_event.dart';
 import 'package:namer_app/services/calendar_api_service.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:namer_app/services/recurring_events_api_service.dart';
+import 'package:namer_app/services/service_exception.dart';
+import 'package:namer_app/utils/alerts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarController extends ChangeNotifier {
@@ -89,16 +92,13 @@ class CalendarController extends ChangeNotifier {
       _events = await CalendarApiService.fetchEvents(startOfMonth, endOfMonth);
       _recurringEvents = await RecurringEventsApiService.fetchCalendarEvents(startOfMonth, endOfMonth);
       
-      // Schedule reminders for all events
-      for (final event in _events) {
-        NotificationService.scheduleEventReminder(event);
-      }
-      for (final event in _recurringEvents) {
-        NotificationService.scheduleEventReminder(event.recurringToCalendarEvent());
-      }
-      
       notifyListeners();
     } catch (e) {
+      if (e is ServiceException) {
+        if (e.statusCode == 401) {
+          await Supabase.instance.client.auth.signOut();
+        }
+      }
       rethrow; // Let the UI handle the error display
     } finally {
       _setLoading(false);
@@ -129,7 +129,7 @@ class CalendarController extends ChangeNotifier {
     try {
       if (event.id != null) {
         await CalendarApiService.deleteEvent(event.id!);
-        NotificationService.cancelEventReminder(event.id!);
+        NotificationService.cancelEventNotification(event.id!);
         _events.removeWhere((e) => e.id == event.id);
         notifyListeners();
       }

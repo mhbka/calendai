@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:dotenv/dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:namer_app/main.dart';
+import 'package:namer_app/services/azure_token_api_service.dart';
 import 'package:namer_app/services/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -24,10 +25,18 @@ Future<void> initDeps() async {
     url: envVars.supabaseUrl,
     anonKey: envVars.supabaseAnonKey
   );
+
   try {
     await Supabase.instance.client.auth.refreshSession();
   } catch (e) {
-    print("Auth not refreshed (likely not logged in)");
+    print("Error while refreshing the session: $e");
+  }
+
+  try {
+    await AzureTokenApiService.verifyAzureTokenExists();
+  } catch (e) {
+    print("Error while verifying Azure token in backend: $e - signing out...");
+    await Supabase.instance.client.auth.signOut();
   }
 }
 
