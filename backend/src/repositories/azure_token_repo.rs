@@ -51,21 +51,6 @@ impl AzureTokensRepository {
         Ok(())
     }
 
-    pub async fn update_encrypted_access_token(&self, user_id: Uuid, encrypted_access_token: &str) -> RepoResult<()> {
-        sqlx::query!(
-            r#"
-                update azure_tokens
-                set encrypted_access_token = $1
-                where user_id = $2
-            "#,
-            encrypted_access_token,
-            user_id
-        )
-            .execute(&self.db)
-            .await?;
-        Ok(())
-    }
-
     pub async fn get_encrypted_refresh_and_access_token(&self, user_id: Uuid) -> RepoResult<(String, String)> {
         let tokens = sqlx::query!(
             r#"

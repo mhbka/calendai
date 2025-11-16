@@ -9,14 +9,14 @@ pub struct OutlookListEmailsResponse {
     pub value: Vec<OutlookMailMessage>
 }
 
-/// Service for functionality related to Outlook/Azure.
+/// Service for functionality related to Azure tokens.
 #[derive(Clone, Debug)]
-pub struct AzureOutlookService {
+pub struct AzureTokenService {
     llm: LLM,
     repositories: Repositories,
 }
 
-impl AzureOutlookService {
+impl AzureTokenService {
     pub fn new(llm: LLM, repositories: Repositories) -> Self {
         Self {
             llm,
@@ -90,27 +90,14 @@ impl AzureOutlookService {
         let access_token = decrypt_token(&encrypted_access_token, &config.azure_encryption_key)
             .map_err(|_| ApiError::Internal("Failed to decrypt the access token".into()))?;
         tracing::trace!("access token: {access_token}");
-        let mut client = Graph::new(access_token);
+        let client = Graph::new(access_token);
 
-        let response = match client.v1().me()
+        let response = client.me()
             .calendars()
             .get_calendars_count()
             .send()
-            .await 
-        {
-            Ok(val) => val,
-            Err(err) => {
-                tracing::trace!("graph api error: {err:?}");
-                return Err(err)?;
-            }
-        };
-        let response = match response.error_for_status() {
-                Ok(res) => res,
-                Err(err) => {
-                    tracing::trace!("status error: {err:?}");
-                    return Err(err)?;
-                }
-            };
+            .await?
+            .error_for_status()?;
         let messages = response
             .json::<OutlookListEmailsResponse>()
             .await?;

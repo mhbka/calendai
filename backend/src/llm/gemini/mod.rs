@@ -39,6 +39,17 @@ impl GeminiLLM {
         self.handle_request(request).await
     }
 
+    /// Send a simple text query, decoding the response as a string.
+    pub async fn request_text_string_res(
+        &self, 
+        text: String, 
+        system_instruction: Option<String>
+    ) -> Result<String, LLMError>
+    {
+        let request = self.build_text_request_without_gen_config(text, system_instruction);
+        self.handle_request_string(request).await
+    }
+
     /// Send a JPEG image and a text query, decoding the response as `Res`.
     pub async fn request_image<Res>(
         &self, 
@@ -51,6 +62,17 @@ impl GeminiLLM {
         self.request_inline_data(image_bytes, "image/jpeg", request_text, system_instruction).await
     }
 
+    /// Send a JPEG image and a text query, decoding the response as a string.
+    pub async fn request_image_string_res(
+        &self, 
+        image_bytes: &[u8], 
+        system_instruction: Option<String>,
+        request_text: String
+    ) -> Result<String, LLMError>
+    {
+        self.request_inline_data_string_res(image_bytes, "image/jpeg", request_text, system_instruction).await
+    }
+
     /// Send an MP3 audio and a text query, decoding the response as `Res`.
     pub async fn request_audio<Res>(
         &self, 
@@ -61,6 +83,17 @@ impl GeminiLLM {
     where Res: GeminiSchema
     {
         self.request_inline_data(audio_bytes, "audio/mp3", request_text, system_instruction).await
+    }
+
+    /// Send an MP3 audio and a text query, decoding the response as a string.
+    pub async fn request_audio_string_res(
+        &self, 
+        audio_bytes: &[u8], 
+        system_instruction: Option<String>,
+        request_text: String
+    ) -> Result<String, LLMError>
+    {
+        self.request_inline_data_string_res(audio_bytes, "audio/mp3", request_text, system_instruction).await
     }
 
     /// Send inline data and a text query, decoding the response as `Res`.
@@ -82,40 +115,70 @@ impl GeminiLLM {
         self.handle_request(request).await
     }
 
+    /// Send inline data and a text query, decoding the response as a string.
+    async fn request_inline_data_string_res(
+        &self, 
+        inline_bytes: &[u8], 
+        mime_type: &'static str, 
+        request_text: String,
+        system_instruction: Option<String>
+    ) -> Result<String, LLMError>
+    {
+        let request = self.build_inline_data_request_without_gen_config(
+            inline_bytes, 
+            mime_type, 
+            request_text, 
+            system_instruction
+        );
+        self.handle_request_string(request).await
+    }
+    
+    /// Handles running a query to the LLM and just returning the string content.
+    async fn handle_request_string(&self, request: LLMRequest) -> Result<String, LLMError> {
+        let response = self.handle_request_inner(request).await?;
+
+        match &response.candidates[0].content.parts[0].data {
+            PartData::Text { text } => Ok(text.clone()),
+            other => return Err(LLMError::NoOrWrongContent { reason: format!("Received unexpected PartData: {other:?}") })
+        }
+    }
+
     /// Handles running and decoding a query to the LLM.
     async fn handle_request<Res>(&self, request: LLMRequest) -> Result<Res, LLMError>
     where Res: GeminiSchema
     {
-        match self.client
+        let response = self.handle_request_inner(request).await?;
+
+        match &response.candidates[0].content.parts[0].data {
+            PartData::Text { text } =>  {
+                let res = serde_json::from_str::<Res>(&text)?;
+                return Ok(res);
+            },
+            other => return Err(LLMError::NoOrWrongContent { reason: format!("Received unexpected PartData: {other:?}") })
+        }
+    }
+
+    /// The general handling of an LLM request.
+    async fn handle_request_inner(&self, request: LLMRequest) -> Result<LLMResponse, LLMError> {
+        let response = self.client
             .post(&self.endpoint)
             .json(&request)
             .send()
             .await
-        {
-            Ok(res) => {
-                match res.error_for_status() {
-                    Ok(res) => {
-                        match res.json::<LLMResponse>().await {
-                            Ok(res) => {
-                                if res.candidates.len() == 0 || res.candidates[0].content.parts.len() == 0 {
-                                    return Err(LLMError::NoOrWrongContent { reason: "No candidates, or candidate had no part".into() });
-                                }
-                                match &res.candidates[0].content.parts[0].data {
-                                    PartData::Text { text } =>  {
-                                        let res = serde_json::from_str::<Res>(&text)?;
-                                        return Ok(res);
-                                    },
-                                    other => return Err(LLMError::NoOrWrongContent { reason: format!("Received unexpected PartData: {other:?}") })
-                                }
-                            },
-                            Err(err) => return Err(LLMError::ParseIntoGeminiResponse(err))
-                        }
-                    },
-                    Err(err) => return Err(LLMError::BadStatus(err))
-                }
-            },  
-            Err(err) => return Err(LLMError::FailedRequest(err))
+            .map_err(|err| LLMError::FailedRequest(err))?
+            .error_for_status()
+            .map_err(|err| LLMError::BadStatus(err))?;
+
+        let res_data = match response.json::<LLMResponse>().await {
+            Ok(res) => res,
+            Err(err) => return Err(LLMError::ParseIntoGeminiResponse(err))
+        };
+
+        if res_data.candidates.len() == 0 || res_data.candidates[0].content.parts.len() == 0 {
+            return Err(LLMError::NoOrWrongContent { reason: "No candidates, or candidate had no part".into() });
         }
+
+        return Ok(res_data)
     }
 
     /// Builds a text query's request.
@@ -126,6 +189,19 @@ impl GeminiLLM {
         let contents = self.build_text_content(text);
         let system_instruction = self.build_system_instruction(system_instruction);
         let generation_config = self.build_generation_config::<Res>();
+        LLMRequest {
+            contents,
+            system_instruction,
+            generation_config
+        }
+    }
+
+    /// Builds a text query's request without a generation config.
+    fn build_text_request_without_gen_config(&self, text: String, system_instruction: Option<String>) -> LLMRequest
+    {
+        let contents = self.build_text_content(text);
+        let system_instruction = self.build_system_instruction(system_instruction);
+        let generation_config = None;
         LLMRequest {
             contents,
             system_instruction,
@@ -146,6 +222,25 @@ impl GeminiLLM {
         let contents = self.build_inline_data_content(&inline_bytes, mime_type, request_text);
         let system_instruction = self.build_system_instruction(system_instruction);
         let generation_config = self.build_generation_config::<Res>();
+        LLMRequest {
+            contents,
+            system_instruction,
+            generation_config
+        }
+    }
+
+    /// Builds an inline data + text request without a generation config.
+    fn build_inline_data_request_without_gen_config(
+        &self, 
+        inline_bytes: &[u8], 
+        mime_type: &'static str, 
+        request_text: String,
+        system_instruction: Option<String>
+    ) -> LLMRequest
+    {
+        let contents = self.build_inline_data_content(&inline_bytes, mime_type, request_text);
+        let system_instruction = self.build_system_instruction(system_instruction);
+        let generation_config = None;
         LLMRequest {
             contents,
             system_instruction,

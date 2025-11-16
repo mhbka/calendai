@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:namer_app/pages/ai_event_page.dart';
-import 'package:namer_app/pages/outlook_emails_page.dart';
 import 'package:namer_app/pages/recurring_event_groups_page.dart';
 import 'package:namer_app/pages/recurring_events_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -59,11 +58,6 @@ class AppRouter {
           final groupId = state.pathParameters['groupId'] ?? Namespace.nil.value;
           return RecurringEventsPage(groupId: groupId);
         }
-      ),
-      GoRoute(
-        path: '/outlook_emails',
-        name: 'outlook_emails',
-        builder: (context, state) => OutlookEmailsPage()
       )
     ],
   );

@@ -1,10 +1,11 @@
-use crate::{llm::LLM, repositories::Repositories, services::{ai_add_events_service::AIAddEventsService, calendar_events_service::CalendarEventsService, azure_outlook_service::AzureOutlookService, recurring_event_groups_service::RecurringEventGroupsService, recurring_events_service::RecurringEventsService}};
+use crate::{llm::LLM, repositories::Repositories, services::{ai_add_events_service::AIAddEventsService, azure_token_service::AzureTokenService, calendar_events_service::CalendarEventsService, outlook_calendar_service::OutlookCalendarService, recurring_event_groups_service::RecurringEventGroupsService, recurring_events_service::RecurringEventsService}};
 
 pub mod ai_add_events_service;
 pub mod calendar_events_service;
 pub mod recurring_event_groups_service;
 pub mod recurring_events_service;
-pub mod azure_outlook_service;
+pub mod azure_token_service;
+pub mod outlook_calendar_service;
 
 /// An abstraction over the business logic.
 #[derive(Clone, Debug)]
@@ -13,7 +14,8 @@ pub struct Services {
     pub recurring_event_groups: RecurringEventGroupsService,
     pub recurring_events: RecurringEventsService,
     pub ai_add_events: AIAddEventsService,
-    pub azure: AzureOutlookService
+    pub azure_token: AzureTokenService,
+    pub outlook_calendar: OutlookCalendarService
 }
 
 impl Services {
@@ -23,7 +25,8 @@ impl Services {
             recurring_event_groups: RecurringEventGroupsService::new(repositories.clone()),
             recurring_events: RecurringEventsService::new(repositories.clone()),
             ai_add_events: AIAddEventsService::new(llm.clone()),
-            azure: AzureOutlookService::new(llm.clone(), repositories.clone())
+            azure_token: AzureTokenService::new(llm.clone(), repositories.clone()),
+            outlook_calendar: OutlookCalendarService::new(repositories.clone())
         }
     }
 }
