@@ -46,9 +46,9 @@ impl FromRequestParts<AppState> for AuthUser
         let azure_refresh_token = parts.headers
             .get("Azure-Refresh-Token")
             .filter(|h| !h.is_empty())
-            .ok_or(AuthError::MissingOrInvalidAzureAccessToken)?
+            .ok_or(AuthError::MissingOrInvalidAzureRefreshToken)?
             .to_str()
-            .map_err(|_| AuthError::MissingOrInvalidAzureAccessToken)?
+            .map_err(|_| AuthError::MissingOrInvalidAzureRefreshToken)?
             .to_owned();
         tracing::trace!("Successfully extracted Azure refresh token");
         

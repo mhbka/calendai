@@ -21,8 +21,10 @@ impl AzureTokensRepository {
                 (user_id, encrypted_refresh_token, encrypted_access_token)
                 values
                 ($1, $2, $3)
-                on conflict
-                do nothing
+                on conflict (user_id) do update
+                set 
+                    encrypted_refresh_token = $2,
+                    encrypted_access_token = $3
             "#,
             user_id,
             encrypted_refresh_token,

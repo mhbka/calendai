@@ -43,13 +43,13 @@ pub async fn refresh_azure_tokens(
             .build()
             .expect("Failed to create client")
     });
-    let url = format!("https://login.microsoftonline.com/{azure_tenant_id}/oauth2/v2.0/token");
+    let url = format!("https://login.microsoftonline.com/common/oauth2/v2.0/token");
     let request = AzureTokenRefreshRequest {
         client_id: azure_client_id,
         client_secret: azure_client_secret,
         refresh_token: &refresh_token,
         grant_type: "refresh_token",
-        scope: "https://graph.microsoft.com/.default",
+        scope: "offline_access https://graph.microsoft.com/.default",
     };
     let response: AzureTokenRefreshResponse = client
         .post(url)

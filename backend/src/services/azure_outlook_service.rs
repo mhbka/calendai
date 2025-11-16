@@ -1,4 +1,4 @@
-use graph_rs_sdk::{Graph, identity::{ConfidentialClientApplication, PublicClientApplicationBuilder}};
+use graph_rs_sdk::{Graph, identity::{ConfidentialClientApplication, ConfidentialClientApplicationBuilder, PublicClientApplicationBuilder}};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::{api::error::{ApiError, ApiResult}, config::Config, llm::{GeneratedEvents, LLM}, models::outlook::OutlookMailMessage, utils::{azure::{is_access_token_valid, refresh_azure_tokens}, encrypt::{decrypt_token, encrypt_token}}};
@@ -17,7 +17,7 @@ pub struct AzureOutlookService {
 }
 
 impl AzureOutlookService {
-    pub fn new(llm: LLM, repositories: Repositories,) -> Self {
+    pub fn new(llm: LLM, repositories: Repositories) -> Self {
         Self {
             llm,
             repositories
@@ -32,6 +32,10 @@ impl AzureOutlookService {
             &config.azure_client_secret
         )
             .await?;
+
+        tracing::trace!("Access token: {}", refreshed_tokens.access_token);
+        tracing::trace!("Refresh token: {}", refreshed_tokens.refresh_token);
+
         let encrypted_access_token = encrypt_token(&refreshed_tokens.access_token, &config.azure_encryption_key)
             .map_err(|_| ApiError::Internal("Failed to encrypt the access token".into()))?;
         let encrypted_refresh_token = encrypt_token(&refreshed_tokens.refresh_token, &config.azure_encryption_key)
@@ -85,15 +89,28 @@ impl AzureOutlookService {
             .1;
         let access_token = decrypt_token(&encrypted_access_token, &config.azure_encryption_key)
             .map_err(|_| ApiError::Internal("Failed to decrypt the access token".into()))?;
+        tracing::trace!("access token: {access_token}");
+        let mut client = Graph::new(access_token);
 
-        let client = Graph::new(access_token);
-
-        let response = client.me()
-            .messages()
-            .list_messages()
+        let response = match client.v1().me()
+            .calendars()
+            .get_calendars_count()
             .send()
-            .await?
-            .error_for_status()?;
+            .await 
+        {
+            Ok(val) => val,
+            Err(err) => {
+                tracing::trace!("graph api error: {err:?}");
+                return Err(err)?;
+            }
+        };
+        let response = match response.error_for_status() {
+                Ok(res) => res,
+                Err(err) => {
+                    tracing::trace!("status error: {err:?}");
+                    return Err(err)?;
+                }
+            };
         let messages = response
             .json::<OutlookListEmailsResponse>()
             .await?;

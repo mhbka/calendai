@@ -66,11 +66,21 @@ class _LoginPageState extends State<LoginPage> {
                 authScreenLaunchMode: LaunchMode.externalApplication,
                 showSuccessSnackBar: false,
                 scopes: {
-                  OAuthProvider.azure: 'openid offline_access email Calendars.ReadWrite.Shared'
+                  OAuthProvider.azure: 'offline_access https://graph.microsoft.com/.default'
+                },
+                queryParams: {
+                  OAuthProvider.azure: {
+                    'prompt': 'consent'
+                  }
                 },
                 onSuccess: (session) async {
-                  await AzureTokenApiService.sendAzureToken();
-                  if (context.mounted) await Alerts.showConfirmationDialog(context, "Successful login", "You've successfully logged in. Provider: ${session.providerToken}");
+                  try {
+                    await AzureTokenApiService.sendAzureToken();
+                    if (context.mounted) await Alerts.showConfirmationDialog(context, "Successful login", "You've successfully logged in.");
+                  } catch (e) {
+                    await Supabase.instance.client.auth.signOut();
+                    if (context.mounted) await Alerts.showErrorDialog(context, "Failed to sign in", "Failed to sign in. Please try again later.");
+                  }
                  },
               ),
               

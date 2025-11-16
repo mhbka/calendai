@@ -19,7 +19,6 @@ async fn fetch_user_emails(
     State(app_state): State<AppState>,
     user: AuthUser,
 ) -> ApiResult<Json<Vec<OutlookMailMessage>>> {
-
     let res = app_state.services.azure
         .fetch_user_emails(user.id, &app_state.config)
         .await?;
