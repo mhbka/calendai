@@ -20,13 +20,14 @@ pub struct Services {
 
 impl Services {
     pub fn new(repositories: Repositories, llm: LLM) -> Self {
+        let azure_token_service = AzureTokenService::new(llm.clone(), repositories.clone());
         Self {
             calendar_events: CalendarEventsService::new(repositories.clone()),
             recurring_event_groups: RecurringEventGroupsService::new(repositories.clone()),
             recurring_events: RecurringEventsService::new(repositories.clone()),
             ai_add_events: AIAddEventsService::new(llm.clone()),
-            azure_token: AzureTokenService::new(llm.clone(), repositories.clone()),
-            outlook_calendar: OutlookCalendarService::new(repositories.clone())
+            azure_token: azure_token_service.clone(),
+            outlook_calendar: OutlookCalendarService::new(azure_token_service, repositories.clone())
         }
     }
 }

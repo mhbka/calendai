@@ -7,7 +7,10 @@ CREATE TABLE calendar_events (
     description VARCHAR,
     location VARCHAR,
     start_time TIMESTAMPTZ NOT NULL,
-    end_time TIMESTAMPTZ NOT NULL
+    end_time TIMESTAMPTZ NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_modified TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
     -- Ensure valid time ordering
     CONSTRAINT check_calendar_event_time_order 
@@ -46,6 +49,10 @@ CREATE TABLE recurring_events (
     recurrence_end TIMESTAMPTZ,
     rrule TEXT NOT NULL,
 
+    is_deleted BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_modified TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
     -- Ensure valid time values
     CONSTRAINT check_duration CHECK (event_duration_seconds >= 0),
     
@@ -69,6 +76,10 @@ CREATE TABLE recurring_event_exceptions (
     modified_location VARCHAR,
     modified_start_time TIMESTAMPTZ,
     modified_end_time TIMESTAMPTZ,
+
+    is_deleted BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_modified TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
     -- Ensure modified events have valid time ordering
     CONSTRAINT check_modified_time_order

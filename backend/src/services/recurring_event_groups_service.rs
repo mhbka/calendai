@@ -4,7 +4,7 @@ use serde::Serialize;
 use crate::{
     api::error::ApiError,
     models::{
-        recurring_event::RecurringEvent,
+        recurring_event::{NewRecurringEvent, RecurringEvent},
         recurring_event_group::{NewRecurringEventGroup, RecurringEventGroup, UpdatedRecurringEventGroup}
     }, repositories::Repositories
 };
@@ -12,7 +12,7 @@ use crate::{
 /// Used for bulk creating events, optionally under a group.
 #[derive(serde::Deserialize)]
 pub struct GroupWithEvents {
-    pub recurring_events: Vec<RecurringEvent>,
+    pub recurring_events: Vec<NewRecurringEvent>,
     pub recurring_event_group: Option<NewRecurringEventGroup>
 }
 
@@ -147,8 +147,8 @@ impl RecurringEventGroupsService {
         Ok(())
     }
 
-    pub async fn add_with_events(&self, user_id: Uuid, events: GroupWithEvents) -> Result<(), ApiError> {
-        let _group_id = match events.recurring_event_group {
+    pub async fn add_with_events(&self, user_id: Uuid, mut events: GroupWithEvents) -> Result<(), ApiError> {
+        let group_id = match events.recurring_event_group {
             Some(new_group) => {
                 let id = self.repositories
                     .recurring_event_groups
@@ -160,7 +160,15 @@ impl RecurringEventGroupsService {
             None => None
         };
 
-        // TODO: finish this - add the recurring events
+        if let Some(id) = group_id {
+            events.recurring_events
+                .iter_mut()
+                .for_each(|e| e.group_id = Some(id));
+        }
+        self.repositories.recurring_events
+            .bulk_create_events(&events.recurring_events, user_id)
+            .await?;
+
         Ok(())
     }
 

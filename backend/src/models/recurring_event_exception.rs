@@ -20,7 +20,9 @@ pub struct RecurringEventException {
     pub modified_description: Option<Option<String>>,
     pub modified_location: Option<Option<String>>,
     pub modified_start_time: Option<DateTime<Utc>>,
-    pub modified_end_time: Option<DateTime<Utc>>
+    pub modified_end_time: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
+    pub last_modified: DateTime<Utc>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

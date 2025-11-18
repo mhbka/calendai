@@ -91,12 +91,12 @@ Future<void> _triggerOutlookSync(BuildContext context) async {
   try {
     await OutlookCalendarApiService.triggerSync();
     if (context.mounted) {
-      Alerts.showConfirmationDialog(context, "Sync successful", "Successfully synced with your Outlook calendar. To view, refresh this calendar, or check out your Outlook calendar!");
+      Alerts.showInfoSnackBar(context, "Successfully synced with your Outlook calendar. To view, refresh this calendar, or check out your Outlook calendar!");
     }
   }
   catch (e) {
     if (context.mounted) {
-      Alerts.showConfirmationDialog(context, "Error", "Failed to trigger the Outlook calendar sync. Please try again later.");
+      Alerts.showErrorSnackBar(context, "Failed to trigger the Outlook calendar sync. Please try again later.");
     }
   }
 }
@@ -104,18 +104,21 @@ Future<void> _triggerOutlookSync(BuildContext context) async {
 Future<void> _getAndSaveIcsFile(BuildContext context) async {
   try {
     final icsString = await OutlookCalendarApiService.getIcsFileContents();
-    final path = await getSaveLocation();
+    final path = await getSaveLocation(
+      suggestedName: 'calendar.ics', 
+      acceptedTypeGroups:  [XTypeGroup(label: 'Calendar (.ics)', extensions: ['ics'], uniformTypeIdentifiers: ['calendar.ics'])]
+    );
     if (path != null) {
       final file = File(path.path);
       file.writeAsStringSync(icsString);
       if (context.mounted) {
-        Alerts.showConfirmationDialog(context, "Saved", "The .ics file was successfully saved.");
+        Alerts.showInfoSnackBar(context, "The .ics file was successfully saved.");
       }
     }
   }
   catch (e) {
     if (context.mounted) {
-        Alerts.showErrorDialog(context, "Error", "Failed to fetch and save the .ics file. Please try again later.");
+        Alerts.showErrorSnackBar(context, "Failed to fetch and save the .ics file. Please try again later.");
       }
   }
   

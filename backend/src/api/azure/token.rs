@@ -1,6 +1,6 @@
 use axum::{Json, Router, extract::{Query, State}, routing::{get, post}};
 use serde::Deserialize;
-use crate::{api::{error::ApiResult, AppState}, auth::types::AuthUser, llm::GeneratedEvents, models::{calendar_event::NewCalendarEvent, outlook::{OutlookEmail, OutlookMailMessage}}, services::azure_token_service::OutlookListEmailsResponse};
+use crate::{api::{error::ApiResult, AppState}, auth::types::AuthUser, llm::GeneratedEvents, models::{calendar_event::NewCalendarEvent,}};
 
 pub(super) fn router() -> Router<AppState> {
     Router::new()   

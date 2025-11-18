@@ -106,13 +106,16 @@ impl RecurringEventsRepository {
                     re.recurrence_start, 
                     re.recurrence_end, 
                     re.event_duration_seconds as "event_duration_seconds: _", 
-                    re.rrule as "rrule: _"
+                    re.rrule as "rrule: _",
+                    re.created_at,
+                    re.last_modified
                 FROM recurring_events re
                 LEFT JOIN recurring_event_groups reg ON reg.id = re.group_id
                 WHERE re.user_id = $1 
                 AND re.is_active = true
                 AND re.recurrence_start < $3 
                 AND (re.recurrence_end IS NULL OR re.recurrence_end > $2)
+                AND re.is_deleted = false
             "#,
             user_id,
             start,
@@ -137,9 +140,11 @@ impl RecurringEventsRepository {
                     modified_description,
                     modified_location,
                     modified_start_time,
-                    modified_end_time
+                    modified_end_time,
+                    created_at,
+                    last_modified
                 FROM recurring_event_exceptions ree
-                WHERE ree.recurring_event_id = ANY($1)
+                WHERE ree.recurring_event_id = ANY($1) AND is_deleted = false
             "#,
             event_ids
         )
@@ -188,7 +193,8 @@ impl RecurringEventsRepository {
                     event_duration_seconds = $5,
                     recurrence_start = $6,
                     recurrence_end = $7,
-                    rrule = $8
+                    rrule = $8,
+                    last_modified = NOW()
                 where id = $9
             "#,
             updated_event.title,
@@ -225,7 +231,7 @@ impl RecurringEventsRepository {
 
     pub async fn delete_event(&self, event_id: Uuid) -> RepoResult<()> {
         sqlx::query!(
-            r#"delete from recurring_events where id = $1"#,
+            r#"UPDATE recurring_events SET is_deleted = true where id = $1"#,
             event_id
         )
         .execute(&self.db)
@@ -292,7 +298,8 @@ impl RecurringEventsRepository {
                     modified_description = $5,
                     modified_location = $6,
                     modified_start_time = $7,
-                    modified_end_time = $8
+                    modified_end_time = $8,
+                    last_modified = NOW()
                 WHERE id = $1
             "#,
             exception.id,

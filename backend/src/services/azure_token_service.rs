@@ -1,13 +1,8 @@
 use graph_rs_sdk::{Graph, identity::{ConfidentialClientApplication, ConfidentialClientApplicationBuilder, PublicClientApplicationBuilder}};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::{api::error::{ApiError, ApiResult}, config::Config, llm::{GeneratedEvents, LLM}, models::outlook::OutlookMailMessage, utils::{azure::{is_access_token_valid, refresh_azure_tokens}, encrypt::{decrypt_token, encrypt_token}}};
+use crate::{api::error::{ApiError, ApiResult}, config::Config, llm::{GeneratedEvents, LLM}, utils::{azure::{is_access_token_valid, refresh_azure_tokens}, encrypt::{decrypt_token, encrypt_token}}};
 use crate::Repositories;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct OutlookListEmailsResponse {
-    pub value: Vec<OutlookMailMessage>
-}
 
 /// Service for functionality related to Azure tokens.
 #[derive(Clone, Debug)]
@@ -80,54 +75,5 @@ impl AzureTokenService {
             }
 
         Ok(access_token)
-    }
-
-    pub async fn fetch_user_emails(&self, user_id: Uuid, config: &Config) -> ApiResult<OutlookListEmailsResponse> {
-        let encrypted_access_token = self.repositories.azure_tokens
-            .get_encrypted_refresh_and_access_token(user_id)
-            .await?
-            .1;
-        let access_token = decrypt_token(&encrypted_access_token, &config.azure_encryption_key)
-            .map_err(|_| ApiError::Internal("Failed to decrypt the access token".into()))?;
-        tracing::trace!("access token: {access_token}");
-        let client = Graph::new(access_token);
-
-        let response = client.me()
-            .calendars()
-            .get_calendars_count()
-            .send()
-            .await?
-            .error_for_status()?;
-        let messages = response
-            .json::<OutlookListEmailsResponse>()
-            .await?;
-
-        Ok(messages)
-    }
-
-    pub async fn generate_events_from_user_email(&self, user_id: Uuid, config: &Config, mail_id: &str, timezone_offset_minutes: i32) -> ApiResult<GeneratedEvents> {
-        let encrypted_access_token = self.repositories.azure_tokens
-            .get_encrypted_refresh_and_access_token(user_id)
-            .await?
-            .1;
-        let access_token = decrypt_token(&encrypted_access_token, &config.azure_encryption_key)
-            .map_err(|_| ApiError::Internal("Failed to decrypt the access token".into()))?;
-        
-        let client = Graph::new(access_token);
-
-        let chosen_email = client.me()
-            .message(mail_id)
-            .get_messages()
-            .send()
-            .await?
-            .json::<OutlookMailMessage>()
-            .await?;
-
-        // TODO: we only parse the body and ignore any attachments and images; is this fine?
-        let generated_events = self.llm
-            .events_from_text(chosen_email.body, timezone_offset_minutes)
-            .await?;
-        
-        Ok(generated_events)
     }
 }

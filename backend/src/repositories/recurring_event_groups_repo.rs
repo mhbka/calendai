@@ -90,7 +90,7 @@ impl RecurringEventGroupsRepository {
                     COALESCE(COUNT(e.id), 0) as event_count
                 FROM recurring_event_groups g
                 LEFT JOIN recurring_events e ON g.id = e.group_id
-                WHERE g.user_id = $1 AND g.id = $2
+                WHERE g.user_id = $1 AND g.id = $2 AND is_deleted = false
                 GROUP BY g.id, g.user_id, g.name, g.description, g.color, g.group_is_active, g.group_recurrence_start, g.group_recurrence_end
             "#,
             user_id,
@@ -201,7 +201,7 @@ impl RecurringEventGroupsRepository {
 
     pub async fn delete_group_events(&self, group_id: Uuid) -> RepoResult<()> {
         sqlx::query!(
-            "DELETE FROM recurring_events WHERE group_id = $1",
+            "UPDATE recurring_events SET is_deleted = true WHERE group_id = $1",
             group_id
         )
         .execute(&self.db)
@@ -237,9 +237,11 @@ impl RecurringEventGroupsRepository {
                     event_duration_seconds as "event_duration_seconds: _", 
                     recurrence_start, 
                     recurrence_end, 
-                    rrule as "rrule: _"
+                    rrule as "rrule: _",
+                    created_at,
+                    last_modified
                 FROM recurring_events
-                WHERE group_id = $1
+                WHERE group_id = $1 and is_deleted = false
             "#,
             group_id
         )
@@ -264,9 +266,13 @@ impl RecurringEventGroupsRepository {
                     event_duration_seconds as "event_duration_seconds: _", 
                     recurrence_start, 
                     recurrence_end, 
-                    rrule as "rrule: _"
+                    rrule as "rrule: _",
+                    created_at,
+                    last_modified
                 FROM recurring_events
-                WHERE user_id = $1 AND group_id IS NULL
+                WHERE user_id = $1 
+                AND group_id IS NULL 
+                AND is_deleted = false
             "#,
             user_id
         )

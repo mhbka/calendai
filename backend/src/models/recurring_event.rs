@@ -41,7 +41,9 @@ pub struct RecurringEvent {
     pub event_duration_seconds: Second,
     pub recurrence_start: DateTime<Utc>,
     pub recurrence_end: Option<DateTime<Utc>>,
-    pub rrule: ValidatedRRule
+    pub rrule: ValidatedRRule,
+    pub created_at: DateTime<Utc>,
+    pub last_modified: DateTime<Utc>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]

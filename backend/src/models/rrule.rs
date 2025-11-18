@@ -48,6 +48,15 @@ impl ValidatedRRule {
             .after(start)
             .before(end);
         restricted_rrule.all(INSTANCE_LIMIT)
+    }
+
+    /// Add EXDATEs for deleted instances for this event.
+    pub fn set_exdates(&mut self, datetimes: &[DateTime<Utc>]) {
+        let mut rrule = self.rrule.clone();
+        for dt in datetimes {
+            rrule = rrule.exdate(Tz::from_utc_datetime(&Tz::UTC, &dt.naive_utc()));
+        }
+        self.rrule = rrule;
     }   
 }
 

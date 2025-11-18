@@ -13,7 +13,7 @@ async fn sync_with_outlook(
     user: AuthUser,
 ) -> ApiResult<()> {
     app_state.services.outlook_calendar
-        .sync_with_outlook(user.id)
+        .sync_with_outlook(user.id, &app_state.config)
         .await
 }
 

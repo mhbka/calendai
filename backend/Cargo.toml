@@ -33,6 +33,7 @@ tower-http = { version = "0.6.6", features = ["trace"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uuid = { version = "1.17.0", features = ["serde"] }
+windows-timezones = { version = "0.5.1", features = ["serde", "chrono-tz"] }
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3

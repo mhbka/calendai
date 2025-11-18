@@ -13,6 +13,8 @@ pub struct CalendarEvent {
     pub location: Option<String>,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
+    pub last_modified: DateTime<Utc>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]

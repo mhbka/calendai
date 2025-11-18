@@ -14,7 +14,7 @@ impl CalendarEventsRepository {
         Self { db }
     }
 
-    pub async fn create_events(&self, user_id: Uuid, events: Vec<NewCalendarEvent>) -> RepoResult<()> {
+    pub async fn create_events(&self, user_id: Uuid, events: Vec<NewCalendarEvent>) -> RepoResult<Vec<Uuid>> {
         let user_ids = vec![user_id; events.len()];
         let mut titles = Vec::with_capacity(events.len());
         let mut descriptions = Vec::with_capacity(events.len());
@@ -30,12 +30,13 @@ impl CalendarEventsRepository {
             locations.push(event.location);
         }
         
-        sqlx::query!(
+        let event_ids = sqlx::query_scalar!(
             r#"
                 insert into calendar_events
                 (user_id, title, description, start_time, end_time, location)
                 select * from unnest
                 ($1::uuid[], $2::varchar[], $3::varchar[], $4::timestamptz[], $5::timestamptz[], $6::varchar[])
+                returning id
             "#,
             &user_ids[..],
             &titles[..],
@@ -44,10 +45,10 @@ impl CalendarEventsRepository {
             &end_times[..],
             &locations[..] as &[Option<String>]
         )
-        .execute(&self.db)
-        .await?;
+            .fetch_all(&self.db)
+            .await?;
 
-        Ok(())
+        Ok(event_ids)
     }
 
     pub async fn get_events_by_user_and_date_range(
@@ -59,9 +60,12 @@ impl CalendarEventsRepository {
         let events = sqlx::query_as!(
             CalendarEvent,
             r#"
-                select id, user_id, title, description, location, start_time, end_time
+                select id, user_id, title, description, location, start_time, end_time, created_at, last_modified
                 from calendar_events 
-                where user_id = $1 and start_time >= $2 and end_time <= $3
+                where user_id = $1 
+                and start_time >= $2 
+                and end_time <= $3 
+                and is_deleted = false
                 order by start_time
             "#,
             user_id,
@@ -94,7 +98,8 @@ impl CalendarEventsRepository {
                     description = $2,
                     location = $3,
                     start_time = $4,
-                    end_time = $5
+                    end_time = $5,
+                    last_modified = NOW()
                 where id = $6
             "#,
             updated_event.title,
@@ -112,7 +117,7 @@ impl CalendarEventsRepository {
 
     pub async fn delete_event(&self, event_id: Uuid) -> RepoResult<()> {
         sqlx::query!(
-            r#"delete from calendar_events where id = $1"#,
+            r#"update calendar_events set is_deleted = true where id = $1"#,
             event_id
         )
         .execute(&self.db)
