@@ -73,3 +73,18 @@ pub struct Config {
     pub azure_client_secret: String,
     pub azure_encryption_key: String
 }
+
+impl Config {
+    pub fn from_secrets(secrets: &shuttle_runtime::SecretStore) -> Result<Self, &'static str> {
+        Ok(Self {
+                database_url: secrets.get("DATABASE_URL").ok_or("`DATABASE_URL` missing from env vars")?,
+                jwt_secret: secrets.get("JWT_SECRET").ok_or("`JWT_SECRET` missing from env vars")?,
+                gemini_key: secrets.get("GEMINI_KEY").ok_or("`GEMINI_KEY` missing from env vars")?,
+                gemini_model: secrets.get("GEMINI_MODEL").ok_or("`GEMINI_MODEL` missing from env vars")?,
+                azure_tenant_id: secrets.get("AZURE_TENANT_ID").ok_or("`AZURE_TENANT_ID` missing from env vars")?,
+                azure_client_id: secrets.get("AZURE_CLIENT_ID").ok_or("`AZURE_CLIENT_ID` missing from env vars")?,
+                azure_client_secret: secrets.get("AZURE_CLIENT_SECRET").ok_or("`AZURE_CLIENT_SECRET` missing from env vars")?,
+                azure_encryption_key: secrets.get("AZURE_ENCRYPTION_KEY").ok_or("`AZURE_ENCRYPTION_KEY` missing from env vars")?,
+        })
+    }
+}

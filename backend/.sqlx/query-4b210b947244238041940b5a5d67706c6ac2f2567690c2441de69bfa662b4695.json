@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update calendar_events set is_deleted = true where id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4b210b947244238041940b5a5d67706c6ac2f2567690c2441de69bfa662b4695"
+}

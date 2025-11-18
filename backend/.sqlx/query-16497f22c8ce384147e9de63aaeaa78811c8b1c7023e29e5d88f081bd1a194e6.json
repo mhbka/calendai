@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE sync_state\n                SET last_sync = NOW(), \n                delta_link = $1\n                WHERE user_id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "16497f22c8ce384147e9de63aaeaa78811c8b1c7023e29e5d88f081bd1a194e6"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO recurring_event_groups \n                (user_id, name, description, color, group_is_active, group_recurrence_start, group_recurrence_end)\n                VALUES \n                ($1, $2, $3, $4, $5, $6, $7)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Int8",
+        "Bool",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "80d989c2f0cef29e1790178f559a9d7caa10f3b973e04c91c8fb346e566d071e"
+}

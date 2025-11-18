@@ -19,20 +19,13 @@ pub struct AppState {
     pub services: Services,
 }
 
-/// Run the API.
-pub async fn run(config: Config, services: Services) {
+/// Get the router.
+pub async fn router(config: Config, services: Services) -> Router {
     let app_state = AppState { 
         config: Arc::new(config), 
         services
     };
-    let router = build_app_router(app_state);
-    let listener = TcpListener::bind("0.0.0.0:80")
-        .await
-        .expect("Binding to port should succeed");
-    tracing::info!("Running server...");
-    axum::serve(listener, router)
-        .await
-        .expect("The app has been stopped");
+    build_app_router(app_state)
 }
 
 /// Build the router for the app.

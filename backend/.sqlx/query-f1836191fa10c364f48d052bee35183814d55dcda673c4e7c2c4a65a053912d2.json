@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select last_sync, delta_link from sync_state where user_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_sync",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 1,
+        "name": "delta_link",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "f1836191fa10c364f48d052bee35183814d55dcda673c4e7c2c4a65a053912d2"
+}

@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT \n                    g.id,\n                    g.user_id,\n                    g.name,\n                    g.description,\n                    g.color,\n                    g.group_is_active,\n                    g.group_recurrence_start,\n                    g.group_recurrence_end,\n                    COALESCE(COUNT(e.id), 0) as event_count\n                FROM recurring_event_groups g\n                LEFT JOIN recurring_events e ON g.id = e.group_id\n                WHERE g.user_id = $1 AND g.id = $2 AND is_deleted = false\n                GROUP BY g.id, g.user_id, g.name, g.description, g.color, g.group_is_active, g.group_recurrence_start, g.group_recurrence_end\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "color",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "group_is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "group_recurrence_start",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "group_recurrence_end",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "event_count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "206d81d445fe663f8e1b51ca59f9be023114db2b2cc67ff0ef69831f66305f21"
+}

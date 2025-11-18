@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE recurring_event_exceptions \n                SET \n                    exception_date = $2,\n                    exception_type = $3,\n                    modified_title = $4,\n                    modified_description = $5,\n                    modified_location = $6,\n                    modified_start_time = $7,\n                    modified_end_time = $8,\n                    last_modified = NOW()\n                WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4d0588a939a18dab5df042c2e96b9613cd88a8d900e077a4eb7ba9f942411941"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO sync_state\n                (user_id, delta_link, last_sync)\n                VALUES\n                ($1, $2, NOW())\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "99f28e17e2da00a3aaa0100c64cc3a25a0135ac9e70ef18515ad9877ec28f552"
+}

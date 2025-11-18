@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT \n                    id, \n                    recurring_event_id, \n                    exception_date, \n                    exception_type as \"exception_type: _\",\n                    modified_title,\n                    modified_description,\n                    modified_location,\n                    modified_start_time,\n                    modified_end_time,\n                    created_at,\n                    last_modified\n                FROM recurring_event_exceptions ree\n                WHERE ree.recurring_event_id = ANY($1) AND is_deleted = false\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "recurring_event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "exception_date",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "exception_type: _",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "modified_title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "modified_description",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "modified_location",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "modified_start_time",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "modified_end_time",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "last_modified",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "26133a550b25d7ab6e1bc51d1d26245c610c00f15037321715d06abbf857ef65"
+}

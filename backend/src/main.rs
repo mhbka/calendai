@@ -1,7 +1,7 @@
 use clap::Parser;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
-use crate::{config::StartupConfig, llm::LLM, repositories::Repositories, services::Services};
+use crate::{config::{Config, StartupConfig}, llm::LLM, repositories::Repositories, services::Services};
 
 mod telemetry;
 mod config;
@@ -13,15 +13,23 @@ mod repositories;
 mod auth;
 mod utils;
 
-#[tokio::main]
-async fn main() {
+#[shuttle_runtime::main]
+async fn main(
+    #[shuttle_runtime::Secrets] secrets: shuttle_runtime::SecretStore
+) -> shuttle_axum::ShuttleAxum {
     dotenv().ok();
-    telemetry::init_tracing();
+    // telemetry::init_tracing();
     
+    /* 
     let config = StartupConfig::parse()
         .to_config()
         .expect("Failed to load config");
     tracing::info!("Config loaded");
+    */
+
+    let config = Config::from_secrets(&secrets)
+        .expect("Failed to load config");
+    tracing::info!("Config loaded");    
     
     let db = PgPoolOptions::new()
         .max_connections(5)
@@ -39,6 +47,6 @@ async fn main() {
     let repos = Repositories::new(db.clone());
     let llm = LLM::new(&config);
     let services = Services::new(repos, llm);
-    api::run(config, services)
-        .await;
+    let router = api::router(config, services).await;
+    Ok(router.into())
 }

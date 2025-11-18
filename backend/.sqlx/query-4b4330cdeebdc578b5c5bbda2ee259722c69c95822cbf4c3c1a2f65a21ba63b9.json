@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO recurring_event_exceptions (\n                    recurring_event_id,\n                    exception_date,\n                    exception_type,\n                    modified_title,\n                    modified_description,\n                    modified_location,\n                    modified_start_time,\n                    modified_end_time\n                )\n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4b4330cdeebdc578b5c5bbda2ee259722c69c95822cbf4c3c1a2f65a21ba63b9"
+}

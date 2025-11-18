@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE calendar_events\n                SET is_deleted = true\n                WHERE id = (\n                    SELECT local_event_id\n                    FROM outlook_event_mappings\n                    WHERE outlook_event_id = $1\n                );\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "026b9c78a268169b775c908dd0b00804588f9f971bd7258519e6e677b86d5e97"
+}

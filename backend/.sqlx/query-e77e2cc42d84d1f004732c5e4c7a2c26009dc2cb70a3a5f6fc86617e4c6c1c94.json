@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE recurring_event_groups\n                SET\n                    name = $1,\n                    description = $2,\n                    color = $3,\n                    group_is_active = $4,\n                    group_recurrence_start = $5,\n                    group_recurrence_end = $6\n                WHERE id = $7\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Int8",
+        "Bool",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e77e2cc42d84d1f004732c5e4c7a2c26009dc2cb70a3a5f6fc86617e4c6c1c94"
+}

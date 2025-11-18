@@ -2,12 +2,15 @@
 //! 
 //! Types only contain fields we actually need/use.
 
+use std::str::FromStr;
+
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use chrono_tz::Tz;
 use serde::Deserialize;
 use windows_timezones::WindowsTimezone;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookCalendarResponse {
     #[serde(rename = "@odata.nextLink")]
     pub next_link: Option<String>,
@@ -17,18 +20,21 @@ pub struct OutlookCalendarResponse {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookSyncState {
     pub delta_link: String,
     pub last_sync: DateTime<Utc>
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookCalendar {
     pub id: String,
     pub name: String
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[serde(untagged)]
 pub enum OutlookDeltaEvent {
     Deleted {
@@ -40,39 +46,45 @@ pub enum OutlookDeltaEvent {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RemovedInfo {
     pub reason: String,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookCalendarEvent {
     pub id: String,
     pub subject: Option<String>,
-    pub body: Option<ItemBody>,
+    //pub body: Option<ItemBody>,
     pub body_preview: Option<String>,
     pub location: Option<OutlookLocation>,
     pub start: OutlookDateTimeTimeZone,
     pub end: OutlookDateTimeTimeZone,
-    pub recurrence: Option<OutlookRecurrence>,
-    pub original_start: Option<String>,
-    pub series_master_id: Option<String>,
-    pub r#type: OutlookEventType,
+    //pub recurrence: Option<OutlookRecurrence>,
+    //pub series_master_id: Option<String>,
+    //pub r#type: OutlookEventType,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ItemBody {
     pub content_type: String, // "text" or "html"
     pub content: String,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookLocation {
     pub display_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookDateTimeTimeZone {
+    #[serde(deserialize_with = "crate::utils::datetime::deserialize_naive_dt")]
     pub date_time: NaiveDateTime, 
+    #[serde(deserialize_with = "crate::utils::datetime::deserialize_windows_tz")]
     pub time_zone: WindowsTimezone, 
 }
 
@@ -88,12 +100,14 @@ impl OutlookDateTimeTimeZone {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutlookRecurrence {
     pub pattern: RecurrencePattern,
     pub range: RecurrenceRange,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RecurrencePattern {
     pub r#type: RecurrencePatternType, 
     pub interval: Option<i32>,
@@ -103,6 +117,7 @@ pub struct RecurrencePattern {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RecurrenceRange {
     pub r#type: RecurrenceRangeType,
     pub start_date: NaiveDate,    
@@ -175,7 +190,6 @@ pub enum DayOfWeek {
     Saturday,
     #[serde(rename = "sunday")]
     Sunday,
-
     #[serde(other)]
     Unknown,
 }

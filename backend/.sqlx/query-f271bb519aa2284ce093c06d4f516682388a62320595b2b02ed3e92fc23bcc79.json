@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT COUNT(*)\n                FROM recurring_event_exceptions ree\n                LEFT JOIN recurring_events re ON ree.recurring_event_id = re.id\n                WHERE re.user_id = $1 AND re.id = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f271bb519aa2284ce093c06d4f516682388a62320595b2b02ed3e92fc23bcc79"
+}

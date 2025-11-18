@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                update azure_tokens\n                set encrypted_refresh_token = $1, encrypted_access_token = $2\n                where user_id = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "df2210916093829c190e445b6c978e512038fd7e54725d1297a4e357aec98719"
+}

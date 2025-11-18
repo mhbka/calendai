@@ -1,0 +1,94 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT \n                    id, \n                    group_id, \n                    user_id,\n                    is_active, \n                    title, \n                    description, \n                    location, \n                    event_duration_seconds as \"event_duration_seconds: _\", \n                    recurrence_start, \n                    recurrence_end, \n                    rrule as \"rrule: _\",\n                    created_at,\n                    last_modified\n                FROM recurring_events\n                WHERE user_id = $1 \n                AND group_id IS NULL \n                AND is_deleted = false\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "group_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "description",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "location",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "event_duration_seconds: _",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "recurrence_start",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "recurrence_end",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "rrule: _",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 12,
+        "name": "last_modified",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "621d974e7f96aa6fa375b047682fbb12f6c4755029e2da4ab0a10004ae0cad84"
+}

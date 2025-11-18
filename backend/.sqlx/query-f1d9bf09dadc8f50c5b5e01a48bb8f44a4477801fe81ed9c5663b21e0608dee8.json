@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO outlook_event_mappings\n                    (local_event_id, outlook_event_id)\n                    VALUES\n                    ($1, $2)\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f1d9bf09dadc8f50c5b5e01a48bb8f44a4477801fe81ed9c5663b21e0608dee8"
+}

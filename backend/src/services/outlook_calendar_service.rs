@@ -39,11 +39,17 @@ impl OutlookCalendarService {
             .await?;
         
         let mut link = match &sync_state {
-            Some(state) => state.delta_link.clone(),
+            Some(state) => {
+                tracing::debug!("Obtained delta link from user {user_id}'s sync state: {}", state.delta_link);
+                state.delta_link.clone()
+            },
             None => {
                 let start = Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true);
                 let end = Utc.with_ymd_and_hms(2040, 1, 1, 1, 1, 1).unwrap().to_rfc3339_opts(SecondsFormat::Secs, true);
-                format!("https://graph.microsoft.com/v1.0/me/calendar/calendarView/delta?startDateTime={start}&endDateTime={end}")
+                let link = format!("https://graph.microsoft.com/v1.0/me/calendar/calendarView/delta?startDateTime={start}&endDateTime={end}");
+
+                tracing::debug!("No delta link for user {user_id}; initial link: {link}");
+                link
             }
         };
 
@@ -78,6 +84,14 @@ impl OutlookCalendarService {
             }
             break;
         }
+
+        let (total_events, total_deletions) = total_updates
+            .iter()
+            .fold((0, 0), |(e, d), event| match event {
+                OutlookDeltaEvent::Deleted { id, removed } => (e, d+1),
+                OutlookDeltaEvent::Event(_) => (e+1, d)
+            });
+        tracing::debug!("Got {total_events} events and {total_deletions} deletions from the Outlook sync");
 
         for update in total_updates {
             match update {

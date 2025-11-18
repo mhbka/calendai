@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                insert into azure_tokens\n                (user_id, encrypted_refresh_token, encrypted_access_token)\n                values\n                ($1, $2, $3)\n                on conflict (user_id) do update\n                set \n                    encrypted_refresh_token = $2,\n                    encrypted_access_token = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "59a924817451c6498a28f4da92c0f7a5bd24cd5995ac4098fcc7f73567949929"
+}

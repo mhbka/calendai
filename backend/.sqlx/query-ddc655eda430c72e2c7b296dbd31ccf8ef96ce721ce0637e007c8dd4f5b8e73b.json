@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                update calendar_events\n                set \n                    title = $1,\n                    description = $2,\n                    location = $3,\n                    start_time = $4,\n                    end_time = $5,\n                    last_modified = NOW()\n                where id = $6\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ddc655eda430c72e2c7b296dbd31ccf8ef96ce721ce0637e007c8dd4f5b8e73b"
+}

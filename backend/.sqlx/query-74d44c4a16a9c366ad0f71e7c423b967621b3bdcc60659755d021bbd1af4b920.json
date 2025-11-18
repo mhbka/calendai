@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                update recurring_events\n                set \n                    title = $1,\n                    group_id = $2,\n                    description = $3,\n                    location = $4,\n                    event_duration_seconds = $5,\n                    recurrence_start = $6,\n                    recurrence_end = $7,\n                    rrule = $8,\n                    last_modified = NOW()\n                where id = $9\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "74d44c4a16a9c366ad0f71e7c423b967621b3bdcc60659755d021bbd1af4b920"
+}
