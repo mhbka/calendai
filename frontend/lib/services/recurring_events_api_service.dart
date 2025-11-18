@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:namer_app/main.dart';
-import 'package:namer_app/models/recurring_calendar_event.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/models/recurring_event_exception.dart';
-import 'package:namer_app/services/base_api_service.dart';
-import 'package:namer_app/services/recurring_event_groups_api_service.dart';
+import 'package:calendai/main.dart';
+import 'package:calendai/models/recurring_calendar_event.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/models/recurring_event_exception.dart';
+import 'package:calendai/services/base_api_service.dart';
+import 'package:calendai/services/recurring_event_groups_api_service.dart';
 
 /// For interacting with the recurring events' API.
 class RecurringEventsApiService extends BaseApiService {

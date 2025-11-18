@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/services/recurring_event_groups_api_service.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/services/recurring_event_groups_api_service.dart';
 
 ///
 class RecurringEventGroupsController extends ChangeNotifier {

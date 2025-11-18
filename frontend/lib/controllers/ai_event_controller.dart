@@ -5,12 +5,12 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/models/generated_events.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/services/ai_event_api_service.dart';
-import 'package:namer_app/controllers/calendar_controller.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/models/generated_events.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/services/ai_event_api_service.dart';
+import 'package:calendai/controllers/calendar_controller.dart';
 
 class AddAIEventController extends ChangeNotifier {
   // singleton stuff
@@ -83,6 +83,23 @@ class AddAIEventController extends ChangeNotifier {
       rethrow;
     } finally {
       _setProcessingState(false, '');
+    }
+  }
+
+  Future<void> submitAudio(String mp3FilePath) async {
+    _setProcessingState(true, 'audio');
+    try {
+        Uri outputPathUri = Uri.parse(mp3FilePath);
+        File outputFile = File.fromUri(outputPathUri);
+        Uint8List audioData = await outputFile.readAsBytes();
+        _generatedEvents = await AIEventService.processAudioToEvent(audioData);
+    }
+    catch (e) {
+      rethrow;
+    } 
+    finally {
+      _setProcessingState(false, '');
+      setRecording(false);
     }
   }
 

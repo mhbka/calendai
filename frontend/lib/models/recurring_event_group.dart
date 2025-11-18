@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:namer_app/utils/color_converter.dart';
-import 'package:namer_app/utils/datetime_converter.dart';
+import 'package:calendai/utils/color_converter.dart';
+import 'package:calendai/utils/datetime_converter.dart';
 
 part 'recurring_event_group.g.dart';
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:namer_app/controllers/recurring_events_controller.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/pages/base_page.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/recurring_event_card.dart';
-import 'package:namer_app/widgets/recurring_event_dialog.dart';
+import 'package:calendai/controllers/recurring_events_controller.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/pages/base_page.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/widgets/recurring_event_card.dart';
+import 'package:calendai/widgets/recurring_event_dialog.dart';
 
 class RecurringEventsPage extends StatefulWidget {
   final String? groupId;

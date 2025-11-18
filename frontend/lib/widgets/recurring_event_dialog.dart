@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/controllers/recurring_events_controller.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
-import 'package:namer_app/widgets/recurrence_input.dart';
+import 'package:calendai/controllers/recurring_events_controller.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/utils/recurrence_rrule_conversions.dart';
+import 'package:calendai/widgets/recurrence_input.dart';
 
 /// Dialog for creating a new recurring event/updating a selected event.
 class RecurringEventDialog extends StatefulWidget {

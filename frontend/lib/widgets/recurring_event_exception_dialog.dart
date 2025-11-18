@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/controllers/recurring_events_controller.dart';
-import 'package:namer_app/models/recurring_calendar_event.dart';
-import 'package:namer_app/models/recurring_event_exception.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/datetime_picker.dart';
+import 'package:calendai/controllers/recurring_events_controller.dart';
+import 'package:calendai/models/recurring_calendar_event.dart';
+import 'package:calendai/models/recurring_event_exception.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/widgets/datetime_picker.dart';
 
 /// Dialog for creating/updating a 'modify' recurring event exception.
 class RecurringEventExceptionDialog extends StatefulWidget {

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/controllers/ai_event_controller.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/event_card.dart';
-import 'package:namer_app/widgets/event_dialog.dart';
-import 'package:namer_app/widgets/recurring_event_card.dart';
-import 'package:namer_app/widgets/recurring_event_dialog.dart';
-import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
-import 'package:namer_app/widgets/recurring_events_group_card.dart';
+import 'package:calendai/controllers/ai_event_controller.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/widgets/event_card.dart';
+import 'package:calendai/widgets/event_dialog.dart';
+import 'package:calendai/widgets/recurring_event_card.dart';
+import 'package:calendai/widgets/recurring_event_dialog.dart';
+import 'package:calendai/widgets/recurring_event_group_dialog.dart';
+import 'package:calendai/widgets/recurring_events_group_card.dart';
 
 /// A dialog for reviewing generated events produced by AI.
 class GeneratedEventsDialog extends StatefulWidget {

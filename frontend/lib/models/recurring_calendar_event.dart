@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/utils/datetime_converter.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/utils/datetime_converter.dart';
 
 part 'recurring_calendar_event.g.dart';
 

@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
-import 'package:namer_app/main.dart';
-import 'package:namer_app/services/base_api_service.dart';
+import 'package:calendai/main.dart';
+import 'package:calendai/services/base_api_service.dart';
 
 // For passing the user's Azure token the backend upon login,
 // and ensuring it exists in the backend when already logged in.

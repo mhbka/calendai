@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:namer_app/utils/datetime_converter.dart';
+import 'package:calendai/utils/datetime_converter.dart';
  
 part 'calendar_event.g.dart';
 

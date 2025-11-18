@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/recurring_event_group_dialog.dart';
+import 'package:calendai/controllers/recurring_event_groups_controller.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/widgets/recurring_event_group_dialog.dart';
 
 class RecurringEventsGroupCard extends StatelessWidget {
   final RecurringEventGroup group;

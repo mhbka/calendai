@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/controllers/calendar_controller.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/controllers/calendar_controller.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 /// The calendar.

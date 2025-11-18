@@ -1,9 +1,9 @@
 // widgets/event_list.dart
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/models/recurring_calendar_event.dart';
-import 'package:namer_app/pages/calendar_page/calendar_dialogs.dart';
-import 'package:namer_app/utils/alerts.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/models/recurring_calendar_event.dart';
+import 'package:calendai/pages/calendar_page/calendar_dialogs.dart';
+import 'package:calendai/utils/alerts.dart';
 
 class EventList extends StatelessWidget {
   final List<CalendarEvent> events;

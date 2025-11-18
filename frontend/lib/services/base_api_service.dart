@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:namer_app/services/service_exception.dart';
+import 'package:calendai/services/service_exception.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Base class for API services with common error handling.

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:namer_app/main.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/services/base_api_service.dart';
+import 'package:calendai/main.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/services/base_api_service.dart';
 import 'package:uuid/enums.dart';
 
 /// For interacting with the recurring event groups' API.

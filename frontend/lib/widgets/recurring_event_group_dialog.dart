@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:namer_app/controllers/recurring_event_groups_controller.dart';
-import 'package:namer_app/models/recurring_event_group.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/date_picker.dart';
-import 'package:namer_app/widgets/recurrence_input.dart';
+import 'package:calendai/controllers/recurring_event_groups_controller.dart';
+import 'package:calendai/models/recurring_event_group.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/widgets/date_picker.dart';
+import 'package:calendai/widgets/recurrence_input.dart';
 
 /// Dialog for creating a new recurring event group/updating a selected group.
 class RecurringEventGroupDialog extends StatefulWidget {

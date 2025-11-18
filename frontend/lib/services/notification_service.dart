@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/services/calendar_api_service.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/services/calendar_api_service.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 /// For interacting with the app's notifications.

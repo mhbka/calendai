@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/widgets/recurrence_input.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/widgets/recurrence_input.dart';
 import 'package:rrule/rrule.dart';
 
 /// Converts a `RecurrenceData` to its corresponding `RecurrenceRule`.

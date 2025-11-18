@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:namer_app/utils/alerts.dart';
+import 'package:calendai/utils/alerts.dart';
 import 'package:record/record.dart';
 
 enum RecordingState { idle, recording, processing }

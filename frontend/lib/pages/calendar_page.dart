@@ -2,15 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/controllers/calendar_controller.dart';
-import 'package:namer_app/models/recurring_calendar_event.dart';
-import 'package:namer_app/pages/base_page.dart';
-import 'package:namer_app/pages/calendar_page/calendar_action_widgets.dart';
-import 'package:namer_app/pages/calendar_page/calendar_events_list.dart';
-import 'package:namer_app/pages/calendar_page/calendar.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/widgets/event_dialog.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/controllers/calendar_controller.dart';
+import 'package:calendai/models/recurring_calendar_event.dart';
+import 'package:calendai/pages/base_page.dart';
+import 'package:calendai/pages/calendar_page/calendar_action_widgets.dart';
+import 'package:calendai/pages/calendar_page/calendar_events_list.dart';
+import 'package:calendai/pages/calendar_page/calendar.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/widgets/event_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 

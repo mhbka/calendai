@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
-import 'package:namer_app/widgets/date_picker.dart';
+import 'package:calendai/utils/recurrence_rrule_conversions.dart';
+import 'package:calendai/widgets/date_picker.dart';
 import 'package:rrule/rrule.dart';
 
 /// Describes a daily recurrence.

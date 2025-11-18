@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:namer_app/main.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/services/base_api_service.dart';
+import 'package:calendai/main.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/services/base_api_service.dart';
 
 /// For interacting with the calendar (event) API.
 class CalendarApiService extends BaseApiService {

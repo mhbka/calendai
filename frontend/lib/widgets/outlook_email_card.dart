@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/outlook_email.dart';
+import 'package:calendai/models/outlook_email.dart';
 
 class OutlookEmailCard extends StatelessWidget {
   final OutlookEmailMessage email;

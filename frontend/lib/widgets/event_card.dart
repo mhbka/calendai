@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/widgets/event_dialog.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/widgets/event_dialog.dart';
 
 /// A card for displaying, editing, and deleting a calendar event.
 class EventCard extends StatelessWidget {

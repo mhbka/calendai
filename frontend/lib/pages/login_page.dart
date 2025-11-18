@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/services/azure_token_api_service.dart';
-import 'package:namer_app/utils/alerts.dart';
+import 'package:calendai/services/azure_token_api_service.dart';
+import 'package:calendai/utils/alerts.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class LoginPage extends StatefulWidget {
@@ -67,6 +67,11 @@ class _LoginPageState extends State<LoginPage> {
                 showSuccessSnackBar: false,
                 scopes: {
                   OAuthProvider.azure: 'offline_access https://graph.microsoft.com/.default'
+                },
+                queryParams: {
+                  OAuthProvider.azure: {
+                    'prompt': 'consent'
+                  }
                 },
                 onSuccess: (session) async {
                   try {

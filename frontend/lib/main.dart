@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:namer_app/init.dart';
-import 'package:namer_app/mixins/system_tray.dart';
-import 'package:namer_app/mixins/window_manager.dart';
-import 'package:namer_app/router.dart'; 
+import 'package:calendai/init.dart';
+import 'package:calendai/mixins/system_tray.dart';
+import 'package:calendai/mixins/window_manager.dart';
+import 'package:calendai/router.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:uuid/uuid.dart';
@@ -26,11 +26,10 @@ late final EnvVars envVars;
 final Uuid uuid = Uuid();
 
 void main() async {
-  envVars = initEnvVars();  
-  await initDeps();
-  await initWindowSettings();
-  
-  runZonedGuarded(() {
+  runZonedGuarded(() async {
+    envVars = initEnvVars();  
+    await initDeps();
+    await initWindowSettings();
     runApp(App());
   }, 
   (error, stackTrace) {
@@ -57,6 +56,7 @@ class _AppState extends State<App> with
 
   void _setupAuthListener() {
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      
       if (mounted) {
         AppRouter.router.refresh();
       }

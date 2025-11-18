@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/models/recurring_calendar_event.dart';
-import 'package:namer_app/services/calendar_api_service.dart';
-import 'package:namer_app/services/notification_service.dart';
-import 'package:namer_app/services/recurring_events_api_service.dart';
-import 'package:namer_app/services/service_exception.dart';
-import 'package:namer_app/utils/alerts.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/models/recurring_calendar_event.dart';
+import 'package:calendai/services/calendar_api_service.dart';
+import 'package:calendai/services/notification_service.dart';
+import 'package:calendai/services/recurring_events_api_service.dart';
+import 'package:calendai/services/service_exception.dart';
+import 'package:calendai/utils/alerts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 

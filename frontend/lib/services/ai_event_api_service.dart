@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'package:namer_app/main.dart';
-import 'package:namer_app/models/generated_events.dart';
-import 'package:namer_app/services/base_api_service.dart';
+import 'package:calendai/main.dart';
+import 'package:calendai/models/generated_events.dart';
+import 'package:calendai/services/base_api_service.dart';
 
 // For interacting with the AI Event API.
 class AIEventService extends BaseApiService {

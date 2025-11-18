@@ -1,14 +1,17 @@
+import 'package:calendai/widgets/audio_recorder.dart';
 import 'package:flutter/material.dart';
-import 'package:namer_app/widgets/audio_recording_input.dart';
+import 'package:calendai/widgets/audio_recording_input.dart';
 
 class EventInputWidget extends StatelessWidget {
   final AudioRecordingInput audioRecorder;
+  final AudioProcessorWidget audioRecorderNew;
   final VoidCallback onPaste;
   final double height;
 
   const EventInputWidget({
     super.key,
     required this.audioRecorder,
+    required this.audioRecorderNew,
     required this.onPaste,
     this.height = 300,
   });
@@ -74,7 +77,7 @@ class EventInputWidget extends StatelessWidget {
               padding: EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [audioRecorder],
+                children: [audioRecorder, audioRecorderNew],
               ),
             ),
           ),

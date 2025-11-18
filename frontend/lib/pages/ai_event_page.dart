@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:namer_app/pages/ai_event_page/ai_event_body.dart';
-import 'package:namer_app/pages/ai_event_page/generated_events_dialog.dart';
-import 'package:namer_app/pages/base_page.dart';
-import 'package:namer_app/utils/alerts.dart';
-import 'package:namer_app/controllers/calendar_controller.dart';
-import 'package:namer_app/controllers/ai_event_controller.dart';
+import 'package:calendai/pages/ai_event_page/ai_event_body.dart';
+import 'package:calendai/pages/ai_event_page/generated_events_dialog.dart';
+import 'package:calendai/pages/base_page.dart';
+import 'package:calendai/utils/alerts.dart';
+import 'package:calendai/controllers/calendar_controller.dart';
+import 'package:calendai/controllers/ai_event_controller.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 class AddAIEventPage extends StatefulWidget {
@@ -102,6 +102,19 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
     }
   }
 
+  Future<void> _submitAudio(String mp3FilePath) async {
+    try {
+      await _controller.submitAudio(mp3FilePath);
+      await _showEventPreview();
+    } catch (e) {
+      Alerts.showErrorDialog(
+        context,
+        "Error",
+        "Failed to process the audio: $e. Please try again."
+      );
+    }
+  }
+
   Future<void> _showEventPreview() async {
     await showDialog(
       context: context, 
@@ -116,7 +129,8 @@ Widget build(BuildContext context) {
     body: AIEventBody(
       controller: _controller, 
       handlePaste: _handlePaste, 
-      onRecordingComplete: _processAudioInput
+      onRecordingComplete: _processAudioInput,
+      onRecComplete: _submitAudio,
       ),
   );
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:namer_app/main.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/router.dart';
-import 'package:namer_app/services/notification_service.dart';
+import 'package:calendai/main.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/router.dart';
+import 'package:calendai/services/notification_service.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 

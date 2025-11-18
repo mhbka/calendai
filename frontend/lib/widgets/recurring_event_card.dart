@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/recurring_event.dart';
-import 'package:namer_app/utils/recurrence_rrule_conversions.dart';
-import 'package:namer_app/widgets/recurring_event_dialog.dart';
+import 'package:calendai/models/recurring_event.dart';
+import 'package:calendai/utils/recurrence_rrule_conversions.dart';
+import 'package:calendai/widgets/recurring_event_dialog.dart';
 
 class RecurringEventCard extends StatelessWidget {
   final RecurringEvent event;

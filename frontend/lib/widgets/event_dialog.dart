@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:namer_app/models/calendar_event.dart';
-import 'package:namer_app/widgets/datetime_picker.dart';
+import 'package:calendai/models/calendar_event.dart';
+import 'package:calendai/widgets/datetime_picker.dart';
 
 /// Dialog for creating a new event/updating a selected event.
 class EventDialog extends StatefulWidget {

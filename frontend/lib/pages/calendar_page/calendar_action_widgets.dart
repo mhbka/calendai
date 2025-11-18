@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:namer_app/services/outlook_calendar_api_service.dart';
-import 'package:namer_app/utils/alerts.dart';
+import 'package:calendai/services/outlook_calendar_api_service.dart';
+import 'package:calendai/utils/alerts.dart';
 
 
 /// Builds the list of AppBar actions for the calendar page.
