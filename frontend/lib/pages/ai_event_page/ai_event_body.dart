@@ -1,4 +1,3 @@
-import 'package:calendai/widgets/audio_recorder.dart';
 import 'package:flutter/material.dart';
 import 'package:calendai/controllers/ai_event_controller.dart';
 import 'package:calendai/widgets/audio_recording_input.dart';
@@ -10,14 +9,12 @@ class AIEventBody extends StatelessWidget {
   final AddAIEventController controller;
   final VoidCallback handlePaste;
   final Function(String wavFilePath) onRecordingComplete;
-  final Function(String mp3FilePath) onRecComplete;
 
   AIEventBody({
     super.key, 
     required this.controller,
     required this.handlePaste,
     required this.onRecordingComplete,
-    required this.onRecComplete
   });
 
   Widget _buildMainArea(BuildContext context) {
@@ -31,9 +28,6 @@ class AIEventBody extends StatelessWidget {
           onRecordingComplete: onRecordingComplete,
           onRecordingStart: () => controller.setRecording(true),
           onRecordingStop: () => controller.setRecording(false)
-        ),
-      audioRecorderNew: AudioProcessorWidget(
-        onRecordingComplete: onRecComplete
         ),
     );
   }

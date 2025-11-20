@@ -24,7 +24,6 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   rrule: ^0.2.17
   http_parser: ^4.1.2
-  ffmpeg_kit_flutter: ^6.0.3
   pasteboard: ^0.4.0
   image: ^4.5.4
   supabase_auth_ui: ^0.5.5
@@ -52,6 +51,6 @@ msix_config:
   display_name: Calendai
   identity_name: calendai.app
   msix_version: 1.0.0.0
-  logo_path: C:\path\to\logo.png
+  logo_path: logo.png
   protocol_activation: calendai
   capabilities: internetClient, location, microphone, webcam

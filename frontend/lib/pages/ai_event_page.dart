@@ -91,20 +91,7 @@ class _AddAIEventPageState extends State<AddAIEventPage> {
 
   Future<void> _processAudioInput(String wavFilePath) async {
     try {
-      await _controller.processAudioInput(wavFilePath);
-      await _showEventPreview();
-    } catch (e) {
-      Alerts.showErrorDialog(
-        context,
-        "Error",
-        "Failed to process the audio: $e. Please try again."
-      );
-    }
-  }
-
-  Future<void> _submitAudio(String mp3FilePath) async {
-    try {
-      await _controller.submitAudio(mp3FilePath);
+      await _controller.submitAudio(wavFilePath);
       await _showEventPreview();
     } catch (e) {
       Alerts.showErrorDialog(
@@ -130,7 +117,6 @@ Widget build(BuildContext context) {
       controller: _controller, 
       handlePaste: _handlePaste, 
       onRecordingComplete: _processAudioInput,
-      onRecComplete: _submitAudio,
       ),
   );
 }

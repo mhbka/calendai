@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:calendai/utils/alerts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 enum RecordingState { idle, recording, processing }
 
@@ -35,6 +38,9 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
   @override
   void initState() {
     super.initState();
+
+    _getMicPermission();
+
     _pulseController = AnimationController(
       duration: Duration(milliseconds: 1000),
       vsync: this,
@@ -54,6 +60,14 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
     _pulseController.dispose();
     _recorder.dispose();
     super.dispose();
+  }
+
+  Future<void> _getMicPermission() async {
+    var status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted) {
+      throw ArgumentError('Microphone permission not granted');
+    }
+    print("Permission for mic granted!");
   }
 
   Future<void> _toggleRecording() async {
@@ -251,7 +265,7 @@ class _AudioRecordingInputState extends State<AudioRecordingInput> with TickerPr
 /// Wrapper for recording and collecting audio data.
 class AudioRecorderWrapper {
   final AudioRecorder _recorder = AudioRecorder();
-  final String tempFilePath = "temp.wav";
+  String? _tempFilePath;
 
   AudioRecorderWrapper();
 
@@ -259,15 +273,25 @@ class AudioRecorderWrapper {
     _recorder.dispose();
   }
 
+  /// Get the temp file path
+  Future<String> _getTempFilePath() async {
+    if (_tempFilePath != null) return _tempFilePath!;
+    
+    final directory = await getTemporaryDirectory();
+    _tempFilePath = '${directory.path}/temp_recording.wav';
+    return _tempFilePath!;
+  }
+
   /// Start recording and collecting WAV audio data.
   Future<void> startRecording() async {
-    await _recorder.start(const RecordConfig(encoder: AudioEncoder.wav), path: tempFilePath);
+    final path = await _getTempFilePath();
+    await _recorder.start(const RecordConfig(encoder: AudioEncoder.wav), path: path);
   }
 
   /// Stop recording and save the audio data to the temp file.
   Future<String> stopRecording() async {
     await _recorder.stop();
-    return tempFilePath;
+    return await _getTempFilePath();
   }
   
   /// Passthrough for internal recorder `hasPermission`.

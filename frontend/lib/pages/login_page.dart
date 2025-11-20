@@ -68,11 +68,6 @@ class _LoginPageState extends State<LoginPage> {
                 scopes: {
                   OAuthProvider.azure: 'offline_access https://graph.microsoft.com/.default'
                 },
-                queryParams: {
-                  OAuthProvider.azure: {
-                    'prompt': 'consent'
-                  }
-                },
                 onSuccess: (session) async {
                   try {
                     await AzureTokenApiService.sendAzureToken();

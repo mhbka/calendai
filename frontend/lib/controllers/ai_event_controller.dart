@@ -1,8 +1,6 @@
 import 'dart:core';
 import 'dart:io';
 import 'package:image/image.dart' as img;
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:calendai/models/calendar_event.dart';
@@ -86,54 +84,14 @@ class AddAIEventController extends ChangeNotifier {
     }
   }
 
-  Future<void> submitAudio(String mp3FilePath) async {
+  Future<void> submitAudio(String wavFilePath) async {
     _setProcessingState(true, 'audio');
     try {
-        Uri outputPathUri = Uri.parse(mp3FilePath);
+        Uri outputPathUri = Uri.parse(wavFilePath);
         File outputFile = File.fromUri(outputPathUri);
         Uint8List audioData = await outputFile.readAsBytes();
         _generatedEvents = await AIEventService.processAudioToEvent(audioData);
     }
-    catch (e) {
-      rethrow;
-    } 
-    finally {
-      _setProcessingState(false, '');
-      setRecording(false);
-    }
-  }
-
-  Future<void> processAudioInput(String wavFilePath) async {
-    _setProcessingState(true, 'audio');
-    try {
-      // convert wav file to mp3
-      final tempOutputPath = "temp.mp3";
-      var session = await FFmpegKit.execute('ffmpeg -i $wavFilePath -vn -ar 44100 -ac 2 -b:a 128k $tempOutputPath');
-      final returnCode = await session.getReturnCode();
-      if (ReturnCode.isSuccess(returnCode)) {
-        // read mp3 file into memory, and send to service for processing
-        Uri outputPathUri = Uri.parse(tempOutputPath);
-        File outputFile = File.fromUri(outputPathUri);
-        Uint8List audioData = await outputFile.readAsBytes();
-        _generatedEvents = await AIEventService.processAudioToEvent(audioData);
-
-        // try to delete the temp files before we return
-        try {
-          outputFile.delete();
-        } catch (e) { /* ignore */ }
-        try {
-          Uri inputPath = Uri.parse(wavFilePath);
-          File inputFile = File.fromUri(inputPath);
-          await inputFile.delete();
-        } catch (e) { /* ignore */ }
-      }
-      else if (ReturnCode.isCancel(returnCode)) {
-        throw ArgumentError("The audio processing was cancelled");
-      }
-      else {
-        throw ArgumentError("The audio processing failed (ffmpeg code $returnCode)");
-      }
-    } 
     catch (e) {
       rethrow;
     } 
@@ -145,7 +103,7 @@ class AddAIEventController extends ChangeNotifier {
 
   /// Submit the generated events.
   Future<void> saveGeneratedEvents() async {
-    // TODO: this
+      await AIEventService.submitGeneratedEvents(_generatedEvents);
   }
 
   /// Edit the calendar event at the index.

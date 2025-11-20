@@ -66,7 +66,12 @@ class _GeneratedEventsDialogState extends State<GeneratedEventsDialog> {
         FilledButton(
           onPressed: () {
             _controller.saveGeneratedEvents()
-              .then((v) {if (context.mounted) Navigator.pop(context);})
+              .then((v) {
+                if (context.mounted) {
+                  Alerts.showInfoSnackBar(context, "Generated events successfully submitted!");
+                  Navigator.pop(context);
+                }
+              })
               .catchError((err) async {
                 if (context.mounted) {
                   await Alerts.showErrorDialog(
